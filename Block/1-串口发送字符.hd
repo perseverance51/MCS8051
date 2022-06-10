@@ -1,0 +1,35 @@
+#define SYS_CLK 11059200L//设置定时器、串口频率参数
+
+#include <STC15X.h>
+#include "lib/STC15_UART.h"
+#include "lib/STC15_delay.h"
+
+void setup()
+{
+  /*****本案例程序说明**************************/
+  //本案例可以通过软件的串口监视器查看数据
+  /*********************************************/
+  uart_init(UART_1, UART1_RX_P30, UART1_TX_P31, 115200ul, TIM_2);//初始化串口
+}
+
+void loop()
+{
+//  uart_putchar(UART_1, 0x31);//串口单个字符输出
+  uart_putstr(UART_1,"perseverance51!\n");
+  
+  delay(1000);
+  uart_putstr(UART_1,"hello world！\n");
+  delay(1000);
+    uart_putstr(UART_1,"Serial1 FROM....\n");
+  delay(1000);
+}
+
+void main(void)
+{
+  setup();
+  while(1){
+    loop();
+  }
+}
+
+/** edittype="stc15code" */

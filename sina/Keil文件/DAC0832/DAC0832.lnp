@@ -1,0 +1,4 @@
+"STARTUP.obj",
+"DAC0832.obj" 
+TO "DAC0832" 
+RAMSIZE(256) 

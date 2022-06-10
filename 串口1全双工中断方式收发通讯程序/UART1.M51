@@ -1,0 +1,143 @@
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                    02/03/2022  13:13:39  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0, INVOKED BY:
+C:\KEIL_V5\C51\BIN\BL51.EXE main.obj TO UART1 RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  main.obj (MAIN)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_STARTUP)
+
+
+LINK MAP OF MODULE:  UART1 (MAIN)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0002H     UNIT         ?DT?MAIN
+                    000AH     0016H                  *** GAP ***
+            BIT     0020H.0   0000H.1   UNIT         ?BI?MAIN
+                    0020H.1   0000H.7                *** GAP ***
+            IDATA   0021H     0020H     UNIT         ?ID?MAIN
+            IDATA   0041H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     000CH     UNIT         ?C_C51STARTUP
+                    000FH     0014H                  *** GAP ***
+            CODE    0023H     0003H     ABSOLUTE     
+            CODE    0026H     004FH     UNIT         ?PR?MAIN?MAIN
+            CODE    0075H     0033H     UNIT         ?PR?UART1_INT?MAIN
+
+
+
+OVERLAY MAP OF MODULE:   UART1 (MAIN)
+
+
+SEGMENT
+  +--> CALLED SEGMENT
+---------------------
+?C_C51STARTUP
+  +--> ?PR?MAIN?MAIN
+
+
+
+SYMBOL TABLE OF MODULE:  UART1 (MAIN)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        MAIN
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0080H         PUBLIC        P0
+  D:0090H         PUBLIC        P1
+  D:00A0H         PUBLIC        P2
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  02/03/2022  13:13:39  PAGE 2
+
+
+  D:00B0H         PUBLIC        P3
+  D:00C0H         PUBLIC        P4
+  D:00C8H         PUBLIC        P5
+  B:0020H.0       PUBLIC        B_TX1_Busy
+  B:00A8H.7       PUBLIC        EA
+  D:00A2H         PUBLIC        P_SW1
+  D:00A8H         PUBLIC        IE
+  B:00A8H.4       PUBLIC        ES
+  D:00B8H         PUBLIC        IP
+  I:0021H         PUBLIC        RX1_Buffer
+  B:0098H.0       PUBLIC        RI
+  C:0075H         PUBLIC        UART1_int
+  B:0098H.1       PUBLIC        TI
+  D:00D8H         PUBLIC        CCON
+  C:0026H         PUBLIC        main
+  D:0099H         PUBLIC        SBUF
+  D:0098H         PUBLIC        SCON
+  D:0088H         PUBLIC        TCON
+  D:00F0H         PUBLIC        B
+  D:008EH         PUBLIC        AUXR
+  D:00E0H         PUBLIC        ACC
+  D:00D6H         PUBLIC        TH2
+  D:00D7H         PUBLIC        TL2
+  D:0008H         PUBLIC        RX1_Cnt
+  D:0009H         PUBLIC        TX1_Cnt
+  B:0098H.4       PUBLIC        REN
+  D:00D0H         PUBLIC        PSW
+  -------         PROC          MAIN
+  C:0026H         LINE#         49
+  C:0026H         LINE#         50
+  C:0026H         LINE#         51
+  C:0028H         LINE#         52
+  C:002BH         LINE#         53
+  C:002DH         LINE#         55
+  C:0035H         LINE#         56
+  C:0038H         LINE#         69
+  C:003BH         LINE#         70
+  C:003EH         LINE#         71
+  C:0041H         LINE#         72
+  C:0044H         LINE#         73
+  C:0047H         LINE#         74
+  C:004AH         LINE#         76
+  C:004CH         LINE#         77
+  C:004EH         LINE#         79
+  C:0050H         LINE#         82
+  C:0050H         LINE#         83
+  C:0050H         LINE#         84
+  C:0056H         LINE#         85
+  C:0056H         LINE#         86
+  C:0059H         LINE#         87
+  C:0059H         LINE#         88
+  C:005BH         LINE#         89
+  C:0063H         LINE#         90
+  C:0073H         LINE#         91
+  C:0073H         LINE#         92
+  C:0073H         LINE#         93
+  -------         ENDPROC       MAIN
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  02/03/2022  13:13:39  PAGE 3
+
+
+  -------         PROC          UART1_INT
+  C:0075H         LINE#         97
+  C:007EH         LINE#         99
+  C:0081H         LINE#         100
+  C:0081H         LINE#         101
+  C:0083H         LINE#         102
+  C:008AH         LINE#         103
+  C:009AH         LINE#         104
+  C:009AH         LINE#         106
+  C:009DH         LINE#         107
+  C:009DH         LINE#         108
+  C:009FH         LINE#         109
+  C:00A1H         LINE#         110
+  C:00A1H         LINE#         111
+  -------         ENDPROC       UART1_INT
+  -------         ENDMOD        MAIN
+
+Program Size: data=43.1 xdata=0 code=148
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

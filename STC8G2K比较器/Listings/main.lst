@@ -1,0 +1,139 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              04/23/2022 21:41:37 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          /*STC8G2单片机中断方式获取P36引脚电压值与内部1.19V电压进行比较，将结果输出到P10，
+   2          当P36引脚电压高于1.19v时，则P10输出高电平，低于1.19V则触发中断，P10输出低电平*/
+   3          #include <STC8.H>
+   4          
+   5          //#include "reg51.h"
+   6          #include "intrins.h"
+   7          #include <stdio.h>         // 为使用KEIL自带的库函数printf而加入
+   8          //sfr CMPCR1 = 0xe6;
+   9          //sfr CMPCR2 = 0xe7;
+  10          //sfr P0M1 = 0x93;
+  11          //sfr P0M0 = 0x94;
+  12          //sfr P1M1 = 0x91;
+  13          //sfr P1M0 = 0x92;
+  14          //sfr P2M1 = 0x95;
+  15          //sfr P2M0 = 0x96;
+  16          //sfr P3M1 = 0xb1;
+  17          //sfr P3M0 = 0xb2;
+  18          //sfr P4M1 = 0xb3;
+  19          //sfr P4M0 = 0xb4;
+  20          //sfr P5M1 = 0xc9;
+  21          //sfr P5M0 = 0xca;
+  22          //sbit P10 = P1^0;
+  23          //sbit P11 = P1^1;
+  24          void Delay1000ms()    //@30.000MHz
+  25          {
+  26   1        unsigned char i, j, k;
+  27   1        _nop_();
+  28   1        i = 153;
+  29   1        j = 49;
+  30   1        k = 161;
+  31   1        do
+  32   1        {
+  33   2          do
+  34   2          {
+  35   3            while (--k);
+  36   3          } while (--j);
+  37   2        } while (--i);
+  38   1      }
+  39          
+  40          void UART_init(void)
+  41          {     
+  42   1        //下面代码设置定时器1
+  43   1        SCON = 0x50;    //8位数据,可变波特率
+  44   1        AUXR |= 0x40;   //定时器时钟1T模式
+  45   1        AUXR &= 0xFE;   //串口1选择定时器1为波特率发生器
+  46   1        TMOD &= 0x0F;   //设置定时器模式
+  47   1        TL1 = 0x5F;   //设置定时初始值
+  48   1        TH1 = 0xFE;   //设置定时初始值
+  49   1        ET1 = 0;    //禁止定时器%d中断
+  50   1        TR1 = 1;    //定时器1开始计时
+  51   1      //  TMOD = 0x20;  // 0010 0000 定时器1工作于方式2（8位自动重装方式）
+  52   1      //  TH1  = 0xFD;  // 波特率：9600 /11.0592MHZ
+  53   1      //  TL1  = 0xFD;  // 波特率：9600 /11.0592MHZ
+  54   1      
+C51 COMPILER V9.60.0.0   MAIN                                                              04/23/2022 21:41:37 PAGE 2   
+
+  55   1        //下面代码设置定串口
+  56   1      //  AUXR = 0x00;             // 很关键，使用定时器1作为波特率发生器，S1ST2=0
+  57   1      //  SCON = 0x50;  // 0101 0000 SM0.SM1=01(最普遍的8位通信）,REN=1（允许接受）
+  58   1        TI=1;     // 很关键，使用printf函数时必须有此命令
+  59   1      } 
+  60          
+  61          //void cmp() interrupt 21 using 1
+  62          //{
+  63          //  CMPCR1 &= 0xbf;//手动清除清除中断标志，1011,1111
+  64          //  P10 = (CMPCR1 & 0x01); //将比较器结果CMPRES输出到测试口显示
+  65          //}
+  66          void main()
+  67          { 
+  68   1        int value;
+  69   1          P0M0 = 0x00;//设置个IO端口为准双向口
+  70   1          P0M1 = 0x00;
+  71   1          P1M0 = 0x00;
+  72   1          P1M1 = 0x00;
+  73   1          P2M0 = 0x00;
+  74   1          P2M1 = 0x00;
+  75   1          P3M0 = 0x00;
+  76   1          P3M1 = 0x00;
+  77   1          P4M0 = 0x00;
+  78   1          P4M1 = 0x00;
+  79   1          P5M0 = 0x00;
+  80   1          P5M1 = 0x00;
+  81   1          P10 =0;//初始P10端口为低电平
+  82   1          CMPCR2 = 0x00;
+  83   1          CMPCR2 &= ~0x80; //比较器正向输出
+  84   1      // CMPCR2 |= 0x80; //比较器反向输出
+  85   1          CMPCR2 &= ~0x40; //使能 0.1us 滤波
+  86   1      // CMPCR2 |= 0x40; //禁止 0.1us 滤波
+  87   1      // CMPCR2 &= ~0x3f; //比较器结果直接输出
+  88   1          CMPCR2 |= 0x10; //比较器结果经过 16 个去抖时钟后输出
+  89   1          CMPCR1 = 0x00;
+  90   1          CMPCR1 |= 0x30; //使能比较器边沿中断
+  91   1      // CMPCR1 &= ~0x20; //禁止比较器上升沿中断
+  92   1      // CMPCR1 |= 0x20; //使能比较器上升沿中断
+  93   1      // CMPCR1 &= ~0x10; //禁止比较器下降沿中断
+  94   1      // CMPCR1 |= 0x10; //使能比较器下降沿中断
+  95   1          CMPCR1 &= ~0x08; //P3.7 为 CMP+输入脚
+  96   1      // CMPCR1 |= 0x08; //ADC 输入脚为 CMP+输入脚
+  97   1      //    CMPCR1 &= ~0x04; //内部 1.19V 参考信号源为 CMP-输入脚
+  98   1         CMPCR1 |= 0x04; //P3.6 为 CMP-输入脚
+  99   1      // CMPCR1 &= ~0x02; //禁止比较器输出
+ 100   1          CMPCR1 |= 0x02; //使能比较器输出
+ 101   1          CMPCR1 |= 0x80; //使能比较器模块
+ 102   1          UART_init();   // 初始化串口
+ 103   1          EA =1;
+ 104   1          while (1)
+ 105   1          {
+ 106   2        value = (CMPCR1 & 0x01);
+ 107   2        P10 =value; //将比较器结果CMPRES输出到测试口显示
+ 108   2            printf ("value= %d \n",value);         // 10进制输出
+ 109   2            Delay1000ms();
+ 110   2          }
+ 111   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    134    ----
+   CONSTANT SIZE    =     12    ----
+C51 COMPILER V9.60.0.0   MAIN                                                              04/23/2022 21:41:37 PAGE 3   
+
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

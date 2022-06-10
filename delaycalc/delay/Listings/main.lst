@@ -1,0 +1,90 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              06/09/2022 10:13:32 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include<reg52.h>
+   2          #include<intrins.h>
+   3          sbit LED = P2^0;
+   4          #define FOSC 12000000uL
+   5          #define T50MS (65536-FOSC*50/12/1000)   //12T模式50ms定时
+   6          unsigned int count; 
+   7          /*
+   8          void delay(unsigned int ms)
+   9          {
+  10            unsigned int cycle = 0;
+  11            TMOD = 0x01;  //设置定时器工作模式为高低八位合并为一个16位寄存器
+  12            TH0 = 0xfc;
+  13            TL0 = 0x67;  
+  14            TR0 = 1;
+  15            while(1)
+  16            {
+  17              if(TF0==1)  //检测定时器0是否溢出
+  18              {
+  19                TF0 = 0;  //若溢出，则重置检测位TF0
+  20                TH0 = 0xfc;
+  21                TL0 = 0x65;
+  22                cycle++;
+  23                if(cycle==ms)
+  24                  break;
+  25              }
+  26            }
+  27          }
+  28          */
+  29            void Timer0Init(void)   //50毫秒@12.000MHz
+  30          {
+  31   1      
+  32   1        TMOD = 0x01;   //set timer0 as mode1 (16-bit)
+  33   1        TL0 = T50MS;    //设置定时初始值，高8位
+  34   1        TH0 = T50MS >> 8;     //设置定时初始值，低8位
+  35   1        TF0 = 0;    //清除TF0标志
+  36   1        TR0 = 1;    //定时器0开始计时
+  37   1        ET0 = 1;                        //enable timer0 interrupt
+  38   1        EA = 1;                         //open global interrupt switch
+  39   1        count = 19;                      //initial counter
+  40   1      }
+  41          
+  42          /* Timer0 interrupt routine */
+  43          void tm0_isr() interrupt 1
+  44          {
+  45   1          TL0 = T50MS;                     //reload timer0 low byte
+  46   1          TH0 = T50MS >> 8;                //reload timer0 high byte
+  47   1          if (count-- == 0)               //50ms * 20 -> 1s
+  48   1          {
+  49   2            count = 19;               //reset counter
+  50   2            LED = ~LED; 
+  51   2          }
+  52   1      }
+  53          
+  54          void main()
+C51 COMPILER V9.60.0.0   MAIN                                                              06/09/2022 10:13:32 PAGE 2   
+
+  55          {
+  56   1        Timer0Init();
+  57   1        LED = 0;  
+  58   1        while(1);
+  59   1      //  {
+  60   1      //    delay(1077);    
+  61   1      //    LED = ~LED;   
+  62   1      //  }
+  63   1      }
+  64          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     73    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      2    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

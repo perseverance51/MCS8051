@@ -1,0 +1,3 @@
+".\Objects\PCA_PWM.obj" 
+TO ".\Objects\PCA_PWM" 
+PRINT(".\Listings\PCA_PWM.m51") RAMSIZE(256) 

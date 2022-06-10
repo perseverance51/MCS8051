@@ -1,0 +1,309 @@
+LX51 LINKER/LOCATER V4.66.93.0                                                          11/06/2021  22:16:23  PAGE 1
+
+
+LX51 LINKER/LOCATER V4.66.93.0, INVOKED BY:
+C:\KEIL_V5\C51\BIN\LX51.EXE .\build\Target 1\USART1.o, .\build\Target 1\delay.o, .\build\Target 1\main.o TO .\build\Targ
+>> et 1\printf PRINT (.\build\Target 1\printf.map) REMOVEUNUSED
+
+
+CPU MODE:     8051 MODE
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  .\build\Target 1\USART1.o (USART1)
+         COMMENT TYPE 0: C51 V9.59.0.0
+  .\build\Target 1\delay.o (DELAY)
+         COMMENT TYPE 0: C51 V9.59.0.0
+  .\build\Target 1\main.o (MAIN)
+         COMMENT TYPE 0: C51 V9.59.0.0
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_STARTUP)
+         COMMENT TYPE 1: A51 / ASM51 Assembler
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?CLDPTR)
+         COMMENT TYPE 1: A51 / ASM51 Assembler
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?CLDOPTR)
+         COMMENT TYPE 1: A51 / ASM51 Assembler
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?ULDIV)
+         COMMENT TYPE 1: A51 / ASM51 Assembler
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?ULCMP)
+         COMMENT TYPE 1: A51 / ASM51 Assembler
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?ULSHR)
+         COMMENT TYPE 1: A51 / ASM51 Assembler
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?LLDOPTR0)
+         COMMENT TYPE 1: A51 / ASM51 Assembler
+  C:\KEIL_V5\C51\LIB\C51S.LIB (PRINTF)
+         COMMENT TYPE 1: A51 / ASM51 Assembler
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?CSTPTR)
+         COMMENT TYPE 1: A51 / ASM51 Assembler
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?LLDIDATA0)
+         COMMENT TYPE 1: A51 / ASM51 Assembler
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?LLDXDATA0)
+         COMMENT TYPE 1: A51 / ASM51 Assembler
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?LLDPDATA0)
+         COMMENT TYPE 1: A51 / ASM51 Assembler
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?LLDCODE0)
+         COMMENT TYPE 1: A51 / ASM51 Assembler
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?PLDIIDATA)
+         COMMENT TYPE 1: A51 / ASM51 Assembler
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?CCASE)
+         COMMENT TYPE 1: A51 / ASM51 Assembler
+
+
+ACTIVE MEMORY CLASSES OF MODULE:  .\build\Target 1\printf (USART1)
+
+BASE        START       END         USED      MEMORY CLASS
+==========================================================
+C:000000H   C:000000H   C:00FFFFH   000820H   CODE
+I:000000H   I:000000H   I:00007FH   000023H   DATA
+I:000000H   I:000000H   I:0000FFH   000051H   IDATA
+C:000000H   C:000000H   C:00FFFFH   000047H   CONST
+I:000020H.0 I:000020H.0 I:00002FH.7 000001H.1 BIT
+
+
+MEMORY MAP OF MODULE:  .\build\Target 1\printf (USART1)
+
+
+START     STOP      LENGTH    ALIGN  RELOC    MEMORY CLASS   SEGMENT NAME
+=========================================================================
+
+* * * * * * * * * * *   D A T A   M E M O R Y   * * * * * * * * * * * * *
+LX51 LINKER/LOCATER V4.66.93.0                                                        11/06/2021  22:16:23  PAGE 2
+
+
+000000H   000007H   000008H   ---    AT..     DATA           "REG BANK 0"
+000008H   00001BH   000014H   BYTE   UNIT     DATA           _DATA_GROUP_
+00001CH.0 00001FH.7 000004H.0 ---    ---      **GAP**
+000020H.0 000021H.0 000001H.1 BIT    UNIT     BIT            _BIT_GROUP_
+000021H.1 000021H   000000H.7 ---    ---      **GAP**
+000022H   000028H   000007H   BYTE   UNIT     DATA           ?DT?USART1
+000029H   000078H   000050H   BYTE   UNIT     IDATA          ?ID?USART1
+000079H   000079H   000001H   BYTE   UNIT     IDATA          ?STACK
+
+* * * * * * * * * * *   C O D E   M E M O R Y   * * * * * * * * * * * * *
+000000H   000002H   000003H   ---    OFFS..   CODE           ?CO??C_STARTUP?0
+000003H   000015H   000013H   BYTE   UNIT     CODE           ?PR?_PRINTSTRING1?USART1
+000016H   00001AH   000005H   BYTE   UNIT     CODE           ?PR?_PUTCHAR?USART1
+00001BH   000022H   000008H   ---    ---      **GAP**
+000023H   000025H   000003H   BYTE   OFFS..   CODE           ?USART1?00023
+000026H   00020BH   0001E6H   BYTE   UNIT     CODE           ?C?LIB_CODE
+00020CH   0003D1H   0001C6H   BYTE   UNIT     CODE           ?PR?_USART_CONFIGURATION?USART1
+0003D2H   000431H   000060H   BYTE   UNIT     CODE           ?PR?UART1_INT?USART1
+000432H   000463H   000032H   BYTE   UNIT     CODE           ?PR?UART_CONFIG?MAIN
+000464H   00048FH   00002CH   BYTE   UNIT     CODE           ?PR?MAIN?MAIN
+000490H   0004B0H   000021H   BYTE   UNIT     CODE           ?PR?_TX1_WRITE2BUFF?USART1
+0004B1H   0004BFH   00000FH   BYTE   UNIT     CODE           ?PR?DELAY1000MS?DELAY
+0004C0H   000506H   000047H   BYTE   UNIT     CONST          ?CO?MAIN
+000507H   0007FFH   0002F9H   ---    ---      **GAP**
+000800H   000B5BH   00035CH   BYTE   UNIT     CODE           ?PR?PRINTF?PRINTF
+000B5CH   001008H   0004ADH   ---    ---      **GAP**
+001009H   001014H   00000CH   BYTE   UNIT     CODE           ?C_C51STARTUP
+
+
+
+OVERLAY MAP OF MODULE:   .\build\Target 1\printf (USART1)
+
+
+FUNCTION/MODULE                   BIT_GROUP   DATA_GROUP 
+--> CALLED FUNCTION/MODULE       START  STOP  START  STOP
+=========================================================
+UART1_INT/USART1                 ----- -----  ----- -----
+
+*** NEW ROOT *******************
+
+?C_C51STARTUP                    ----- -----  ----- -----
+  +--> MAIN/MAIN
+
+MAIN/MAIN                        ----- -----  ----- -----
+  +--> UART_CONFIG/MAIN
+  +--> PRINTF/PRINTF
+  +--> DELAY1000MS/DELAY
+
+UART_CONFIG/MAIN                 ----- -----  0008H 0014H
+  +--> _USART_CONFIGURATION/USART1
+  +--> _PRINTSTRING1/USART1
+
+_USART_CONFIGURATION/USART1      ----- -----  0015H 001BH
+
+_PRINTSTRING1/USART1             ----- -----  ----- -----
+  +--> _TX1_WRITE2BUFF/USART1
+
+_TX1_WRITE2BUFF/USART1           ----- -----  ----- -----
+
+PRINTF/PRINTF                    20H.0 21H.0  0008H 001BH
+  +--> _PUTCHAR/USART1
+
+_PUTCHAR/USART1                  ----- -----  ----- -----
+  +--> _TX1_WRITE2BUFF/USART1
+
+LX51 LINKER/LOCATER V4.66.93.0                                                        11/06/2021  22:16:23  PAGE 3
+
+
+DELAY1000MS/DELAY                ----- -----  ----- -----
+
+
+
+PUBLIC SYMBOLS OF MODULE:  .\build\Target 1\printf (USART1)
+
+
+      VALUE       CLASS    TYPE      PUBLIC SYMBOL NAME
+      =================================================
+      00000008H   DATA     ---       ?_PRINTF517?BYTE
+      00000008H   DATA     ---       ?_PRINTF?BYTE
+      00000008H   DATA     ---       ?_SPRINTF517?BYTE
+      00000008H   DATA     ---       ?_SPRINTF?BYTE
+      010001E6H   CODE     ---       ?C?CCASE
+      0100003FH   CODE     ---       ?C?CLDOPTR
+      01000026H   CODE     ---       ?C?CLDPTR
+      00000000H   NUMBER   ---       ?C?CODESEG
+      0100018EH   CODE     ---       ?C?CSTPTR
+      010001C6H   CODE     ---       ?C?LLDCODE0
+      010001A0H   CODE     ---       ?C?LLDIDATA0
+      0100015EH   CODE     ---       ?C?LLDOPTR0
+      010001B9H   CODE     ---       ?C?LLDPDATA0
+      010001ADH   CODE     ---       ?C?LLDXDATA0
+      010001D6H   CODE     ---       ?C?PLDIIDATA
+      0100013AH   CODE     ---       ?C?ULCMP
+      010000A8H   CODE     ---       ?C?ULDIV
+      0100014BH   CODE     ---       ?C?ULSHR
+      00000000H   NUMBER   ---       ?C?XDATASEG
+      01000464H   CODE     ---       ?C_START
+      01000000H   CODE     ---       ?C_STARTUP
+      01000862H   CODE     ---       _PRINTF
+      01000862H   CODE     ---       _PRINTF517
+      01000003H   CODE     ---       _PrintString1
+      01000016H   CODE     ---       _putchar
+      0100085CH   CODE     ---       _SPRINTF
+      0100085CH   CODE     ---       _SPRINTF517
+      01000490H   CODE     ---       _TX1_write2buff
+      0100020CH   CODE     ---       _USART_Configuration
+      00000022H   DATA     ---       COM1
+      010004B1H   CODE     ---       Delay1000ms
+      01000464H   CODE     ---       main
+      00000029H   IDATA    ---       RX1_Buffer
+      00000051H   IDATA    ---       TX1_Buffer
+      010003D2H   CODE     ---       UART1_int
+      01000432H   CODE     ---       UART_config
+
+
+
+SYMBOL TABLE OF MODULE:  .\build\Target 1\printf (USART1)
+
+      VALUE       REP       CLASS    TYPE      SYMBOL NAME
+      ====================================================
+      ---         MODULE    ---      ---       USART1
+      00000051H   PUBLIC    IDATA    ---       TX1_Buffer
+      00000029H   PUBLIC    IDATA    ---       RX1_Buffer
+      00000022H   PUBLIC    DATA     ---       COM1
+      01000016H   PUBLIC    CODE     ---       _putchar
+      010003D2H   PUBLIC    CODE     ---       UART1_int
+      01000003H   PUBLIC    CODE     ---       _PrintString1
+      01000490H   PUBLIC    CODE     ---       _TX1_write2buff
+      0100020CH   PUBLIC    CODE     ---       _USART_Configuration
+
+      0100020CH   BLOCK     CODE     ---       LVL=0
+      01000212H   BLOCK     CODE     NEAR LAB  LVL=1
+      00000007H   SYMBOL    DATA     VOID      i
+LX51 LINKER/LOCATER V4.66.93.0                                                        11/06/2021  22:16:23  PAGE 4
+
+
+      00000018H   SYMBOL    DATA     VOID      j
+      ---         BLOCKEND  ---      ---       LVL=1
+      ---         BLOCKEND  ---      ---       LVL=0
+
+      01000490H   BLOCK     CODE     ---       LVL=0
+      ---         BLOCKEND  ---      ---       LVL=0
+
+      01000003H   BLOCK     CODE     ---       LVL=0
+      ---         BLOCKEND  ---      ---       LVL=0
+
+      010003D2H   BLOCK     CODE     ---       LVL=0
+      ---         BLOCKEND  ---      ---       LVL=0
+
+      01000016H   BLOCK     CODE     ---       LVL=0
+      ---         BLOCKEND  ---      ---       LVL=0
+
+      ---         MODULE    ---      ---       DELAY
+      010004B1H   PUBLIC    CODE     ---       Delay1000ms
+
+      010004B1H   BLOCK     CODE     ---       LVL=0
+      010004B1H   BLOCK     CODE     NEAR LAB  LVL=1
+      00000007H   SYMBOL    DATA     VOID      i
+      00000006H   SYMBOL    DATA     VOID      j
+      00000005H   SYMBOL    DATA     VOID      k
+      ---         BLOCKEND  ---      ---       LVL=1
+      ---         BLOCKEND  ---      ---       LVL=0
+
+      ---         MODULE    ---      ---       MAIN
+      01000464H   PUBLIC    CODE     ---       main
+      01000432H   PUBLIC    CODE     ---       UART_config
+
+      01000432H   BLOCK     CODE     ---       LVL=0
+      01000432H   BLOCK     CODE     NEAR LAB  LVL=1
+      00000008H   SYMBOL    DATA     VOID      COMx_InitStructure
+      ---         BLOCKEND  ---      ---       LVL=1
+      ---         BLOCKEND  ---      ---       LVL=0
+
+      01000464H   BLOCK     CODE     ---       LVL=0
+      ---         BLOCKEND  ---      ---       LVL=0
+
+      ---         MODULE    ---      ---       ?C_STARTUP
+      01000000H   PUBLIC    CODE     ---       ?C_STARTUP
+
+      ---         MODULE    ---      ---       ?C?CLDPTR
+      01000026H   PUBLIC    CODE     ---       ?C?CLDPTR
+
+      ---         MODULE    ---      ---       ?C?CLDOPTR
+      0100003FH   PUBLIC    CODE     ---       ?C?CLDOPTR
+
+      ---         MODULE    ---      ---       ?C?ULDIV
+      010000A8H   PUBLIC    CODE     ---       ?C?ULDIV
+
+      ---         MODULE    ---      ---       ?C?ULCMP
+      0100013AH   PUBLIC    CODE     ---       ?C?ULCMP
+
+      ---         MODULE    ---      ---       ?C?ULSHR
+      0100014BH   PUBLIC    CODE     ---       ?C?ULSHR
+
+      ---         MODULE    ---      ---       ?C?LLDOPTR0
+      0100015EH   PUBLIC    CODE     ---       ?C?LLDOPTR0
+
+      ---         MODULE    ---      ---       PRINTF
+      00000008H   PUBLIC    DATA     ---       ?_PRINTF517?BYTE
+      00000008H   PUBLIC    DATA     ---       ?_PRINTF?BYTE
+      00000008H   PUBLIC    DATA     ---       ?_SPRINTF517?BYTE
+LX51 LINKER/LOCATER V4.66.93.0                                                        11/06/2021  22:16:23  PAGE 5
+
+
+      00000008H   PUBLIC    DATA     ---       ?_SPRINTF?BYTE
+      01000862H   PUBLIC    CODE     ---       _PRINTF
+      01000862H   PUBLIC    CODE     ---       _PRINTF517
+      0100085CH   PUBLIC    CODE     ---       _SPRINTF
+      0100085CH   PUBLIC    CODE     ---       _SPRINTF517
+
+      ---         MODULE    ---      ---       ?C?CSTPTR
+      0100018EH   PUBLIC    CODE     ---       ?C?CSTPTR
+
+      ---         MODULE    ---      ---       ?C?LLDIDATA0
+      010001A0H   PUBLIC    CODE     ---       ?C?LLDIDATA0
+
+      ---         MODULE    ---      ---       ?C?LLDXDATA0
+      010001ADH   PUBLIC    CODE     ---       ?C?LLDXDATA0
+
+      ---         MODULE    ---      ---       ?C?LLDPDATA0
+      010001B9H   PUBLIC    CODE     ---       ?C?LLDPDATA0
+
+      ---         MODULE    ---      ---       ?C?LLDCODE0
+      010001C6H   PUBLIC    CODE     ---       ?C?LLDCODE0
+
+      ---         MODULE    ---      ---       ?C?PLDIIDATA
+      010001D6H   PUBLIC    CODE     ---       ?C?PLDIIDATA
+
+      ---         MODULE    ---      ---       ?C?CCASE
+      010001E6H   PUBLIC    CODE     ---       ?C?CCASE
+
+******************************************************************************
+* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 0316H BYTE (38%) *
+******************************************************************************
+
+Program Size: data=117.1 xdata=0 const=71 code=2080
+*** ERROR L257: UNKNOWN

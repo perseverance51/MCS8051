@@ -1,0 +1,5 @@
+"main.obj",
+"TM1638_drive.obj",
+"delay.obj" 
+TO "TM1638" 
+RAMSIZE(256) 

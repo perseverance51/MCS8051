@@ -1,0 +1,1 @@
+"mpu.c" OPTIMIZE (8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\list\mpu.lst) TABS (2) OBJECT(.\list\mpu.obj)

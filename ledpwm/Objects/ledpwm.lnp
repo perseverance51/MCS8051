@@ -1,0 +1,3 @@
+".\Objects\main2.obj" 
+TO ".\Objects\ledpwm" 
+PRINT(".\Listings\ledpwm.m51") RAMSIZE(256) 

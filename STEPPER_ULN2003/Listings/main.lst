@@ -1,0 +1,355 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              05/02/2022 15:57:32 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include<reg52.h>
+   2          #include<stdio.h>
+   3          #include<intrins.h>
+   4          
+   5          #define uchar unsigned char
+   6          #define uint unsigned int
+   7          
+   8          sbit RS = P2^0;//1602数据/命令选择端（H：数据寄存器L：指令寄存器）
+   9          sbit RW = P2^1;//1602读/写选择端
+  10          sbit E  = P2^2;//1602使能信号端
+  11          
+  12          sbit key1=P3^0;//用户按键
+  13          sbit key2=P3^1;
+  14          sbit key3=P3^2;
+  15          sbit key4=P3^3;
+  16          sbit key5=P3^4;
+  17          
+  18          //uchar code B_Rotation[8]={0x7f,0x3f,0xbf,0x9f,0xdf,0xcf,0xef,0x6f}; //反转表格
+  19          //uchar code F_Rotation[8]={0xef,0xcf,0xdf,0x9f,0xbf,0x3f,0x7f,0x6f}; //正转表格
+  20          uchar code B_Rotation[8]={0x09,0x08,0x0c,0x04,0x06,0x02,0x03,0x01}; //反转表格
+  21          uchar code F_Rotation[8]={0x01,0x03,0x02,0x06,0x04,0x0C,0x08,0x09}; //正转表格
+  22          
+  23          //0x01,0x03,0x02,0x06,0x04,0x0C,0x08,0x09
+  24          uchar table1[]="dir: +  spe:005";
+  25          uchar table2[]="cir:000 ang:000";
+  26          
+  27          uchar num;
+  28          uint key,flag,speed=5,zflag,znum,fflag,fnum,select,pp,qq;
+  29          //1键值2键值标志3速度4正转标志5正转圈数6反转标志7反转圈数8正转角度9反转角度10选择
+  30          float zang,fang;
+  31          /******************************************************************/
+  32          /*                    延时函数 Xms                                   */
+  33          /******************************************************************/
+  34          void delay(uint z)
+  35          {
+  36   1              uint x,y;
+  37   1              for(x=z;x>0;x--)
+  38   1                      for(y=110;y>0;y--);
+  39   1      }
+  40          /******************************************************************/
+  41          /*                   LCD1602写命令操作                            */
+  42          /******************************************************************/
+  43          void WriteCommand(uchar com)
+  44          {
+  45   1              delay(5);//操作前短暂延时，保证信号稳定
+  46   1              E=0;
+  47   1              RS=0;
+  48   1              RW=0;
+  49   1              P0=com;
+  50   1              E=1;
+  51   1              delay(5);
+  52   1              E=0;
+  53   1      }
+  54          /******************************************************************/
+C51 COMPILER V9.60.0.0   MAIN                                                              05/02/2022 15:57:32 PAGE 2   
+
+  55          /*                   LCD1602写数据操作                            */
+  56          /******************************************************************/
+  57          void WriteData(uchar dat)
+  58          {
+  59   1              delay(5);  //操作前短暂延时，保证信号稳定
+  60   1              E=0;
+  61   1              RS=1;
+  62   1              RW=0;
+  63   1              P0=dat;
+  64   1              E=1;
+  65   1              delay(5);
+  66   1              E=0;
+  67   1      }
+  68          /******************************************************************/
+  69          /*                           1602初始化程序                       */
+  70          /******************************************************************/
+  71          void InitLcd()//1602初始化程序
+  72          {
+  73   1              delay(15);
+  74   1              WriteCommand(0x38); //display mode
+  75   1              WriteCommand(0x38); //display mode
+  76   1              WriteCommand(0x38); //display mode
+  77   1              WriteCommand(0x06); //当读或写一个字符后地址指针加一，且光标加一
+  78   1              WriteCommand(0x0c); //显示开及光标不显示
+  79   1              WriteCommand(0x01); //清屏
+  80   1      
+  81   1              WriteCommand(0x80);
+  82   1              for(num=0;num<15;num++)//第一行的显示
+  83   1              {
+  84   2                      WriteData(table1[num]);
+  85   2                      delay(15);
+  86   2              }
+  87   1              WriteCommand(0x80+0x40);//第二行的显示
+  88   1              for(num=0;num<15;num++)
+  89   1              {
+  90   2                      WriteData(table2[num]);
+  91   2                      delay(15);
+  92   2              }
+  93   1      
+  94   1      }
+  95          /******************************************************************/
+  96          /*              独立键盘扫描函数                                  */
+  97          /******************************************************************/
+  98          void keyscan()  
+  99          {        
+ 100   1              
+ 101   1              P3=0xff;//拉高P3口，以读取P3口的值
+ 102   1              if(key1==0)//键1被按下
+ 103   1              {
+ 104   2                      delay(5);//延时消抖
+ 105   2                      if(key1==0)
+ 106   2                      {
+ 107   3                              flag=1;
+ 108   3                      }
+ 109   2                      while(!key1);
+ 110   2                      delay(5);//延时消抖
+ 111   2                      while(!key1);//松手检测
+ 112   2              }
+ 113   1              if(key2==0)
+ 114   1              {
+ 115   2                      delay(5);
+ 116   2                      if(key2==0)
+C51 COMPILER V9.60.0.0   MAIN                                                              05/02/2022 15:57:32 PAGE 3   
+
+ 117   2                      {
+ 118   3                              flag=2;
+ 119   3                      }
+ 120   2                      while(!key2);
+ 121   2                      delay(5);
+ 122   2                      while(!key2);
+ 123   2              }
+ 124   1              if(key3==0)//键1被按下
+ 125   1              {
+ 126   2                      delay(5);//延时消抖
+ 127   2                      if(key3==0)
+ 128   2                      {
+ 129   3                              flag=3;
+ 130   3                      }
+ 131   2                      while(!key3);
+ 132   2                      delay(5);//延时消抖
+ 133   2                      while(!key3);//松手检测
+ 134   2              }
+ 135   1              if(key4==0)
+ 136   1              {
+ 137   2                      delay(5);
+ 138   2                      if(key4==0)
+ 139   2                      {
+ 140   3                              flag=4;
+ 141   3                      }
+ 142   2                      while(!key4);
+ 143   2                      delay(5);
+ 144   2                      while(!key4);
+ 145   2              }
+ 146   1              if(key5==0)
+ 147   1              {
+ 148   2                      delay(5);
+ 149   2                      if(key5==0)
+ 150   2                      {
+ 151   3                              flag=5;
+ 152   3                      }
+ 153   2                      while(!key5);
+ 154   2                      delay(5);
+ 155   2                      while(!key5);
+ 156   2              }
+ 157   1      }
+ 158          /******************************************************************/
+ 159          /*                           1602显示3位数                       */
+ 160          /******************************************************************/
+ 161          void write_sfm (uchar add,uint date)  reentrant //1602显示
+ 162          {
+ 163   1              uchar bai,shi,ge;
+ 164   1              bai=date/100;
+ 165   1              shi=date%100/10;
+ 166   1              ge=date%10;
+ 167   1              WriteCommand(0x80+add);//设置数据地址指针
+ 168   1              WriteData(0x30+bai);
+ 169   1              WriteData(0x30+shi);
+ 170   1              WriteData(0x30+ge);
+ 171   1              WriteData(0x20);
+ 172   1      }
+ 173          /******************************************************************/
+ 174          /*                           键值处理                             */
+ 175          /******************************************************************/
+ 176          void handle_flag()
+ 177          {        
+ 178   1              uchar select1;
+C51 COMPILER V9.60.0.0   MAIN                                                              05/02/2022 15:57:32 PAGE 4   
+
+ 179   1              if(TR0==0&&TR1==0)
+ 180   1              {        
+ 181   2                      if(flag==1) //正转
+ 182   2                      {
+ 183   3                              WriteCommand(0x80+0x05);
+ 184   3                              WriteData('+');
+ 185   3                              delay(20);
+ 186   3                              select=0;
+ 187   3                      }
+ 188   2                      if(flag==2) //反转
+ 189   2                      {
+ 190   3                              WriteCommand(0x80+0x05);
+ 191   3                              WriteData('-');
+ 192   3                              delay(20);
+ 193   3                              select=1;
+ 194   3                      }
+ 195   2                      if(flag==3)//转速加
+ 196   2                      {
+ 197   3                          speed++;
+ 198   3                              if(speed>=12)
+ 199   3                                      speed=12;
+ 200   3                              write_sfm(0x0c,speed);//显示速度
+ 201   3                              delay(20);
+ 202   3                  }
+ 203   2                      if(flag==4)        //转速减
+ 204   2                      {
+ 205   3                              speed--;
+ 206   3                              if(speed<=1)
+ 207   3                                      speed=1;
+ 208   3                              write_sfm(0x0c,speed);//显示速度
+ 209   3                              delay(20);
+ 210   3                      }
+ 211   2      }
+ 212   1              if(flag==5)////关闭中断，停止电机
+ 213   1              {
+ 214   2                      select1++;
+ 215   2                      select1%=2;
+ 216   2                      if( select1==0)
+ 217   2                      {
+ 218   3                              TR0=0;
+ 219   3                              TR1=0;
+ 220   3                              if(select==0)//显示转动的角度
+ 221   3                                      write_sfm(0x40+0x0c,zang);
+ 222   3                              else
+ 223   3                                      write_sfm(0x40+0x0c,fang);
+ 224   3                   }
+ 225   2                      else
+ 226   2                      {if(select==0)
+ 227   3                      {
+ 228   4                              TR0=1;//开定时器0，产生正转相序
+ 229   4                              TR1=0;//关定时器1
+ 230   4                      }
+ 231   3                      else
+ 232   3                      {        
+ 233   4                              TR1=1;//开定时器1，产生反转相序
+ 234   4                              TR0=0;//关定时器0        
+ 235   4                      }
+ 236   3                      }                        
+ 237   2              }
+ 238   1              flag=0;
+ 239   1      }
+ 240          
+C51 COMPILER V9.60.0.0   MAIN                                                              05/02/2022 15:57:32 PAGE 5   
+
+ 241          
+ 242          void main()
+ 243          {        
+ 244   1              pp=0;
+ 245   1              qq=0;
+ 246   1         
+ 247   1              InitLcd();
+ 248   1              TMOD=0x11;
+ 249   1              EA=1;
+ 250   1              ET0=1;
+ 251   1              ET1=1;
+ 252   1      
+ 253   1              TH0=(65536-(14648/speed))/256;
+ 254   1              TL0=(65536-(14648/speed))%256;
+ 255   1              TH1=(65536-(14648/speed))/256;
+ 256   1              TL1=(65536-(14648/speed))%256;
+ 257   1      
+ 258   1              TR0=0;
+ 259   1              TR1=0;
+ 260   1              
+ 261   1              while(1)
+ 262   1              {        
+ 263   2                      keyscan();
+ 264   2                      handle_flag();        
+ 265   2              }
+ 266   1      
+ 267   1      }
+ 268          
+ 269          void time0() interrupt 1  //定时器0
+ 270          {        
+ 271   1              uchar zz;
+ 272   1              TH0=(65536-(14648/speed))/256; // 360/(5.625/64)=4096   
+ 273   1                                         //假设60秒转一圈，即60秒中断4096次，
+ 274   1                                         //那么一次中断需要60000000/4096=14648个时钟
+ 275   1                                         //60000000/(4096*speed)   zflag=4096时一圈
+ 276   1              TL0=(65536-(14648/speed))%256;
+ 277   1              zz%=8;
+ 278   1              P1=F_Rotation[zz];  //输出对应的相
+ 279   1              zz++;
+ 280   1              zflag++;
+ 281   1              if(zflag==4096) //正转了一圈
+ 282   1              {        
+ 283   2                      zflag=0;
+ 284   2                      znum++;
+ 285   2                      write_sfm(0x40+0x04,znum);
+ 286   2              }
+ 287   1              if(zflag%64==0)//计算正转动的角度
+ 288   1              {
+ 289   2                      pp++;
+ 290   2                      zang=(uint)(pp*5.625);
+ 291   2                      if(zang==360)
+ 292   2                              pp=0;
+ 293   2                      write_sfm(0x40+0x0c,zang);
+ 294   2              }
+ 295   1              //zang=0.088*zflag;
+ 296   1              //write_sfm(0x40+0x0c,zang);
+ 297   1      }
+ 298          void time1() interrupt 3    //定时器1
+ 299          {               
+ 300   1              uchar ff;
+ 301   1              TH1=(65536-(14648/speed))/256;
+ 302   1              TL1=(65536-(14648/speed))%256;
+C51 COMPILER V9.60.0.0   MAIN                                                              05/02/2022 15:57:32 PAGE 6   
+
+ 303   1          ff%=8;
+ 304   1              P1=B_Rotation[ff]; //输出对应的相
+ 305   1              ff++;
+ 306   1              fflag++;
+ 307   1              if(fflag==4096) //反转了一圈
+ 308   1              {        
+ 309   2                      fflag=0;
+ 310   2                      fnum++;
+ 311   2                      write_sfm(0x40+0x04,fnum);
+ 312   2              }
+ 313   1              if(fflag%64==0)//计算反转动的角度
+ 314   1              {
+ 315   2                      qq++;
+ 316   2                      fang=(uint)(qq*5.625);
+ 317   2                      if(fang==360)
+ 318   2                      qq=0;
+ 319   2                      write_sfm(0x40+0x0c,fang);
+ 320   2              }
+ 321   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1435    ----
+   CONSTANT SIZE    =     16    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     61       3
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

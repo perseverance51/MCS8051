@@ -1,0 +1,128 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              05/07/2022 13:11:39 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          //#include <STC15F2K60S2.H>
+   2                //这个根据自己的51单片机芯片来修改。
+   3          //#include <STC89C5xRC.H>
+   4          #include <STC12C5A60S2.H>
+   5          
+   6          #include "intrins.h"//如果延时函数当中所用了nop()就需要添加此头文件
+   7          #include <stdio.h>         // 为使用KEIL自带的库函数printf而加入
+   8          
+   9          sbit INIR = P3^2;                //这个根据自己定义引脚，注意要带中断功能。
+  10          bit InFrared_Way = 0;
+  11          unsigned char Data[4] = {0};
+  12          
+  13          void InFrared_Init(void);
+  14          void UartInit(void)   //
+  15          {
+  16   1        SCON = 0x50;    //8位数据,可变波特率
+  17   1        AUXR |= 0x40;   //定时器时钟1T模式
+  18   1        AUXR &= 0xFE;   //串口1选择定时器1为波特率发生器
+  19   1        TMOD &= 0x0F;   //设置定时器模式
+  20   1        TL1 = 0xE0;   //设置定时初始值
+  21   1        TH1 = 0xFE;   //设置定时初始值
+  22   1        ET1 = 0;    //禁止定时器%d中断
+  23   1        TR1 = 1;    //定时器1开始计时
+  24   1        TI=1;     // 很关键，使用printf函数时必须有此命令
+  25   1      }
+  26          void Delay1000ms()    //@35MHz
+  27          {
+  28   1        unsigned char i, j, k;
+  29   1      
+  30   1        _nop_();
+  31   1        _nop_();
+  32   1        i = 133;
+  33   1        j = 255;
+  34   1        k = 40;
+  35   1        do
+  36   1        {
+  37   2          do
+  38   2          {
+  39   3            while (--k);
+  40   3          } while (--j);
+  41   2        } while (--i);
+  42   1      }
+  43          
+  44          
+  45          void main(void)
+  46          {
+  47   1      //       TMOD = 0x01;
+  48   1      //       TR0 = 0;
+  49   1      //       IT0 = 1;
+  50   1      //       EX0 = 1;
+  51   1          UartInit();
+  52   1             EA = 1;
+  53   1        Delay1000ms();
+  54   1          printf ("STC12单片机 \n"); 
+C51 COMPILER V9.60.0.0   MAIN                                                              05/07/2022 13:11:39 PAGE 2   
+
+  55   1        Delay1000ms();
+  56   1          printf ("Start waite IR_DATE \n"); 
+  57   1             while (1)
+  58   1             {
+  59   2      //              if (InFrared_Way == 1)
+  60   2      //              {
+  61   2      //                     EX0 = 0;
+  62   2      //                     TR0 = 1;
+  63   2      //                     InFrared_Init();
+  64   2      //                     TR0 = 1;
+  65   2      //                     EX0 = 1;
+  66   2      //                     InFrared_Way = 0;
+  67   2      //              }
+  68   2             }
+  69   1      }
+  70          
+  71          void Int_0(void) interrupt 0
+  72          {//外部中断0
+  73   1             InFrared_Way  = 1;
+  74   1      }
+  75          
+  76          void InFrared_Init(void)
+  77          {
+  78   1             unsigned char i, j;     
+  79   1             TH0 = 0;
+  80   1             TL0 = 0;
+  81   1             while (INIR == 0 && TH0 <= 35);
+  82   1             if (INIR == 1)
+  83   1             {
+  84   2                    while (INIR == 1 && TH0 <= 55);
+  85   2                    for (i = 0; i < 4; i++)
+  86   2                    {
+  87   3                           for (j = 0; j < 8; j++)
+  88   3                           {
+  89   4                                  TH0 = 0;
+  90   4                                  TL0 = 0;
+  91   4                                  while (INIR == 0 && TH0 <= 3);
+  92   4                                  while (INIR == 1);
+  93   4                                  Data[i] >>= 1;
+  94   4                                  if (TH0 >= 7)
+  95   4                                  {
+  96   5                                         Data[i] |= 0x80;
+  97   5                                  }
+  98   4                           }
+  99   3                    }
+ 100   2                    printf ("RECE_DATA: %s \n",Data); 
+ 101   2             }
+ 102   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    216    ----
+   CONSTANT SIZE    =     52    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      4    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

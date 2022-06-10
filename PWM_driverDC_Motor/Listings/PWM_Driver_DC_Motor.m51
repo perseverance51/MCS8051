@@ -1,0 +1,101 @@
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                    06/07/2022  22:54:59  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0, INVOKED BY:
+C:\KEIL_V5\C51\BIN\BL51.EXE .\Objects\PWM_Driver_DC_Motor.obj TO .\Objects\PWM_Driver_DC_Motor PRINT (.\Listings\PWM_Dri
+>> ver_DC_Motor.m51) RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  .\Objects\PWM_Driver_DC_Motor.obj (PWM_DRIVER_DC_MOTOR)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_STARTUP)
+
+
+LINK MAP OF MODULE:  .\Objects\PWM_Driver_DC_Motor (PWM_DRIVER_DC_MOTOR)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0002H     UNIT         _DATA_GROUP_
+            IDATA   000AH     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     0075H     UNIT         ?PR?MAIN?PWM_DRIVER_DC_MOTOR
+            CODE    0078H     0012H     UNIT         ?PR?_DELAY?PWM_DRIVER_DC_MOTOR
+            CODE    008AH     000CH     UNIT         ?C_C51STARTUP
+
+
+
+OVERLAY MAP OF MODULE:   .\Objects\PWM_Driver_DC_Motor (PWM_DRIVER_DC_MOTOR)
+
+
+SEGMENT                                  DATA_GROUP 
+  +--> CALLED SEGMENT                  START    LENGTH
+------------------------------------------------------
+?C_C51STARTUP                          -----    -----
+  +--> ?PR?MAIN?PWM_DRIVER_DC_MOTOR
+
+?PR?MAIN?PWM_DRIVER_DC_MOTOR           0008H    0002H
+  +--> ?PR?_DELAY?PWM_DRIVER_DC_MOTOR
+
+
+
+SYMBOL TABLE OF MODULE:  .\Objects\PWM_Driver_DC_Motor (PWM_DRIVER_DC_MOTOR)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        PWM_DRIVER_DC_MOTOR
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:00B0H         PUBLIC        P3
+  B:00B0H.5       PUBLIC        Dec
+  C:0078H         PUBLIC        _delay
+  B:00B0H.4       PUBLIC        Inc
+  B:00B0H.6       PUBLIC        Dir
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  06/07/2022  22:54:59  PAGE 2
+
+
+  C:0003H         PUBLIC        main
+  B:00B0H.7       PUBLIC        PWM
+  -------         PROC          MAIN
+  -------         DO            
+  D:0008H         SYMBOL        speed
+  -------         ENDDO         
+  C:0003H         LINE#         19
+  C:0003H         LINE#         20
+  C:0003H         LINE#         23
+  C:0005H         LINE#         24
+  C:0008H         LINE#         25
+  C:0010H         LINE#         27
+  C:0016H         LINE#         28
+  C:0016H         LINE#         29
+  C:0016H         LINE#         30
+  C:0019H         LINE#         32
+  C:003AH         LINE#         33
+  C:003DH         LINE#         35
+  C:005DH         LINE#         38
+  C:005FH         LINE#         39
+  C:0066H         LINE#         40
+  C:0068H         LINE#         41
+  C:0076H         LINE#         42
+  -------         ENDPROC       MAIN
+  -------         PROC          _DELAY
+  D:0006H         SYMBOL        j
+  C:0078H         LINE#         45
+  C:0078H         LINE#         46
+  C:0081H         LINE#         47
+  C:0081H         LINE#         48
+  C:0082H         LINE#         49
+  C:0089H         LINE#         50
+  -------         ENDPROC       _DELAY
+  -------         ENDMOD        PWM_DRIVER_DC_MOTOR
+
+Program Size: data=11.0 xdata=0 code=150
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

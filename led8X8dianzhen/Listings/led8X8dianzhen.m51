@@ -1,0 +1,139 @@
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                    01/21/2022  21:25:39  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0, INVOKED BY:
+C:\KEIL_V5\C51\BIN\BL51.EXE .\Objects\main.obj TO .\Objects\led8X8dianzhen PRINT (.\Listings\led8X8dianzhen.m51) RAMSIZE
+>>  (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  .\Objects\main.obj (MAIN)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_STARTUP)
+
+
+LINK MAP OF MODULE:  .\Objects\led8X8dianzhen (MAIN)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0004H     UNIT         _DATA_GROUP_
+            IDATA   000CH     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     0091H     UNIT         ?PR?MAIN?MAIN
+            CODE    0094H     0028H     UNIT         ?PR?_QUDONG595?MAIN
+            CODE    00BCH     0010H     UNIT         ?CO?MAIN
+            CODE    00CCH     000CH     UNIT         ?C_C51STARTUP
+
+
+
+OVERLAY MAP OF MODULE:   .\Objects\led8X8dianzhen (MAIN)
+
+
+SEGMENT                          DATA_GROUP 
+  +--> CALLED SEGMENT          START    LENGTH
+----------------------------------------------
+?C_C51STARTUP                  -----    -----
+  +--> ?PR?MAIN?MAIN
+
+?PR?MAIN?MAIN                  0008H    0004H
+  +--> ?CO?MAIN
+  +--> ?PR?_QUDONG595?MAIN
+
+
+
+SYMBOL TABLE OF MODULE:  .\Objects\led8X8dianzhen (MAIN)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        MAIN
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0080H         PUBLIC        P0
+  D:0090H         PUBLIC        P1
+  D:00A0H         PUBLIC        P2
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  01/21/2022  21:25:39  PAGE 2
+
+
+  D:00B0H         PUBLIC        P3
+  D:00E8H         PUBLIC        P4
+  D:00A8H         PUBLIC        IE
+  D:00B8H         PUBLIC        IP
+  C:00C4H         PUBLIC        dzwei
+  C:0003H         PUBLIC        main
+  B:0090H.1       PUBLIC        shcp
+  C:00BCH         PUBLIC        shuju
+  D:0098H         PUBLIC        SCON
+  D:0088H         PUBLIC        TCON
+  B:0090H.4       PUBLIC        P14
+  B:0090H.2       PUBLIC        stcp
+  B:0090H.0       PUBLIC        ds
+  B:0090H.3       PUBLIC        mr
+  D:00C8H         PUBLIC        T2CON
+  C:0094H         PUBLIC        _QuDong595
+  D:00D0H         PUBLIC        PSW
+  -------         PROC          _QUDONG595
+  D:0007H         SYMBOL        sj
+  -------         DO            
+  D:0006H         SYMBOL        aa
+  -------         ENDDO         
+  C:0094H         LINE#         13
+  C:0094H         LINE#         14
+  C:0096H         LINE#         15
+  C:0098H         LINE#         16
+  C:009AH         LINE#         17
+  C:00A0H         LINE#         18
+  C:00A0H         LINE#         19
+  C:00ABH         LINE#         20
+  C:00AFH         LINE#         21
+  C:00B1H         LINE#         22
+  C:00B3H         LINE#         23
+  C:00B5H         LINE#         24
+  C:00B7H         LINE#         25
+  C:00B9H         LINE#         26
+  C:00BBH         LINE#         27
+  -------         ENDPROC       _QUDONG595
+  -------         PROC          MAIN
+  -------         DO            
+  D:0008H         SYMBOL        Xd
+  D:0009H         SYMBOL        ss
+  D:0004H         SYMBOL        cs
+  D:0003H         SYMBOL        d
+  D:0001H         SYMBOL        y
+  D:000AH         SYMBOL        ys
+  -------         ENDDO         
+  C:0003H         LINE#         28
+  C:0003H         LINE#         29
+  C:0003H         LINE#         30
+  C:000CH         LINE#         31
+  C:0010H         LINE#         32
+  C:0012H         LINE#         34
+  C:0012H         LINE#         35
+  C:0012H         LINE#         36
+  C:0030H         LINE#         37
+  C:0063H         LINE#         41
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  01/21/2022  21:25:39  PAGE 3
+
+
+  C:0069H         LINE#         42
+  C:006BH         LINE#         43
+  C:006DH         LINE#         44
+  C:0071H         LINE#         45
+  C:007EH         LINE#         46
+  C:0082H         LINE#         47
+  C:008DH         LINE#         48
+  C:008FH         LINE#         49
+  C:008FH         LINE#         50
+  C:0091H         LINE#         51
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        MAIN
+
+Program Size: data=13.0 xdata=0 code=216
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

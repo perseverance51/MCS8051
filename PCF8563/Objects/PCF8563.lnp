@@ -1,0 +1,3 @@
+".\Objects\PCF8563.obj" 
+TO ".\Objects\PCF8563" 
+PRINT(".\Listings\PCF8563.m51") RAMSIZE(256) 

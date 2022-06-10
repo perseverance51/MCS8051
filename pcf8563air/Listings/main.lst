@@ -1,0 +1,109 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              01/04/2022 11:31:01 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include "config.h"
+*** ERROR C141 IN LINE 10 OF TWI.h: syntax error near ')', expected '<id>'
+*** ERROR C141 IN LINE 20 OF PCF8563.h: syntax error near ')', expected '<id>'
+   2          #include <REGX52.H>
+*** ERROR C231 IN LINE 15 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'P0': redefinition
+*** ERROR C231 IN LINE 16 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'SP': redefinition
+*** ERROR C231 IN LINE 17 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'DPL': redefinition
+*** ERROR C231 IN LINE 18 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'DPH': redefinition
+*** ERROR C231 IN LINE 19 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'PCON': redefinition
+*** ERROR C231 IN LINE 20 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'TCON': redefinition
+*** ERROR C231 IN LINE 21 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'TMOD': redefinition
+*** ERROR C231 IN LINE 22 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'TL0': redefinition
+*** ERROR C231 IN LINE 23 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'TL1': redefinition
+*** ERROR C231 IN LINE 24 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'TH0': redefinition
+*** ERROR C231 IN LINE 25 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'TH1': redefinition
+*** ERROR C231 IN LINE 26 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'P1': redefinition
+*** ERROR C231 IN LINE 27 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'SCON': redefinition
+*** ERROR C231 IN LINE 28 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'SBUF': redefinition
+*** ERROR C231 IN LINE 29 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'P2': redefinition
+*** ERROR C231 IN LINE 30 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'IE': redefinition
+*** ERROR C231 IN LINE 31 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'P3': redefinition
+*** ERROR C231 IN LINE 32 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'IP': redefinition
+*** ERROR C231 IN LINE 33 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'T2CON': redefinition
+*** ERROR C231 IN LINE 35 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'RCAP2L': redefinition
+*** ERROR C231 IN LINE 36 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'RCAP2H': redefinition
+*** ERROR C231 IN LINE 37 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'TL2': redefinition
+*** ERROR C231 IN LINE 38 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'TH2': redefinition
+*** ERROR C231 IN LINE 39 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'PSW': redefinition
+*** ERROR C231 IN LINE 40 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'ACC': redefinition
+*** ERROR C231 IN LINE 41 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'B': redefinition
+*** ERROR C231 IN LINE 70 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'IT0': redefinition
+*** ERROR C231 IN LINE 71 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'IE0': redefinition
+*** ERROR C231 IN LINE 72 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'IT1': redefinition
+*** ERROR C231 IN LINE 73 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'IE1': redefinition
+*** ERROR C231 IN LINE 74 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'TR0': redefinition
+*** ERROR C231 IN LINE 75 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'TF0': redefinition
+*** ERROR C231 IN LINE 76 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'TR1': redefinition
+*** ERROR C231 IN LINE 77 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'TF1': redefinition
+*** ERROR C231 IN LINE 106 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'T2': redefinition
+*** ERROR C231 IN LINE 107 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'T2EX': redefinition
+*** ERROR C231 IN LINE 112 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'RI': redefinition
+*** ERROR C231 IN LINE 113 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'TI': redefinition
+*** ERROR C231 IN LINE 114 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'RB8': redefinition
+*** ERROR C231 IN LINE 115 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'TB8': redefinition
+*** ERROR C231 IN LINE 116 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'REN': redefinition
+*** ERROR C231 IN LINE 117 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'SM2': redefinition
+*** ERROR C231 IN LINE 118 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'SM1': redefinition
+*** ERROR C231 IN LINE 119 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'SM0': redefinition
+*** ERROR C231 IN LINE 136 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'EX0': redefinition
+*** ERROR C231 IN LINE 137 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'ET0': redefinition
+*** ERROR C231 IN LINE 138 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'EX1': redefinition
+*** ERROR C231 IN LINE 139 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'ET1': redefinition
+*** ERROR C231 IN LINE 140 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'ES': redefinition
+*** ERROR C231 IN LINE 141 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'ET2': redefinition
+C51 COMPILER V9.60.0.0   MAIN                                                              01/04/2022 11:31:01 PAGE 2   
+
+*** ERROR C231 IN LINE 143 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'EA': redefinition
+*** ERROR C231 IN LINE 157 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'RXD': redefinition
+*** ERROR C231 IN LINE 158 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'TXD': redefinition
+*** ERROR C231 IN LINE 159 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'INT0': redefinition
+*** ERROR C231 IN LINE 160 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'INT1': redefinition
+*** ERROR C231 IN LINE 161 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'T0': redefinition
+*** ERROR C231 IN LINE 162 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'T1': redefinition
+*** ERROR C231 IN LINE 163 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'WR': redefinition
+*** ERROR C231 IN LINE 164 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'RD': redefinition
+*** ERROR C231 IN LINE 169 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'PX0': redefinition
+*** ERROR C231 IN LINE 170 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'PT0': redefinition
+*** ERROR C231 IN LINE 171 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'PX1': redefinition
+*** ERROR C231 IN LINE 172 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'PT1': redefinition
+*** ERROR C231 IN LINE 173 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'PS': redefinition
+*** ERROR C231 IN LINE 174 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'PT2': redefinition
+*** ERROR C231 IN LINE 179 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'CP_RL2': redefinition
+*** ERROR C231 IN LINE 180 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'C_T2': redefinition
+*** ERROR C231 IN LINE 181 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'TR2': redefinition
+*** ERROR C231 IN LINE 182 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'EXEN2': redefinition
+*** ERROR C231 IN LINE 183 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'TCLK': redefinition
+*** ERROR C231 IN LINE 184 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'RCLK': redefinition
+*** ERROR C231 IN LINE 185 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'EXF2': redefinition
+*** ERROR C231 IN LINE 186 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'TF2': redefinition
+*** ERROR C231 IN LINE 197 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'P': redefinition
+*** ERROR C231 IN LINE 199 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'OV': redefinition
+*** ERROR C231 IN LINE 200 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'RS0': redefinition
+*** ERROR C231 IN LINE 201 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'RS1': redefinition
+*** ERROR C231 IN LINE 202 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'F0': redefinition
+*** ERROR C231 IN LINE 203 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'AC': redefinition
+*** ERROR C231 IN LINE 204 OF C:\Keil_v5\C51\Inc\Atmel\REGX52.H: 'CY': redefinition
+   3          
+   4          void main()
+   5          {
+   6   1        
+   7   1        
+   8   1            while(1)
+   9   1          {
+  10   2            
+  11   2          }
+  12   1          
+  13   1        }
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  82 ERROR(S)

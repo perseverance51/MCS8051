@@ -1,0 +1,367 @@
+C51 COMPILER V9.60.0.0   LCD1602IIC                                                        12/10/2021 18:48:01 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE LCD1602IIC
+OBJECT MODULE PLACED IN .\Objects\lcd1602iic.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE lcd1602iic.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listing
+                    -s\lcd1602iic.lst) TABS(2) OBJECT(.\Objects\lcd1602iic.obj)
+
+line level    source
+
+   1          #include "stdio.h"
+   2          #include <reg52.h>
+   3          #include "intrins.h"
+   4          #include  "delay.h"
+   5          #define uchar unsigned char
+   6          #define uint unsigned int
+   7          sbit SCL = P1^0;
+   8          sbit SDA = P1^1;
+   9          sbit Temp_data = P1^2 ;
+  10          sbit led = P1^5;//DHT响应指示灯
+  11          sbit led2 = P1^6;//效验数据指示灯
+  12          unsigned int rec_dat[4];
+  13          //#define   L1                0x80            // 第一行写入地址
+  14          //#define   L2                0xc0            // 第二行写入地址
+  15          char ADDR = 0x4E;    // PCF8574  T  模块的地址码
+  16          //char ADDR = 0x7e;    // PCF8574   AT  模块的地址码
+  17          
+  18          void DHT11_start();//DHT开始信号
+  19          unsigned char DHT11_rec_byte();
+  20          void DHT11_receive();
+  21          
+  22          //***************************** 延时毫秒函数***********************************************
+  23          
+  24          
+  25          void delay1(int y)   //
+  26          {
+  27   1          while(y--)
+  28   1          {
+  29   2              unsigned char a,b,c;
+  30   2              for(c=1; c>0; c--)
+  31   2                  for(b=142; b>0; b--)
+  32   2                      for(a=2; a>0; a--);
+  33   2          }
+  34   1      }
+  35          
+  36          //******************************** IIC 串口开始 ********************************************
+  37          
+  38          
+  39          void IIC_start(void)
+  40          {
+  41   1          SDA=1;
+  42   1          _nop_();
+  43   1          SCL=1;
+  44   1          _nop_();
+  45   1          _nop_();
+  46   1          _nop_();
+  47   1          _nop_();
+  48   1          _nop_();
+  49   1          SDA=0;
+  50   1          _nop_();
+  51   1          _nop_();
+  52   1          _nop_();
+  53   1          _nop_();
+  54   1          _nop_();
+C51 COMPILER V9.60.0.0   LCD1602IIC                                                        12/10/2021 18:48:01 PAGE 2   
+
+  55   1          SCL=0;
+  56   1      }
+  57          //********************************** IIC 串口写1个字节 ******************************************
+  58          
+  59          
+  60          void IIC_writeByte(char temp)
+  61          {
+  62   1          char i;
+  63   1          for(i=0; i<8; i++)
+  64   1          {
+  65   2              SDA=(bit)(temp & 0x80) ;   // 根据规定1602的数据最高位必须为  1
+  66   2              temp <<=1;
+  67   2              _nop_();
+  68   2              _nop_();
+  69   2              SCL=1;
+  70   2              _nop_();
+  71   2              _nop_();
+  72   2              _nop_();
+  73   2              _nop_();
+  74   2              _nop_();
+  75   2              SCL=0;
+  76   2          }
+  77   1          _nop_();
+  78   1          _nop_();
+  79   1          _nop_();
+  80   1          _nop_();
+  81   1          SDA=1;
+  82   1          _nop_();
+  83   1          _nop_();
+  84   1          _nop_();
+  85   1          _nop_();
+  86   1          SCL=1;
+  87   1          _nop_();
+  88   1          _nop_();
+  89   1          _nop_();
+  90   1          while(SDA);
+  91   1          _nop_();
+  92   1          SCL=0;
+  93   1      }
+  94          
+  95          
+  96          
+  97          
+  98          //******************************** 1602写命令 ********************************************
+  99          
+ 100          
+ 101          void LCD_write_command(char comm)
+ 102          {
+ 103   1          char tmp;
+ 104   1          IIC_start();          // 串口开始
+ 105   1          IIC_writeByte(ADDR);  // 先选PCF 8574T 的地址  （应该是相当于选中的意思吧）
+ 106   1      
+ 107   1          tmp = comm & 0xF0;    // 与0xf0 应该是取第四位的意思吧
+ 108   1          tmp |= 0x0C;         //保留高4位为指令的高四位，低四位为   RS = 0, RW = 0, EN = 1
+ 109   1          IIC_writeByte(tmp);  //从串口送出
+ 110   1          delay1(20);
+ 111   1          tmp &= 0xFB;        //Make EN = 0
+ 112   1          IIC_writeByte(tmp);
+ 113   1      
+ 114   1          tmp = (comm & 0x0F) << 4 ;  //将指令的低四位 送到高位置保存
+ 115   1          tmp |= 0x0C;        //RS = 0, RW = 0, EN = 1
+ 116   1          IIC_writeByte(tmp);
+C51 COMPILER V9.60.0.0   LCD1602IIC                                                        12/10/2021 18:48:01 PAGE 3   
+
+ 117   1          delay1(20);
+ 118   1          tmp &= 0xFB; // Make EN = 0
+ 119   1          IIC_writeByte(tmp);
+ 120   1      
+ 121   1      }
+ 122          //******************************** 1602写数据 ********************************************
+ 123          
+ 124          
+ 125          void LCD_write_data(char data1)
+ 126          {
+ 127   1          char tmp;
+ 128   1          IIC_start();
+ 129   1          IIC_writeByte(ADDR);   // 先选PCF 8574T 的地址  （应该是相当于选中的意思吧）
+ 130   1      
+ 131   1          tmp = data1 & 0xF0;
+ 132   1          tmp |= 0x0D; //RS = 0, RW = 0, EN = 1
+ 133   1          IIC_writeByte(tmp);
+ 134   1          delay1(20);
+ 135   1          tmp &= 0xFB; //Make EN = 0
+ 136   1          IIC_writeByte(tmp);
+ 137   1      
+ 138   1          tmp = (data1 & 0x0F) << 4 ;
+ 139   1          tmp |= 0x0D; //RS = 0, RW = 0, EN = 1
+ 140   1          IIC_writeByte(tmp);
+ 141   1          delay1(20);
+ 142   1          tmp &= 0xFB ; // Make EN = 0
+ 143   1          IIC_writeByte(tmp);
+ 144   1      }
+ 145          
+ 146          
+ 147          //******************************** 1602初始化 ********************************************
+ 148          
+ 149          
+ 150          void Init_Lcd(void)
+ 151          {
+ 152   1          LCD_write_command(0x33); //将8位总线转为4位总线
+ 153   1          delay1(50) ;
+ 154   1          LCD_write_command(0x32); //
+ 155   1          delay1(50) ;
+ 156   1          LCD_write_command(0x28); // 4位数据线，显示2行，5*7点阵字符  ！如果是0x38  则为8位数据线，显示2行，5*7
+             -点阵字符
+ 157   1          delay1(50) ;
+ 158   1          LCD_write_command(0x0C); // 开显示，关闭光标，不闪烁
+ 159   1          delay1(50) ;
+ 160   1          LCD_write_command(0x06); // 设定输入方式，增量不位移
+ 161   1          delay1(50) ;
+ 162   1          LCD_write_command(0x01); // 清屏
+ 163   1          delay1(50) ;
+ 164   1      }
+ 165          
+ 166          
+ 167          
+ 168          
+ 169          
+ 170          
+ 171          
+ 172          
+ 173          //*************************************** 在指定位置显示字符串 *************************************
+ 174          
+ 175          
+ 176          void Write_LCD(int x, int y, char *str)
+ 177          {
+C51 COMPILER V9.60.0.0   LCD1602IIC                                                        12/10/2021 18:48:01 PAGE 4   
+
+ 178   1          char addr;
+ 179   1          if( x < 0)
+ 180   1          {
+ 181   2              x = 0;
+ 182   2          }
+ 183   1          if(x > 15)
+ 184   1          {
+ 185   2              x = 15;
+ 186   2          }
+ 187   1          if(y<0)
+ 188   1          {
+ 189   2              y = 0;
+ 190   2          }
+ 191   1          if(y > 1)
+ 192   1          {
+ 193   2              y = 1;
+ 194   2          }
+ 195   1      
+ 196   1          addr = 0x80 + 0x40 * y + x;   // Move cursor  移动光标
+ 197   1          LCD_write_command(addr);
+ 198   1          while (*str)
+ 199   1          {
+ 200   2              LCD_write_data(*str++);
+ 201   2          }
+ 202   1      }
+ 203          
+ 204          
+ 205          //-------------------------------------------- 显示字符串的函数 ------------------------------------------
+             -----------
+ 206          
+ 207          /*
+ 208          void LCD_write_word(unsigned char *s) //显示字符串的函数
+ 209          {
+ 210              while(*s>0)
+ 211              {
+ 212                  LCD_write_data(*s);
+ 213                  s++;
+ 214              }
+ 215          }
+ 216          */
+ 217          //********************************* 指定位置显示一个字符*******************************************
+ 218          /*
+ 219          void Print_Char (unsigned char line,unsigned char num,unsigned char date)
+ 220          {
+ 221                          LCD_write_command(line+num);
+ 222                          LCD_write_data(date);
+ 223          }
+ 224          
+ 225          
+ 226          */
+ 227          /*
+ 228          //按指定位置显示一个字符(针对1602液晶)-用在温度显示
+ 229          void DisplayOneChar(unsigned char X, unsigned char Y, unsigned char DData)
+ 230          {
+ 231              Y &= 0x1;
+ 232              X &= 0xF;                 //限制X不能大于15，Y不能大于1
+ 233              if (Y) X |= 0x40;        //当要显示第二行时地址码+0x40;
+ 234              X |= 0x80;               // 算出指令码
+ 235              LCD_write_command(X);    //这里不检测忙信号，发送地址码
+ 236              LCD_write_data(DData);
+ 237          }
+ 238          */
+C51 COMPILER V9.60.0.0   LCD1602IIC                                                        12/10/2021 18:48:01 PAGE 5   
+
+ 239          
+ 240          //DHT11起始信号
+ 241          void DHT11_start()
+ 242          {
+ 243   1          Temp_data=1;
+ 244   1          Delay10us();
+ 245   1          Temp_data=0;
+ 246   1          Delay25ms();//这个延时不能过短,18ms以上,实际在仿真当中要想读到数据延时要在延时参数要在40以上才能出数据
+ 247   1          Temp_data=1;
+ 248   1          Delay50us();//MCU释放总线20~40us,需要在40微秒到100微秒之间
+ 249   1      }
+ 250          
+ 251          //接收一个字节
+ 252          unsigned char DHT11_rec_byte()
+ 253          {
+ 254   1          unsigned char i,dat=0;
+ 255   1          for(i=0; i<8; i++)
+ 256   1          {
+ 257   2              while(!Temp_data);//跳过数据前段的50us
+ 258   2              Delay35us();//过了数据0和数据1相同区域，再做检测
+ 259   2              dat <<=1;
+ 260   2              if(Temp_data==1)
+ 261   2              {   //如果读到的数据是1
+ 262   3                  dat +=1;
+ 263   3              }
+ 264   2              while(Temp_data);
+ 265   2          }
+ 266   1          return dat;
+ 267   1      }
+ 268          //接收温湿度数据
+ 269          void DHT11_receive()
+ 270          {
+ 271   1          unsigned int R_H,R_L,T_H,T_L;
+ 272   1          unsigned char RH,RL,TH,TL,revise;
+ 273   1          DHT11_start();
+ 274   1          if(Temp_data==0)
+ 275   1          {
+ 276   2              led=1;//检测从设备DHT拉低总线信号，作为响应信号
+ 277   2              while(Temp_data==0); //等待DHT响应信号，80us内来拉高总线
+ 278   2      
+ 279   2              while(Temp_data==1); //等待DHT响应信号，80us内来拉低总线
+ 280   2              //  led=1;
+ 281   2              R_H=DHT11_rec_byte();    //接收湿度高八位
+ 282   2              R_L=DHT11_rec_byte();    //接收湿度低八位
+ 283   2              T_H=DHT11_rec_byte();    //接收温度高八位
+ 284   2              T_L=DHT11_rec_byte();    //接收温度低八位
+ 285   2              revise=DHT11_rec_byte(); //接收校正位
+ 286   2              Delay25us();    //结束
+ 287   2      
+ 288   2              if((R_H+R_L+T_H+T_L)==revise)      //校正
+ 289   2              {
+ 290   3                  led2 = 0;
+ 291   3      
+ 292   3                  RH=R_H;
+ 293   3                  RL=R_L;
+ 294   3                  TH=T_H;
+ 295   3                  TL=T_L;
+ 296   3              }
+ 297   2              /*数据处理，方便显示*/
+ 298   2              rec_dat[0]=RH;
+ 299   2              rec_dat[1]=RL;
+ 300   2              rec_dat[2]=TH;
+C51 COMPILER V9.60.0.0   LCD1602IIC                                                        12/10/2021 18:48:01 PAGE 6   
+
+ 301   2              rec_dat[3]=TL;
+ 302   2      
+ 303   2          }
+ 304   1      //else{ led=1;}
+ 305   1      
+ 306   1      }
+ 307          
+ 308          void main() {
+ 309   1          float tem = 0.0,hum = 0.0;
+ 310   1          unsigned char Tempbuf[8],Humbuf[5];
+ 311   1          Init_Lcd();
+ 312   1      
+ 313   1          led = 0;
+ 314   1          led2 = 0;
+ 315   1          while(1) {
+ 316   2              DHT11_receive();//接收DHT11数据
+ 317   2              Write_LCD(3, 1, "Temp:");//在第一行第一个位置显示字符串
+ 318   2              Write_LCD(3, 0, "Hum:");//在第一行第一个位置显示字符串
+ 319   2              hum = rec_dat[0] + rec_dat[1]/10.0;
+ 320   2              tem = rec_dat[2] + rec_dat[3]/10.0;
+ 321   2              sprintf(Tempbuf, "%3.1f*C",tem);
+ 322   2              sprintf(Humbuf, "%2.0f%%", hum);
+ 323   2              Write_LCD(7, 0, Humbuf);
+ 324   2              Write_LCD(8, 1, Tempbuf);
+ 325   2              Delay1000ms();
+ 326   2              Delay1000ms();
+ 327   2              led=0;
+ 328   2              LCD_write_command(0x01); // 清屏
+ 329   2          }
+ 330   1      }
+ 331          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    865    ----
+   CONSTANT SIZE    =     27    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      9      42
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

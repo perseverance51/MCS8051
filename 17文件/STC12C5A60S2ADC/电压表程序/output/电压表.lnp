@@ -1,0 +1,3 @@
+"..\output\ADC2.obj" 
+TO "..\output\电压表" 
+PRINT(".\Listings\电压表.m51") RAMSIZE(256) 

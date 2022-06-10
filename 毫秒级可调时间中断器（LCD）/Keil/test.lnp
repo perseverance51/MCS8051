@@ -1,0 +1,4 @@
+"STARTUP.obj",
+"1.obj" 
+TO "test" 
+RAMSIZE(256) 

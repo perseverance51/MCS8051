@@ -1,0 +1,221 @@
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                    04/29/2022  22:21:01  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0, INVOKED BY:
+C:\KEIL_V5\C51\BIN\BL51.EXE .\Objects\main.obj, .\Objects\software.obj, .\Objects\hardware.obj TO .\Objects\SEC60 PRINT 
+>> (.\Listings\SEC60.m51) RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  .\Objects\main.obj (MAIN)
+  .\Objects\software.obj (SOFTWARE)
+  .\Objects\hardware.obj (HARDWARE)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_STARTUP)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?SIDIV)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_INIT)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?UIDIV)
+
+
+LINK MAP OF MODULE:  .\Objects\SEC60 (MAIN)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0004H     UNIT         ?DT?SOFTWARE
+            DATA    000CH     0001H     UNIT         _DATA_GROUP_
+            IDATA   000DH     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     0005H     UNIT         ?C_INITSEG
+                    0008H     0003H                  *** GAP ***
+            CODE    000BH     0003H     ABSOLUTE     
+            CODE    000EH     000AH     UNIT         ?CO?HARDWARE
+                    0018H     0003H                  *** GAP ***
+            CODE    001BH     0003H     ABSOLUTE     
+            CODE    001EH     008CH     UNIT         ?C_C51STARTUP
+            CODE    00AAH     008BH     UNIT         ?C?LIB_CODE
+            CODE    0135H     005FH     UNIT         ?PR?SEGDISPLAY?HARDWARE
+            CODE    0194H     0028H     UNIT         ?PR?TIMERI_ROUTINE?SOFTWARE
+            CODE    01BCH     001EH     UNIT         ?PR?MAIN?MAIN
+            CODE    01DAH     001EH     UNIT         ?PR?_DELAYMS?SOFTWARE
+            CODE    01F8H     0017H     UNIT         ?PR?TIMER0_ROUNTINE?SOFTWARE
+
+
+
+OVERLAY MAP OF MODULE:   .\Objects\SEC60 (MAIN)
+
+
+SEGMENT                                DATA_GROUP 
+  +--> CALLED SEGMENT                START    LENGTH
+----------------------------------------------------
+?C_C51STARTUP                        -----    -----
+  +--> ?PR?MAIN?MAIN
+  +--> ?C_INITSEG
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  04/29/2022  22:21:01  PAGE 2
+
+
+?PR?MAIN?MAIN                        -----    -----
+  +--> ?PR?SEGDISPLAY?HARDWARE
+
+?PR?SEGDISPLAY?HARDWARE              000CH    0001H
+  +--> ?CO?HARDWARE
+  +--> ?PR?_DELAYMS?SOFTWARE
+
+
+
+SYMBOL TABLE OF MODULE:  .\Objects\SEC60 (MAIN)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        MAIN
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:00A0H         PUBLIC        P2
+  B:00A8H.7       PUBLIC        EA
+  C:01BCH         PUBLIC        main
+  D:0089H         PUBLIC        TMOD
+  B:00A8H.1       PUBLIC        ET0
+  B:00A8H.3       PUBLIC        ET1
+  D:008CH         PUBLIC        TH0
+  D:008DH         PUBLIC        TH1
+  D:008AH         PUBLIC        TL0
+  D:008BH         PUBLIC        TL1
+  B:0088H.4       PUBLIC        TR0
+  B:0088H.6       PUBLIC        TR1
+  -------         PROC          MAIN
+  C:01BCH         LINE#         3
+  C:01BCH         LINE#         4
+  C:01BCH         LINE#         5
+  C:01BFH         LINE#         12
+  C:01C2H         LINE#         13
+  C:01C5H         LINE#         14
+  C:01C8H         LINE#         15
+  C:01CBH         LINE#         27
+  C:01CDH         LINE#         28
+  C:01CFH         LINE#         29
+  C:01D1H         LINE#         30
+  C:01D3H         LINE#         31
+  C:01D5H         LINE#         32
+  C:01D5H         LINE#         33
+  C:01D5H         LINE#         34
+  C:01D8H         LINE#         35
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        MAIN
+
+  -------         MODULE        SOFTWARE
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:00A0H         PUBLIC        P2
+  D:0008H         PUBLIC        num1
+  D:0009H         PUBLIC        num2
+  C:0194H         PUBLIC        TimerI_Routine
+  D:008CH         PUBLIC        TH0
+  D:008DH         PUBLIC        TH1
+  D:008AH         PUBLIC        TL0
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  04/29/2022  22:21:01  PAGE 3
+
+
+  D:000BH         PUBLIC        num
+  D:008BH         PUBLIC        TL1
+  B:00A0H.0       PUBLIC        LED
+  C:01F8H         PUBLIC        Timer0_Rountine
+  C:01DAH         PUBLIC        _delayms
+  -------         PROC          _DELAYMS
+  D:0006H         SYMBOL        xms
+  -------         DO            
+  D:0006H         SYMBOL        a
+  D:0004H         SYMBOL        b
+  -------         ENDDO         
+  C:01DAH         LINE#         6
+  C:01DAH         LINE#         7
+  C:01DAH         LINE#         9
+  C:01E3H         LINE#         10
+  C:01F7H         LINE#         11
+  -------         ENDPROC       _DELAYMS
+  -------         PROC          TIMER0_ROUNTINE
+  C:01F8H         LINE#         13
+  C:01FAH         LINE#         15
+  C:01FDH         LINE#         16
+  C:0200H         LINE#         17
+  C:0202H         LINE#         18
+  C:0208H         LINE#         19
+  C:0208H         LINE#         20
+  C:020AH         LINE#         21
+  C:020CH         LINE#         22
+  C:020CH         LINE#         23
+  -------         ENDPROC       TIMER0_ROUNTINE
+  -------         PROC          TIMERI_ROUTINE
+  C:0194H         LINE#         25
+  C:0196H         LINE#         27
+  C:0199H         LINE#         28
+  C:019CH         LINE#         29
+  C:019EH         LINE#         30
+  C:01A4H         LINE#         31
+  C:01A4H         LINE#         32
+  C:01A6H         LINE#         33
+  C:01AEH         LINE#         34
+  C:01B4H         LINE#         35
+  C:01B9H         LINE#         36
+  C:01B9H         LINE#         38
+  -------         ENDPROC       TIMERI_ROUTINE
+  -------         ENDMOD        SOFTWARE
+
+  -------         MODULE        HARDWARE
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0080H         PUBLIC        P0
+  D:00A0H         PUBLIC        P2
+  C:000EH         PUBLIC        block
+  C:0135H         PUBLIC        SEGDisplay
+  B:00A0H.2       PUBLIC        LSA
+  B:00A0H.3       PUBLIC        LSB
+  B:00A0H.4       PUBLIC        LSC
+  -------         PROC          SEGDISPLAY
+  -------         DO            
+  D:000CH         SYMBOL        i
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  04/29/2022  22:21:01  PAGE 4
+
+
+  -------         ENDDO         
+  C:0135H         LINE#         16
+  C:0135H         LINE#         17
+  C:0135H         LINE#         19
+  C:0143H         LINE#         20
+  C:0143H         LINE#         21
+  C:014BH         LINE#         22
+  C:014BH         LINE#         23
+  C:014BH         LINE#         24
+  C:014DH         LINE#         25
+  C:014FH         LINE#         26
+  C:0151H         LINE#         27
+  C:0164H         LINE#         28
+  C:0166H         LINE#         29
+  C:0166H         LINE#         30
+  C:0168H         LINE#         31
+  C:016AH         LINE#         32
+  C:016CH         LINE#         33
+  C:0185H         LINE#         34
+  C:0185H         LINE#         35
+  C:0185H         LINE#         36
+  C:018CH         LINE#         37
+  C:018FH         LINE#         38
+  C:0193H         LINE#         39
+  -------         ENDPROC       SEGDISPLAY
+  -------         ENDMOD        HARDWARE
+
+  -------         MODULE        ?C?SIDIV
+  C:00AAH         PUBLIC        ?C?SIDIV
+  -------         ENDMOD        ?C?SIDIV
+
+  -------         MODULE        ?C?UIDIV
+  C:00E0H         PUBLIC        ?C?UIDIV
+  -------         ENDMOD        ?C?UIDIV
+
+Program Size: data=14.0 xdata=0 code=521
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

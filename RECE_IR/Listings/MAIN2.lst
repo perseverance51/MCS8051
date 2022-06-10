@@ -1,0 +1,203 @@
+C51 COMPILER V9.60.0.0   MAIN2                                                             05/07/2022 15:11:28 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN2
+OBJECT MODULE PLACED IN .\Objects\MAIN2.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE MAIN2.C OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\MAI
+                    -N2.lst) TABS(2) OBJECT(.\Objects\MAIN2.obj)
+
+line level    source
+
+   1          //#include "STC15W4K.H"
+   2          //#include <STC15F2K60S2.H>
+   3          #include <STC12C5A60S2.H>
+   4          #include "intrins.h"//如果延时函数当中所用了nop()就需要添加此头文件
+   5          #include <stdio.h>         // 为使用KEIL自带的库函数printf而加入
+   6          #include <string.h> 
+   7          
+   8          sbit IR=P3^2;  //红外接口标志         //红外接收器数据线 注意要带中断功能。
+   9          unsigned char  irtime;//红外用全局变量
+  10          
+  11          bit irpro_ok,irok; //处理OK，接收OK
+  12          
+  13          unsigned char IRcord[4];
+  14          unsigned char irdata[33];
+  15          
+  16          void delay(unsigned int x)    //x*0.14MS
+  17          {
+  18   1       unsigned char i;
+  19   1        while(x--)
+  20   1       {
+  21   2        for (i = 0; i<13; i++) {}
+  22   2       }
+  23   1      }
+  24          
+  25          
+  26          /*------------------------------------------------
+  27                            定时器0中断处理
+  28          ------------------------------------------------*/
+  29          
+  30          void tim0_isr (void) interrupt 1 using 1
+  31          {
+  32   1          irtime++;  //用于计数2个下降沿之间的时间
+  33   1      }
+  34            
+  35          /*------------------------------------------------
+  36                          定时器0初始化
+  37          ------------------------------------------------*/
+  38          void TIM0init(void)//定时器0初始化
+  39          {
+  40   1      
+  41   1      //  TMOD=0x02;//定时器0工作方式2，TH0是重装值，TL0是初值
+  42   1      //  TH0=0x00; //装初值
+  43   1      //  TL0=0x00; 
+  44   1      //  ET0=1;    //开中断
+  45   1      //  TR0=1;   
+  46   1        AUXR |= 0x80;   //定时器时钟1T模式
+  47   1        TMOD &= 0xF0;   //设置定时器模式
+  48   1        TMOD |= 0x02;   //设置定时器模式
+  49   1        TL0 = 0xF5;   //设置定时初始值
+  50   1        TH0 = 0xF5;   //设置定时重载值
+  51   1        TF0 = 0;    //清除TF0标志
+  52   1        ET0 = 1;
+  53   1        TR0 = 1;    //定时器0开始计时 
+  54   1      }
+C51 COMPILER V9.60.0.0   MAIN2                                                             05/07/2022 15:11:28 PAGE 2   
+
+  55          
+  56          //void printf_String(void) 
+  57          //{
+  58          //  char buf [] = "Test String";
+  59          //  char *p = buf;
+  60          //  printf ("String %s is at address %p\n",buf,p);
+  61          //   //输出：String Test String is at address i：0022    
+  62          //}   
+  63          /**********************************************************/
+  64          //void IR_IN() interrupt 0 using 0
+  65          
+  66          // printf ("RECE_DATA: %s \n",IRcord); 
+  67          /*------------------------------------------------
+  68                          红外码值处理
+  69          ------------------------------------------------*/
+  70          void Irpro(void)//红外码值处理函数  分析出那些是1那些是0
+  71          { 
+  72   1        unsigned char i, j, k;
+  73   1        unsigned char cord,value;
+  74   1      
+  75   1        k=1;  //前导码没数据，从第二个开始，就是用户码开始。
+  76   1        for(i=0;i<4;i++)      //处理4个字节
+  77   1           {
+  78   2            for(j=1;j<=8;j++) //处理1个字节8位
+  79   2               {
+  80   3                cord=irdata[k]; //
+  81   3                if(cord>7)  //低电平下降沿到下一个下降沿的宽度是0.56+0.565=1.125ms，高电平则是0.56+1.69=2.25ms，
+             -同样我们也给出一个范围用于区分它们，可以这样识别 （1.125ms + 2.25ms ）/ 2=1.68ms, 
+  82   3                             //大于1.68为高，小于1.68为低。
+  83   3                      //假设使用12M晶振 定时器的单位数值时1us，使用8位定时器自动重装，将得到每个定时周期0.256ms的时
+             -长， 1.68/0.256=6.59，约等于7.也就是 定时器0计数次数。
+  84   3                  value|=0x80;//最高位就给1，
+  85   3            if(j<8)
+  86   3              {
+  87   4             value>>=1;
+  88   4            }
+  89   3                 k++;
+  90   3               }
+  91   2           IRcord[i]=value;
+  92   2           value=0;     
+  93   2           } 
+  94   1         irpro_ok=1;//处理完毕标志位置1
+  95   1      }
+  96          /*------------------------------------------------
+  97                            外部中断0初始化
+  98          ------------------------------------------------*/
+  99          void EX0init(void)
+ 100          {
+ 101   1       IT0 = 1;   //指定外部中断0下降沿触发，INT0 (P3.2)
+ 102   1       EX0 = 1;   //打开外部中断
+ 103   1       EA = 1;    //开总中断
+ 104   1      }
+ 105          void EX0_ISR(void) interrupt 0 //外部中断0服务函数
+ 106          {
+ 107   1        static unsigned char  i;             //接收红外信号处理
+ 108   1        static bit startflag;                //是否开始处理标志位
+ 109   1      
+ 110   1      if(startflag)                         
+ 111   1         {
+ 112   2          if(irtime<63&&irtime>=33)//引导码 TC9012的头码，9ms+4.5ms 头码的持续时间的范围，33(8.448ms)<63(16.128m
+             -s)，
+ 113   2                              i=0;
+C51 COMPILER V9.60.0.0   MAIN2                                                             05/07/2022 15:11:28 PAGE 3   
+
+ 114   2              irdata[i]=irtime;//存储每个电平的持续时间，用于以后判断是0还是1
+ 115   2              irtime=0;
+ 116   2              i++;
+ 117   2               if(i==33)    //33是33位的意思，包括32位的数据和一位的头码。
+ 118   2                  {
+ 119   3                 irok=1;
+ 120   3               i=0;
+ 121   3                }
+ 122   2                }
+ 123   1           else
+ 124   1          {
+ 125   2          irtime=0;
+ 126   2          startflag=1;
+ 127   2          }
+ 128   1      
+ 129   1      }
+ 130          void UART_init(void)
+ 131          {     
+ 132   1        PCON &= 0x7F;   //波特率不倍速
+ 133   1        SCON = 0x50;    //8位数据,可变波特率
+ 134   1        AUXR |= 0x04;   //定时器时钟1T模式
+ 135   1        BRT = 0xDC;   //设置定时重载值
+ 136   1        AUXR |= 0x01;   //串口1使用独立波特率发射器为波特率发生器
+ 137   1        AUXR |= 0x10;   //启动独立波特率发射器
+ 138   1        TI=1;     // 很关键，使用printf函数时必须有此命令
+ 139   1      } 
+ 140          
+ 141          void main()
+ 142          { 
+ 143   1      
+ 144   1         EX0init(); //初始化外部中断
+ 145   1        TIM0init();
+ 146   1        UART_init();   // 初始化串口
+ 147   1        //printf_String() ;
+ 148   1         while(1)//主循环
+ 149   1         {
+ 150   2          if(irok)                        //如果接收好了进行红外处理
+ 151   2          {   
+ 152   3           Irpro();
+ 153   3           irok=0;
+ 154   3          }
+ 155   2           if(irpro_ok)                   //如果处理好后进行工作处理，如按对应的按键后显示对应的数字等
+ 156   2              {
+ 157   3                printf ("RECE_DATA: %s \n",IRcord); 
+ 158   3                //strcpy(IRcord, "");
+ 159   3                memset(IRcord, 0, sizeof(IRcord));          //清空数组 
+ 160   3                irpro_ok =0;
+ 161   3            }
+ 162   2           }
+ 163   1      }
+ 164          
+ 165          
+ 166          
+ 167               
+ 168               
+ 169               
+ 170               
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    292    ----
+   CONSTANT SIZE    =     16    ----
+C51 COMPILER V9.60.0.0   MAIN2                                                             05/07/2022 15:11:28 PAGE 4   
+
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     39    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      3    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

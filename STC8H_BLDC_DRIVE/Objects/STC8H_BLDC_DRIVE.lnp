@@ -1,0 +1,3 @@
+".\Objects\main2.obj" 
+TO ".\Objects\STC8H_BLDC_DRIVE" 
+PRINT(".\Listings\STC8H_BLDC_DRIVE.m51") RAMSIZE(256) 

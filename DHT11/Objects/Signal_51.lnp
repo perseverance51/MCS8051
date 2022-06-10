@@ -1,0 +1,4 @@
+".\Objects\Signal_51.obj",
+".\Objects\LCD1602.obj" 
+TO ".\Objects\Signal_51" 
+PRINT(".\Listings\Signal_51.m51")

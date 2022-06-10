@@ -1,0 +1,934 @@
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                    12/21/2021  22:52:31  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0, INVOKED BY:
+C:\KEIL_V5\C51\BIN\BL51.EXE .\Objects\main.obj, .\Objects\Software_SPI.obj, .\Objects\st7920.obj TO .\Objects\lcd12864SP
+>> I PRINT (.\Listings\lcd12864SPI.m51) RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  .\Objects\main.obj (MAIN)
+  .\Objects\Software_SPI.obj (SOFTWARE_SPI)
+  .\Objects\st7920.obj (ST7920)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_STARTUP)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?CLDPTR)
+
+
+LINK MAP OF MODULE:  .\Objects\lcd12864SPI (MAIN)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0009H     UNIT         ?DT?_LCD_DRAW_BMP?ST7920
+            DATA    0011H     0006H     UNIT         ?DT?_LCD_INVERSE_16X16?ST7920
+            DATA    0017H     0005H     UNIT         _DATA_GROUP_
+            DATA    001CH     0004H     UNIT         ?DT?_LCD_WRITE_CHAR?ST7920
+            DATA    0020H     0002H     UNIT         ?DT?_LCD_SET_GRAPHIC_ADDRESS?ST7920
+            IDATA   0022H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     0063H     UNIT         ?PR?_LCD_INVERSE_16X16?ST7920
+            CODE    0066H     005EH     UNIT         ?PR?LCD_INIT?ST7920
+            CODE    00C4H     005EH     UNIT         ?PR?_LCD_DRAW_BMP?ST7920
+            CODE    0122H     0057H     UNIT         ?PR?LCD_CLEAR?ST7920
+            CODE    0179H     0044H     UNIT         ?CO?MAIN
+            CODE    01BDH     003BH     UNIT         ?PR?MAIN?MAIN
+            CODE    01F8H     0033H     UNIT         ?PR?_SOFT_SPI_RW_MODE2?SOFTWARE_SPI
+            CODE    022BH     0030H     UNIT         ?PR?_SOFT_SPI_RW_MODE3?SOFTWARE_SPI
+            CODE    025BH     002CH     UNIT         ?PR?_SOFT_SPI_RW_MODE1?SOFTWARE_SPI
+            CODE    0287H     002BH     UNIT         ?PR?_LCD_WRITE_STRING?ST7920
+            CODE    02B2H     002AH     UNIT         ?PR?_LCD_SET_TEXT_ADDRESS?ST7920
+            CODE    02DCH     0029H     UNIT         ?PR?_SOFT_SPI_RW_MODE0?SOFTWARE_SPI
+            CODE    0305H     0029H     UNIT         ?PR?_LCD_SET_GRAPHIC_ADDRESS?ST7920
+            CODE    032EH     0024H     UNIT         ?PR?_LCD_WRITE_CHAR?ST7920
+            CODE    0352H     0021H     UNIT         ?PR?_LCD_ROWCOL_TO_INTER_XY?ST7920
+            CODE    0373H     0019H     UNIT         ?PR?MISO_READ?SOFTWARE_SPI
+            CODE    038CH     0019H     UNIT         ?C?LIB_CODE
+            CODE    03A5H     0015H     UNIT         ?PR?LCD_READ_BYTE?ST7920
+            CODE    03BAH     0014H     UNIT         ?PR?_DELAY_MS?MAIN
+            CODE    03CEH     0013H     UNIT         ?PR?_LCD2_SPI_WRITE_BYTE_STANDARD?ST7920
+            CODE    03E1H     0012H     UNIT         ?PR?_LCD_WRITE_COMMAND?ST7920
+            CODE    03F3H     000FH     UNIT         ?PR?_LCD_WRITE_DATA?ST7920
+            CODE    0402H     000DH     UNIT         ?PR?ST7920_DELAY?ST7920
+            CODE    040FH     000CH     UNIT         ?C_C51STARTUP
+            CODE    041BH     000AH     UNIT         ?PR?DELAY1MS?MAIN
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/21/2021  22:52:31  PAGE 2
+
+
+            CODE    0425H     000AH     UNIT         ?PR?SPI_SCK_L?SOFTWARE_SPI
+            CODE    042FH     000AH     UNIT         ?PR?LCD_STARTGRAPHIC?ST7920
+            CODE    0439H     000AH     UNIT         ?PR?LCD_ENDGRAPHIC?ST7920
+            CODE    0443H     0009H     UNIT         ?PR?_LCD_WRITE_BYTE?ST7920
+            CODE    044CH     0009H     UNIT         ?PR?_LCD_WRITE_HALF_BYTE?ST7920
+            CODE    0455H     0009H     UNIT         ?PR?_LCD2_SPI_WRITE_BYTE?ST7920
+            CODE    045EH     0008H     UNIT         ?PR?SPI_DELAY?SOFTWARE_SPI
+            CODE    0466H     0007H     UNIT         ?PR?_LCD12864_PORT_WRITE_4B?ST7920
+            CODE    046DH     0006H     UNIT         ?PR?LCD_READ_DATA?ST7920
+            CODE    0473H     0006H     UNIT         ?PR?LCD_READ_STATUS?ST7920
+            CODE    0479H     0003H     UNIT         ?PR?MOSI_H?SOFTWARE_SPI
+            CODE    047CH     0003H     UNIT         ?PR?MOSI_L?SOFTWARE_SPI
+            CODE    047FH     0003H     UNIT         ?PR?MISO_H?SOFTWARE_SPI
+            CODE    0482H     0003H     UNIT         ?PR?MISO_L?SOFTWARE_SPI
+            CODE    0485H     0003H     UNIT         ?PR?SPI_SCK_H?SOFTWARE_SPI
+            CODE    0488H     0003H     UNIT         ?PR?LCD12864_CS_H?ST7920
+            CODE    048BH     0003H     UNIT         ?PR?LCD12864_CS_L?ST7920
+            CODE    048EH     0003H     UNIT         ?PR?LCD12864_PSB_L?ST7920
+            CODE    0491H     0003H     UNIT         ?PR?LCD12864_RS_H?ST7920
+            CODE    0494H     0003H     UNIT         ?PR?LCD12864_RS_L?ST7920
+            CODE    0497H     0003H     UNIT         ?PR?LCD12864_WR_H?ST7920
+            CODE    049AH     0003H     UNIT         ?PR?LCD12864_WR_L?ST7920
+            CODE    049DH     0003H     UNIT         ?PR?LCD12864_EN_H?ST7920
+            CODE    04A0H     0003H     UNIT         ?PR?LCD12864_EN_L?ST7920
+            CODE    04A3H     0003H     UNIT         ?PR?LCD12864_PORT_READ?ST7920
+            CODE    04A6H     0003H     UNIT         ?PR?_LCD12864_PORT_WRITE_8B?ST7920
+
+
+
+OVERLAY MAP OF MODULE:   .\Objects\lcd12864SPI (MAIN)
+
+
+SEGMENT                                            DATA_GROUP 
+  +--> CALLED SEGMENT                            START    LENGTH
+----------------------------------------------------------------
+?C_C51STARTUP                                    -----    -----
+  +--> ?PR?MAIN?MAIN
+
+?PR?MAIN?MAIN                                    -----    -----
+  +--> ?PR?LCD_INIT?ST7920
+  +--> ?PR?LCD_CLEAR?ST7920
+  +--> ?CO?MAIN
+  +--> ?PR?_LCD_WRITE_STRING?ST7920
+
+?PR?LCD_INIT?ST7920                              -----    -----
+  +--> ?PR?LCD12864_PSB_L?ST7920
+  +--> ?PR?_DELAY_MS?MAIN
+  +--> ?PR?_LCD_WRITE_COMMAND?ST7920
+
+?PR?_DELAY_MS?MAIN                               -----    -----
+  +--> ?PR?DELAY1MS?MAIN
+
+?PR?_LCD_WRITE_COMMAND?ST7920                    001AH    0001H
+  +--> ?PR?_LCD2_SPI_WRITE_BYTE?ST7920
+  +--> ?PR?ST7920_DELAY?ST7920
+  +--> ?PR?_LCD2_SPI_WRITE_BYTE_STANDARD?ST7920
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/21/2021  22:52:31  PAGE 3
+
+
+?PR?_LCD2_SPI_WRITE_BYTE?ST7920                  -----    -----
+  +--> ?PR?LCD12864_CS_H?ST7920
+  +--> ?PR?_SOFT_SPI_RW_MODE3?SOFTWARE_SPI
+  +--> ?PR?LCD12864_CS_L?ST7920
+
+?PR?_SOFT_SPI_RW_MODE3?SOFTWARE_SPI              -----    -----
+  +--> ?PR?SPI_SCK_H?SOFTWARE_SPI
+  +--> ?PR?SPI_DELAY?SOFTWARE_SPI
+  +--> ?PR?SPI_SCK_L?SOFTWARE_SPI
+  +--> ?PR?MOSI_H?SOFTWARE_SPI
+  +--> ?PR?MOSI_L?SOFTWARE_SPI
+  +--> ?PR?MISO_READ?SOFTWARE_SPI
+
+?PR?SPI_DELAY?SOFTWARE_SPI                       -----    -----
+  +--> ?PR?SPI_SCK_L?SOFTWARE_SPI
+
+?PR?MISO_READ?SOFTWARE_SPI                       -----    -----
+  +--> ?PR?SPI_DELAY?SOFTWARE_SPI
+  +--> ?PR?SPI_SCK_H?SOFTWARE_SPI
+
+?PR?ST7920_DELAY?ST7920                          -----    -----
+  +--> ?PR?LCD12864_WR_L?ST7920
+  +--> ?PR?LCD12864_EN_H?ST7920
+  +--> ?PR?LCD12864_EN_L?ST7920
+
+?PR?_LCD2_SPI_WRITE_BYTE_STANDARD?ST7920         001BH    0001H
+  +--> ?PR?_LCD2_SPI_WRITE_BYTE?ST7920
+
+?PR?LCD_CLEAR?ST7920                             0017H    0002H
+  +--> ?PR?_LCD_WRITE_COMMAND?ST7920
+  +--> ?PR?ST7920_DELAY?ST7920
+  +--> ?PR?LCD_STARTGRAPHIC?ST7920
+  +--> ?PR?_LCD_WRITE_DATA?ST7920
+  +--> ?PR?LCD_ENDGRAPHIC?ST7920
+  +--> ?PR?_DELAY_MS?MAIN
+
+?PR?LCD_STARTGRAPHIC?ST7920                      -----    -----
+  +--> ?PR?_LCD_WRITE_COMMAND?ST7920
+
+?PR?_LCD_WRITE_DATA?ST7920                       001AH    0001H
+  +--> ?PR?_LCD2_SPI_WRITE_BYTE?ST7920
+  +--> ?PR?ST7920_DELAY?ST7920
+  +--> ?PR?_LCD2_SPI_WRITE_BYTE_STANDARD?ST7920
+
+?PR?LCD_ENDGRAPHIC?ST7920                        -----    -----
+  +--> ?PR?_LCD_WRITE_COMMAND?ST7920
+
+?PR?_LCD_WRITE_STRING?ST7920                     0017H    0003H
+  +--> ?PR?_LCD_SET_TEXT_ADDRESS?ST7920
+  +--> ?PR?_LCD_WRITE_DATA?ST7920
+
+?PR?_LCD_SET_TEXT_ADDRESS?ST7920                 -----    -----
+  +--> ?PR?_LCD_WRITE_COMMAND?ST7920
+
+
+
+SYMBOL TABLE OF MODULE:  .\Objects\lcd12864SPI (MAIN)
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/21/2021  22:52:31  PAGE 4
+
+
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        MAIN
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0080H         PUBLIC        P0
+  D:0090H         PUBLIC        P1
+  D:00A0H         PUBLIC        P2
+  D:00B0H         PUBLIC        P3
+  D:00E8H         PUBLIC        P4
+  C:041BH         PUBLIC        Delay1ms
+  D:00A8H         PUBLIC        IE
+  D:00B8H         PUBLIC        IP
+  C:01BDH         PUBLIC        main
+  D:0098H         PUBLIC        SCON
+  D:0088H         PUBLIC        TCON
+  C:03BAH         PUBLIC        _delay_ms
+  D:00C8H         PUBLIC        T2CON
+  D:00D0H         PUBLIC        PSW
+  -------         PROC          DELAY1MS
+  -------         DO            
+  D:0007H         SYMBOL        i
+  D:0006H         SYMBOL        j
+  -------         ENDDO         
+  C:041BH         LINE#         16
+  C:041BH         LINE#         17
+  C:041BH         LINE#         20
+  C:041CH         LINE#         21
+  C:041EH         LINE#         22
+  C:0420H         LINE#         24
+  C:0420H         LINE#         25
+  C:0422H         LINE#         26
+  C:0424H         LINE#         27
+  -------         ENDPROC       DELAY1MS
+  -------         PROC          _DELAY_MS
+  D:0004H         SYMBOL        i
+  C:03BAH         LINE#         30
+  C:03BEH         LINE#         31
+  C:03BEH         LINE#         32
+  C:03C8H         LINE#         33
+  C:03CDH         LINE#         34
+  -------         ENDPROC       _DELAY_MS
+  -------         PROC          MAIN
+  C:01BDH         LINE#         37
+  C:01BDH         LINE#         38
+  C:01BDH         LINE#         39
+  C:01C0H         LINE#         40
+  C:01C3H         LINE#         41
+  C:01CFH         LINE#         42
+  C:01DCH         LINE#         43
+  C:01E9H         LINE#         44
+  C:01F6H         LINE#         46
+  C:01F6H         LINE#         47
+  C:01F6H         LINE#         49
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        MAIN
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/21/2021  22:52:31  PAGE 5
+
+
+
+  -------         MODULE        SOFTWARE_SPI
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0080H         PUBLIC        P0
+  D:0090H         PUBLIC        P1
+  D:00A0H         PUBLIC        P2
+  D:00B0H         PUBLIC        P3
+  D:00E8H         PUBLIC        P4
+  B:00A0H.5       PUBLIC        SPI_MISO
+  B:00A0H.5       PUBLIC        SPI_MOSI
+  D:00A8H         PUBLIC        IE
+  C:0381H         PUBLIC        MISO_Read
+  D:00B8H         PUBLIC        IP
+  B:00A0H.7       PUBLIC        SPI_SCK
+  D:0098H         PUBLIC        SCON
+  D:0088H         PUBLIC        TCON
+  C:0465H         PUBLIC        SPI_Delay
+  C:02DCH         PUBLIC        _SOFT_SPI_RW_MODE0
+  C:025BH         PUBLIC        _SOFT_SPI_RW_MODE1
+  C:01F8H         PUBLIC        _SOFT_SPI_RW_MODE2
+  C:022BH         PUBLIC        _SOFT_SPI_RW_MODE3
+  C:0485H         PUBLIC        SPI_SCK_H
+  C:042CH         PUBLIC        SPI_SCK_L
+  C:047FH         PUBLIC        MISO_H
+  C:0479H         PUBLIC        MOSI_H
+  C:0482H         PUBLIC        MISO_L
+  C:047CH         PUBLIC        MOSI_L
+  D:00C8H         PUBLIC        T2CON
+  D:00D0H         PUBLIC        PSW
+  -------         PROC          L?0035
+  -------         ENDPROC       L?0035
+  -------         PROC          SPI_DELAY
+  C:0465H         LINE#         3
+  C:0465H         LINE#         4
+  C:0465H         LINE#         6
+  -------         ENDPROC       SPI_DELAY
+  -------         PROC          MOSI_H
+  C:0479H         LINE#         9
+  C:0479H         LINE#         10
+  C:0479H         LINE#         11
+  C:047BH         LINE#         12
+  -------         ENDPROC       MOSI_H
+  -------         PROC          MOSI_L
+  C:047CH         LINE#         15
+  C:047CH         LINE#         16
+  C:047CH         LINE#         17
+  C:047EH         LINE#         18
+  -------         ENDPROC       MOSI_L
+  -------         PROC          MISO_H
+  C:047FH         LINE#         21
+  C:047FH         LINE#         22
+  C:047FH         LINE#         23
+  C:0481H         LINE#         24
+  -------         ENDPROC       MISO_H
+  -------         PROC          MISO_L
+  C:0482H         LINE#         27
+  C:0482H         LINE#         28
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/21/2021  22:52:31  PAGE 6
+
+
+  C:0482H         LINE#         29
+  C:0484H         LINE#         30
+  -------         ENDPROC       MISO_L
+  -------         PROC          SPI_SCK_H
+  C:0485H         LINE#         33
+  C:0485H         LINE#         34
+  C:0485H         LINE#         35
+  C:0487H         LINE#         36
+  -------         ENDPROC       SPI_SCK_H
+  -------         PROC          L?0036
+  -------         ENDPROC       L?0036
+  -------         PROC          SPI_SCK_L
+  C:042CH         LINE#         39
+  C:042CH         LINE#         40
+  C:042CH         LINE#         41
+  C:042EH         LINE#         42
+  -------         ENDPROC       SPI_SCK_L
+  C:037DH         SYMBOL        L?0034
+  -------         PROC          L?0033
+  -------         ENDPROC       L?0033
+  C:037DH         SYMBOL        L?0034
+  -------         PROC          MISO_READ
+  C:0381H         LINE#         45
+  C:0381H         LINE#         46
+  C:0381H         LINE#         47
+  C:0383H         LINE#         48
+  C:0386H         LINE#         49
+  C:038BH         LINE#         50
+  -------         ENDPROC       MISO_READ
+  -------         PROC          _SOFT_SPI_RW_MODE0
+  D:0006H         SYMBOL        write_dat
+  -------         DO            
+  D:0004H         SYMBOL        i
+  D:0005H         SYMBOL        read_dat
+  -------         ENDDO         
+  C:02DCH         LINE#         56
+  C:02DCH         LINE#         57
+  C:02DCH         LINE#         58
+  C:02DCH         LINE#         60
+  C:02DCH         LINE#         61
+  C:02DFH         LINE#         62
+  C:02EAH         LINE#         63
+  C:02EAH         LINE#         64
+  C:02EEH         LINE#         65
+  C:02F3H         LINE#         67
+  C:02F6H         LINE#         68
+  C:02F6H         LINE#         69
+  C:02F6H         LINE#         70
+  C:02F6H         LINE#         71
+  C:02F6H         LINE#         72
+  C:02FCH         LINE#         73
+  C:02FFH         LINE#         74
+  C:0302H         LINE#         75
+  C:0304H         LINE#         76
+  -------         ENDPROC       _SOFT_SPI_RW_MODE0
+  -------         PROC          _SOFT_SPI_RW_MODE1
+  D:0006H         SYMBOL        write_dat
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/21/2021  22:52:31  PAGE 7
+
+
+  -------         DO            
+  D:0004H         SYMBOL        i
+  D:0005H         SYMBOL        read_dat
+  -------         ENDDO         
+  C:025BH         LINE#         79
+  C:025BH         LINE#         80
+  C:025BH         LINE#         81
+  C:025BH         LINE#         83
+  C:025BH         LINE#         84
+  C:025EH         LINE#         85
+  C:0269H         LINE#         86
+  C:0269H         LINE#         87
+  C:026CH         LINE#         88
+  C:0270H         LINE#         89
+  C:0275H         LINE#         91
+  C:0278H         LINE#         92
+  C:0278H         LINE#         93
+  C:0278H         LINE#         94
+  C:027BH         LINE#         95
+  C:027BH         LINE#         96
+  C:0281H         LINE#         97
+  C:0284H         LINE#         98
+  C:0286H         LINE#         99
+  -------         ENDPROC       _SOFT_SPI_RW_MODE1
+  -------         PROC          _SOFT_SPI_RW_MODE2
+  D:0006H         SYMBOL        write_dat
+  -------         DO            
+  D:0004H         SYMBOL        i
+  D:0005H         SYMBOL        read_dat
+  -------         ENDDO         
+  C:01F8H         LINE#         102
+  C:01FAH         LINE#         103
+  C:01FAH         LINE#         104
+  C:01FCH         LINE#         106
+  C:01FFH         LINE#         107
+  C:0202H         LINE#         108
+  C:020DH         LINE#         109
+  C:020DH         LINE#         110
+  C:0211H         LINE#         111
+  C:0216H         LINE#         113
+  C:0219H         LINE#         114
+  C:0219H         LINE#         115
+  C:0219H         LINE#         116
+  C:021CH         LINE#         117
+  C:021CH         LINE#         118
+  C:0222H         LINE#         119
+  C:0225H         LINE#         120
+  C:0228H         LINE#         121
+  C:022AH         LINE#         122
+  -------         ENDPROC       _SOFT_SPI_RW_MODE2
+  -------         PROC          _SOFT_SPI_RW_MODE3
+  D:0006H         SYMBOL        write_dat
+  -------         DO            
+  D:0004H         SYMBOL        i
+  D:0005H         SYMBOL        read_dat
+  -------         ENDDO         
+  C:022BH         LINE#         125
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/21/2021  22:52:31  PAGE 8
+
+
+  C:022DH         LINE#         126
+  C:022DH         LINE#         127
+  C:022FH         LINE#         129
+  C:0232H         LINE#         130
+  C:0235H         LINE#         131
+  C:0240H         LINE#         132
+  C:0240H         LINE#         133
+  C:0243H         LINE#         134
+  C:0247H         LINE#         135
+  C:024CH         LINE#         137
+  C:024FH         LINE#         138
+  C:024FH         LINE#         139
+  C:024FH         LINE#         140
+  C:024FH         LINE#         141
+  C:024FH         LINE#         142
+  C:0255H         LINE#         143
+  C:0258H         LINE#         144
+  C:025AH         LINE#         145
+  -------         ENDPROC       _SOFT_SPI_RW_MODE3
+  -------         ENDMOD        SOFTWARE_SPI
+
+  -------         MODULE        ST7920
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0080H         PUBLIC        P0
+  D:0090H         PUBLIC        P1
+  D:00A0H         PUBLIC        P2
+  D:00B0H         PUBLIC        P3
+  D:00E8H         PUBLIC        P4
+  C:0491H         PUBLIC        LCD12864_RS_H
+  C:0497H         PUBLIC        LCD12864_WR_H
+  C:0494H         PUBLIC        LCD12864_RS_L
+  D:00A8H         PUBLIC        IE
+  C:049AH         PUBLIC        LCD12864_WR_L
+  C:0305H         PUBLIC        _LCD_set_graphic_address
+  C:03CEH         PUBLIC        _LCD2_spi_write_byte_standard
+  D:00B8H         PUBLIC        IP
+  B:00A0H.7       PUBLIC        EN_Pin
+  C:0003H         PUBLIC        _LCD_Inverse_16X16
+  B:00B0H.2       PUBLIC        LCD12864_PSB
+  C:03E4H         PUBLIC        _LCD_write_command
+  C:0466H         PUBLIC        _LCD12864_Port_Write_4B
+  C:042FH         PUBLIC        LCD_startGraphic
+  C:0352H         PUBLIC        _LCD_rowCol_to_inter_Xy
+  C:04A6H         PUBLIC        _LCD12864_Port_Write_8B
+  C:040EH         PUBLIC        st7920_delay
+  B:00A0H.6       PUBLIC        RS_Pin
+  C:0439H         PUBLIC        LCD_endGraphic
+  B:00A0H.5       PUBLIC        WR_Pin
+  D:0098H         PUBLIC        SCON
+  D:0088H         PUBLIC        TCON
+  C:0122H         PUBLIC        LCD_clear
+  C:04A3H         PUBLIC        LCD12864_Port_Read
+  C:00C4H         PUBLIC        _LCD_Draw_Bmp
+  C:048EH         PUBLIC        LCD12864_PSB_L
+  C:046DH         PUBLIC        LCD_read_data
+  B:00A0H.6       PUBLIC        LCD12864_CS
+  C:0455H         PUBLIC        _LCD2_spi_write_byte
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/21/2021  22:52:31  PAGE 9
+
+
+  C:0473H         PUBLIC        LCD_read_status
+  C:0287H         PUBLIC        _LCD_write_string
+  C:03F3H         PUBLIC        _LCD_write_data
+  C:032EH         PUBLIC        _LCD_write_char
+  D:00C8H         PUBLIC        T2CON
+  C:03A5H         PUBLIC        LCD_read_byte
+  C:0066H         PUBLIC        LCD_init
+  C:02B2H         PUBLIC        _LCD_set_text_address
+  C:049DH         PUBLIC        LCD12864_EN_H
+  C:044CH         PUBLIC        _LCD_write_half_byte
+  C:0488H         PUBLIC        LCD12864_CS_H
+  C:0443H         PUBLIC        _LCD_write_byte
+  C:04A0H         PUBLIC        LCD12864_EN_L
+  D:00D0H         PUBLIC        PSW
+  C:048BH         PUBLIC        LCD12864_CS_L
+  -------         PROC          L?0062
+  -------         ENDPROC       L?0062
+  -------         PROC          ST7920_DELAY
+  C:040EH         LINE#         7
+  C:040EH         LINE#         8
+  C:040EH         LINE#         10
+  -------         ENDPROC       ST7920_DELAY
+  -------         PROC          LCD12864_CS_H
+  C:0488H         LINE#         12
+  C:0488H         LINE#         13
+  C:0488H         LINE#         14
+  C:048AH         LINE#         15
+  -------         ENDPROC       LCD12864_CS_H
+  -------         PROC          LCD12864_CS_L
+  C:048BH         LINE#         17
+  C:048BH         LINE#         18
+  C:048BH         LINE#         19
+  C:048DH         LINE#         20
+  -------         ENDPROC       LCD12864_CS_L
+  -------         PROC          LCD12864_PSB_L
+  C:048EH         LINE#         22
+  C:048EH         LINE#         23
+  C:048EH         LINE#         24
+  C:0490H         LINE#         25
+  -------         ENDPROC       LCD12864_PSB_L
+  -------         PROC          LCD12864_RS_H
+  C:0491H         LINE#         27
+  C:0491H         LINE#         28
+  C:0491H         LINE#         29
+  C:0493H         LINE#         30
+  -------         ENDPROC       LCD12864_RS_H
+  -------         PROC          LCD12864_RS_L
+  C:0494H         LINE#         32
+  C:0494H         LINE#         33
+  C:0494H         LINE#         34
+  C:0496H         LINE#         35
+  -------         ENDPROC       LCD12864_RS_L
+  -------         PROC          LCD12864_WR_H
+  C:0497H         LINE#         37
+  C:0497H         LINE#         38
+  C:0497H         LINE#         39
+  C:0499H         LINE#         40
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/21/2021  22:52:31  PAGE 10
+
+
+  -------         ENDPROC       LCD12864_WR_H
+  -------         PROC          LCD12864_WR_L
+  C:049AH         LINE#         42
+  C:049AH         LINE#         43
+  C:049AH         LINE#         44
+  C:049CH         LINE#         45
+  -------         ENDPROC       LCD12864_WR_L
+  -------         PROC          LCD12864_EN_H
+  C:049DH         LINE#         47
+  C:049DH         LINE#         48
+  C:049DH         LINE#         49
+  C:049FH         LINE#         50
+  -------         ENDPROC       LCD12864_EN_H
+  -------         PROC          LCD12864_EN_L
+  C:04A0H         LINE#         52
+  C:04A0H         LINE#         53
+  C:04A0H         LINE#         54
+  C:04A2H         LINE#         55
+  -------         ENDPROC       LCD12864_EN_L
+  -------         PROC          LCD12864_PORT_READ
+  C:04A3H         LINE#         57
+  C:04A3H         LINE#         58
+  C:04A3H         LINE#         59
+  C:04A5H         LINE#         60
+  -------         ENDPROC       LCD12864_PORT_READ
+  -------         PROC          _LCD12864_PORT_WRITE_8B
+  D:0007H         SYMBOL        Data
+  C:04A6H         LINE#         63
+  C:04A6H         LINE#         64
+  C:04A6H         LINE#         65
+  C:04A8H         LINE#         66
+  -------         ENDPROC       _LCD12864_PORT_WRITE_8B
+  -------         PROC          _LCD12864_PORT_WRITE_4B
+  D:0007H         SYMBOL        Data
+  C:0466H         LINE#         69
+  C:0466H         LINE#         70
+  C:0466H         LINE#         71
+  C:0469H         LINE#         72
+  C:046CH         LINE#         73
+  -------         ENDPROC       _LCD12864_PORT_WRITE_4B
+  -------         PROC          LCD_INIT
+  C:0066H         LINE#         76
+  C:0066H         LINE#         77
+  C:0066H         LINE#         79
+  C:0069H         LINE#         81
+  C:0070H         LINE#         82
+  C:0075H         LINE#         83
+  C:007CH         LINE#         84
+  C:0081H         LINE#         85
+  C:0088H         LINE#         92
+  C:008DH         LINE#         93
+  C:0094H         LINE#         94
+  C:0099H         LINE#         95
+  C:00A0H         LINE#         96
+  C:00A5H         LINE#         97
+  C:00ACH         LINE#         98
+  C:00B1H         LINE#         99
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/21/2021  22:52:31  PAGE 11
+
+
+  C:00B8H         LINE#         100
+  C:00BDH         LINE#         101
+  -------         ENDPROC       LCD_INIT
+  -------         PROC          L?0063
+  -------         ENDPROC       L?0063
+  -------         PROC          _LCD_WRITE_COMMAND
+  D:001AH         SYMBOL        command
+  C:03E4H         LINE#         105
+  C:03E6H         LINE#         106
+  C:03E6H         LINE#         108
+  C:03EBH         LINE#         109
+  C:03EEH         LINE#         110
+  -------         ENDPROC       _LCD_WRITE_COMMAND
+  -------         PROC          _LCD_WRITE_DATA
+  D:001AH         SYMBOL        Data
+  C:03F3H         LINE#         119
+  C:03F5H         LINE#         120
+  C:03F5H         LINE#         122
+  C:03FAH         LINE#         123
+  C:03FDH         LINE#         124
+  -------         ENDPROC       _LCD_WRITE_DATA
+  -------         PROC          _LCD_WRITE_BYTE
+  D:0007H         SYMBOL        Data
+  C:0443H         LINE#         132
+  C:0443H         LINE#         133
+  C:0443H         LINE#         139
+  C:0446H         LINE#         140
+  C:0446H         LINE#         141
+  C:0446H         LINE#         142
+  C:0446H         LINE#         143
+  C:0446H         LINE#         144
+  C:0449H         LINE#         145
+  -------         ENDPROC       _LCD_WRITE_BYTE
+  -------         PROC          _LCD_WRITE_HALF_BYTE
+  D:0007H         SYMBOL        half_byte
+  C:044CH         LINE#         150
+  C:044CH         LINE#         151
+  C:044CH         LINE#         152
+  C:044FH         LINE#         153
+  C:044FH         LINE#         154
+  C:044FH         LINE#         155
+  C:044FH         LINE#         156
+  C:044FH         LINE#         157
+  C:0452H         LINE#         158
+  -------         ENDPROC       _LCD_WRITE_HALF_BYTE
+  -------         PROC          _LCD2_SPI_WRITE_BYTE
+  D:0007H         SYMBOL        Data
+  C:0455H         LINE#         162
+  C:0455H         LINE#         163
+  C:0455H         LINE#         164
+  C:0458H         LINE#         165
+  C:045BH         LINE#         166
+  -------         ENDPROC       _LCD2_SPI_WRITE_BYTE
+  -------         PROC          _LCD2_SPI_WRITE_BYTE_STANDARD
+  D:001BH         SYMBOL        Data
+  C:03CEH         LINE#         170
+  C:03D0H         LINE#         171
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/21/2021  22:52:31  PAGE 12
+
+
+  C:03D0H         LINE#         172
+  C:03D8H         LINE#         173
+  -------         ENDPROC       _LCD2_SPI_WRITE_BYTE_STANDARD
+  -------         PROC          LCD_READ_DATA
+  -------         DO            
+  D:0007H         SYMBOL        Data
+  -------         ENDDO         
+  C:046DH         LINE#         177
+  C:046DH         LINE#         178
+  C:046DH         LINE#         181
+  C:0470H         LINE#         182
+  -------         ENDPROC       LCD_READ_DATA
+  -------         PROC          LCD_READ_STATUS
+  -------         DO            
+  D:0007H         SYMBOL        Data
+  -------         ENDDO         
+  C:0473H         LINE#         191
+  C:0473H         LINE#         192
+  C:0473H         LINE#         194
+  C:0476H         LINE#         195
+  -------         ENDPROC       LCD_READ_STATUS
+  -------         PROC          LCD_READ_BYTE
+  -------         DO            
+  D:0007H         SYMBOL        Data
+  -------         ENDDO         
+  C:03A5H         LINE#         203
+  C:03A5H         LINE#         204
+  C:03A5H         LINE#         206
+  C:03A8H         LINE#         208
+  C:03ABH         LINE#         209
+  C:03AEH         LINE#         210
+  C:03B1H         LINE#         211
+  C:03B4H         LINE#         213
+  C:03B7H         LINE#         214
+  -------         ENDPROC       LCD_READ_BYTE
+  -------         PROC          _LCD_SET_TEXT_ADDRESS
+  D:0004H         SYMBOL        rowCol
+  -------         DO            
+  D:0003H         SYMBOL        start
+  D:0007H         SYMBOL        row
+  D:0006H         SYMBOL        col
+  -------         ENDDO         
+  C:02B2H         LINE#         223
+  C:02B6H         LINE#         224
+  C:02B6H         LINE#         225
+  C:02B8H         LINE#         226
+  C:02BAH         LINE#         227
+  C:02BCH         LINE#         229
+  C:02C4H         LINE#         230
+  C:02C6H         LINE#         231
+  C:02C6H         LINE#         232
+  C:02CCH         LINE#         233
+  C:02CEH         LINE#         234
+  C:02CEH         LINE#         235
+  C:02D4H         LINE#         236
+  C:02D6H         LINE#         237
+  C:02D6H         LINE#         238
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/21/2021  22:52:31  PAGE 13
+
+
+  -------         ENDPROC       _LCD_SET_TEXT_ADDRESS
+  -------         PROC          _LCD_ROWCOL_TO_INTER_XY
+  D:0004H         SYMBOL        rowCol
+  -------         DO            
+  D:0007H         SYMBOL        row
+  D:0006H         SYMBOL        col
+  D:0006H         SYMBOL        x
+  D:0005H         SYMBOL        y
+  -------         ENDDO         
+  C:0352H         LINE#         244
+  C:0356H         LINE#         245
+  C:0356H         LINE#         246
+  C:035AH         LINE#         247
+  C:035EH         LINE#         248
+  C:0367H         LINE#         249
+  C:036CH         LINE#         250
+  C:0372H         LINE#         251
+  -------         ENDPROC       _LCD_ROWCOL_TO_INTER_XY
+  -------         PROC          _LCD_SET_GRAPHIC_ADDRESS
+  D:0007H         SYMBOL        x
+  D:0005H         SYMBOL        y
+  -------         DO            
+  D:0020H         SYMBOL        xWord
+  D:0021H         SYMBOL        downPage
+  D:0007H         SYMBOL        yInter
+  -------         ENDDO         
+  C:0305H         LINE#         256
+  C:0305H         LINE#         257
+  C:0305H         LINE#         260
+  C:0308H         LINE#         261
+  C:030BH         LINE#         262
+  C:0311H         LINE#         263
+  C:0318H         LINE#         264
+  C:031BH         LINE#         266
+  C:031EH         LINE#         267
+  -------         ENDPROC       _LCD_SET_GRAPHIC_ADDRESS
+  -------         PROC          LCD_CLEAR
+  -------         DO            
+  D:0017H         SYMBOL        x
+  D:0018H         SYMBOL        y
+  -------         ENDDO         
+  C:0122H         LINE#         271
+  C:0122H         LINE#         272
+  C:0122H         LINE#         274
+  C:0127H         LINE#         275
+  C:012AH         LINE#         276
+  C:012FH         LINE#         280
+  C:0132H         LINE#         281
+  C:0140H         LINE#         282
+  C:0140H         LINE#         283
+  C:0145H         LINE#         284
+  C:014AH         LINE#         285
+  C:0158H         LINE#         286
+  C:0158H         LINE#         287
+  C:015DH         LINE#         288
+  C:0162H         LINE#         289
+  C:0166H         LINE#         290
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/21/2021  22:52:31  PAGE 14
+
+
+  C:016AH         LINE#         291
+  C:016DH         LINE#         293
+  C:0172H         LINE#         294
+  -------         ENDPROC       LCD_CLEAR
+  -------         PROC          LCD_STARTGRAPHIC
+  C:042FH         LINE#         298
+  C:042FH         LINE#         299
+  C:042FH         LINE#         304
+  C:0434H         LINE#         305
+  -------         ENDPROC       LCD_STARTGRAPHIC
+  -------         PROC          LCD_ENDGRAPHIC
+  C:0439H         LINE#         310
+  C:0439H         LINE#         311
+  C:0439H         LINE#         316
+  C:043EH         LINE#         317
+  -------         ENDPROC       LCD_ENDGRAPHIC
+  -------         PROC          _LCD_INVERSE_16X16
+  D:0006H         SYMBOL        rowCol
+  D:0011H         SYMBOL        charNum
+  D:0012H         SYMBOL        reverse
+  -------         DO            
+  D:0013H         SYMBOL        i
+  D:0014H         SYMBOL        ch
+  D:0004H         SYMBOL        xy
+  D:0015H         SYMBOL        x
+  D:0016H         SYMBOL        y
+  -------         ENDDO         
+  C:0003H         LINE#         327
+  C:0007H         LINE#         328
+  C:0007H         LINE#         330
+  C:000CH         LINE#         331
+  C:000FH         LINE#         332
+  C:0014H         LINE#         334
+  C:0017H         LINE#         335
+  C:0025H         LINE#         336
+  C:0025H         LINE#         337
+  C:002FH         LINE#         338
+  C:0037H         LINE#         339
+  C:0041H         LINE#         340
+  C:0041H         LINE#         341
+  C:004EH         LINE#         342
+  C:005BH         LINE#         343
+  C:005FH         LINE#         344
+  C:0063H         LINE#         345
+  -------         ENDPROC       _LCD_INVERSE_16X16
+  -------         PROC          _LCD_WRITE_CHAR
+  D:0002H         SYMBOL        rowCol
+  D:001CH         SYMBOL        Code
+  -------         DO            
+  D:001EH         SYMBOL        high
+  D:001FH         SYMBOL        low
+  -------         ENDDO         
+  C:032EH         LINE#         352
+  C:0332H         LINE#         353
+  C:0332H         LINE#         354
+  C:0336H         LINE#         355
+  C:033AH         LINE#         356
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/21/2021  22:52:31  PAGE 15
+
+
+  C:033DH         LINE#         357
+  C:0348H         LINE#         358
+  C:0348H         LINE#         359
+  C:034DH         LINE#         360
+  C:034DH         LINE#         361
+  -------         ENDPROC       _LCD_WRITE_CHAR
+  -------         PROC          _LCD_WRITE_STRING
+  D:0006H         SYMBOL        rowCol
+  D:0017H         SYMBOL        p
+  C:0287H         LINE#         366
+  C:028DH         LINE#         367
+  C:028DH         LINE#         368
+  C:0290H         LINE#         369
+  C:02A1H         LINE#         370
+  C:02A1H         LINE#         371
+  C:02A4H         LINE#         372
+  C:02AFH         LINE#         373
+  C:02B1H         LINE#         374
+  -------         ENDPROC       _LCD_WRITE_STRING
+  -------         PROC          _LCD_DRAW_BMP
+  D:0008H         SYMBOL        pImage
+  D:000BH         SYMBOL        col
+  D:000CH         SYMBOL        row
+  D:000DH         SYMBOL        x0
+  D:000EH         SYMBOL        y0
+  -------         DO            
+  D:000FH         SYMBOL        i
+  D:0010H         SYMBOL        y
+  -------         ENDDO         
+  C:00C4H         LINE#         376
+  C:00CCH         LINE#         377
+  C:00CCH         LINE#         380
+  C:00CFH         LINE#         382
+  C:00E7H         LINE#         383
+  C:00E7H         LINE#         384
+  C:00EEH         LINE#         385
+  C:00FFH         LINE#         386
+  C:00FFH         LINE#         387
+  C:010CH         LINE#         388
+  C:0117H         LINE#         389
+  C:011BH         LINE#         390
+  C:011FH         LINE#         392
+  -------         ENDPROC       _LCD_DRAW_BMP
+  -------         ENDMOD        ST7920
+
+  -------         MODULE        ?C?CLDPTR
+  C:038CH         PUBLIC        ?C?CLDPTR
+  -------         ENDMOD        ?C?CLDPTR
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?MISO_H?SOFTWARE_SPI
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?MISO_L?SOFTWARE_SPI
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_SOFT_SPI_RW_MODE0?SOFTWARE_SPI
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/21/2021  22:52:31  PAGE 16
+
+
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_SOFT_SPI_RW_MODE1?SOFTWARE_SPI
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_SOFT_SPI_RW_MODE2?SOFTWARE_SPI
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_WRITE_BYTE?ST7920
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_WRITE_HALF_BYTE?ST7920
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?LCD_READ_DATA?ST7920
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?LCD_READ_STATUS?ST7920
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_INVERSE_16X16?ST7920
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_WRITE_CHAR?ST7920
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_DRAW_BMP?ST7920
+
+Program Size: data=35.0 xdata=0 code=1193
+LINK/LOCATE RUN COMPLETE.  12 WARNING(S),  0 ERROR(S)

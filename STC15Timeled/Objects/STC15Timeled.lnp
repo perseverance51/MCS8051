@@ -1,0 +1,3 @@
+".\Objects\main.obj" 
+TO ".\Objects\STC15Timeled" 
+PRINT(".\Listings\STC15Timeled.m51") RAMSIZE(256) 

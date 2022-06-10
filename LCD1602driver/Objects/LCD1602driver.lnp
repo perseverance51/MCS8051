@@ -1,0 +1,4 @@
+".\Objects\main.obj",
+".\Objects\LCD1602.obj" 
+TO ".\Objects\LCD1602driver" 
+PRINT(".\Listings\LCD1602driver.m51") RAMSIZE(256) 

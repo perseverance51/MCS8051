@@ -1,0 +1,215 @@
+C51 COMPILER V9.60.0.0   PCF8563                                                           01/04/2022 11:31:01 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE PCF8563
+OBJECT MODULE PLACED IN .\Objects\PCF8563.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE PCF8563.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\P
+                    -CF8563.lst) TABS(2) OBJECT(.\Objects\PCF8563.obj)
+
+line level    source
+
+   1          /************************************************
+   2          文件：PCF8563.h
+   3          用途：PCF8563函数头文件
+   4          注意：系统时钟8M
+   5          ************************************************/
+   6          #include "config.h"
+*** ERROR C141 IN LINE 10 OF TWI.h: syntax error near ')', expected '<id>'
+*** ERROR C141 IN LINE 20 OF PCF8563.h: syntax error near ')', expected '<id>'
+   7          unsigned char syserr;
+   8          unsigned char *week_list[7]={
+   9                            "  Sunday ",
+  10                          "  Monday ",
+  11                          " Tuesday ",
+  12                          "Wednesday",
+  13                          "Thursday ",
+  14                          " Friday  ",
+  15                          "Saturday "
+  16          };
+  17          unsigned char write_buff[8],read_buff[8],time_tmp[]="00:00:00",data_tmp[]="2008.01.01",*week_tmp;
+  18          unsigned char time[7]={
+  19                         0x40/*秒*/,
+  20                       0x59/*分*/,
+  21                       0x23/*时*/,
+  22                       0x29/*天*/,
+  23                       0x05/*星期*/,
+  24                       0x02/*月/世纪*/,
+  25                       0x08/*年*/
+  26          };
+  27          /*************************************************************************
+  28          ** 函数名称: clear(unsigned char *p,unsigned char num)
+  29          ** 功能描述: 清除指定区域指定长度的数据
+  30          ** 输　入: unsigned char *p :起始地址   unsigned char num :零数据长度
+  31          ** 输出  : 
+  32          ** 全局变量: 
+  33          ** 调用模块: 
+  34          ** 说明：
+  35          ** 注意：
+  36          **************************************************************************/
+  37          void clear(unsigned char *p,unsigned char num)
+  38          {
+  39   1       for(;num>0;num--)
+  40   1        {
+  41   2         *p=0;
+  42   2         p++;
+  43   2        }
+  44   1      }
+  45          /*************************************************************************
+  46          ** 函数名称: PCF8536_wt(unsigned int add,unsigned char data)
+  47          ** 功能描述: 向PCF8563指定地址写入一条数据
+  48          ** 输　入: unsigned int add    ：高八位为器件地址，低八位为内部寄存器地址
+  49                   unsigned char data  ：需要写入的数据
+  50          ** 输出  : 
+  51          ** 全局变量: 
+  52          ** 调用模块: 
+C51 COMPILER V9.60.0.0   PCF8563                                                           01/04/2022 11:31:01 PAGE 2   
+
+  53          ** 说明：
+  54          ** 注意：
+  55          **************************************************************************/
+  56          void PCF8536_wt(unsigned int add,unsigned char data)
+*** ERROR C141 IN LINE 56 OF PCF8563.c: syntax error near ')', expected '<id>'
+  57          {
+  58   1       unsigned char t;
+  59   1       t=add>>8;
+  60   1       t<<=1;
+  61   1       i2cstart();
+  62   1       if(i2cwt(W_ADD_COM+t)==SLAW)
+  63   1        {
+  64   2         i2cwt(add);
+  65   2         i2cwt(data);
+*** ERROR C141 IN LINE 65 OF PCF8563.c: syntax error near 'data', expected 'sizeof'
+  66   2        }
+  67   1       else syserr=ERR_SLAW;
+  68   1       i2cstop();
+  69   1      }
+  70          /*************************************************************************
+  71          ** 函数名称: PCF8536_wt_p(unsigned int add,unsigned char *p,unsigned char num)
+  72          ** 功能描述: 向PCF8563地址连续的寄存器写入系列数据
+  73          ** 输　入: unsigned int add    ：高八位为器件地址，低八位为内部寄存器地址
+  74                   unsigned char *p    ：需要写入的数据域的起始地址
+  75                 unsigned char num   ：写入数据的个数
+  76          ** 输出  : 
+  77          ** 全局变量: 
+  78          ** 调用模块: 
+  79          ** 说明：写入数据区域为地址连续的寄存器
+  80          ** 注意：
+  81          **************************************************************************/
+  82          void PCF8536_wt_p(unsigned int add,unsigned char *p,unsigned char num)
+  83          {
+  84   1       unsigned char t;
+  85   1       t=add>>8;
+  86   1       t<<=1;
+  87   1       i2cstart();
+  88   1       if(i2cwt(W_ADD_COM+t)==SLAW)
+  89   1        {
+  90   2         i2cwt(add);
+  91   2         for(;num>0;num--)
+  92   2          {
+  93   3           i2cwt(*p);
+  94   3           p++;
+  95   3           _NOP();
+  96   3          }
+  97   2        }
+  98   1       else syserr=ERR_SLAW;
+  99   1       i2cstop();
+ 100   1      }
+ 101          /*************************************************************************
+ 102          ** 函数名称: PCF8536_rd(unsigned int add,unsigned char *p,unsigned char num)
+ 103          ** 功能描述: 读PCF8563
+ 104          ** 输　入: unsigned int add    ：高八位为器件地址，低八位为内部寄存器地址
+ 105                   unsigned char *p    ：读出的数据存放地址的起始地址
+ 106                 unsigned char num   ：读出数据的个数
+ 107          ** 输出  : 
+ 108          ** 全局变量: 
+ 109          ** 调用模块: 
+ 110          ** 说明：
+ 111          ** 注意：
+ 112          **************************************************************************/
+C51 COMPILER V9.60.0.0   PCF8563                                                           01/04/2022 11:31:01 PAGE 3   
+
+ 113          void PCF8536_rd(unsigned int add,unsigned char *p,unsigned char num)
+ 114          {
+ 115   1       unsigned char t;
+ 116   1       t=add>>8;
+ 117   1       t<<=1;
+ 118   1       i2cstart();
+ 119   1       if(i2cwt(W_ADD_COM+t)==SLAW)
+ 120   1        {
+ 121   2         i2cwt(add);
+ 122   2        }
+ 123   1       else syserr=ERR_SLAW;
+ 124   1       
+ 125   1       i2cstart();
+ 126   1       if(i2cwt(R_ADD_COM+t)==SLAW)
+ 127   1        {
+ 128   2         i2cwt(add);
+ 129   2        }
+ 130   1       else syserr=ERR_SLAW;
+ 131   1       
+ 132   1       for(;num>0;num--)
+ 133   1        {
+ 134   2         *p=i2crd();
+ 135   2         p++;
+ 136   2        } 
+ 137   1      }
+ 138          /*************************************************************************
+ 139          ** 函数名称: PCF8563_init(void)
+ 140          ** 功能描述: PCF8563初始化
+ 141          ** 输　入: 
+ 142          ** 输出  : 
+ 143          ** 全局变量: 
+ 144          ** 调用模块: 
+ 145          ** 说明：
+ 146          ** 注意：
+ 147          **************************************************************************/
+ 148          void PCF8563_init(void)
+ 149          {
+ 150   1       clear(write_buff,8);
+ 151   1       clear(read_buff,8);
+ 152   1       
+ 153   1       PCF8536_wt(0x00,0x20);//写寄存器1，停止计时
+ 154   1       //PCF8536_wt_p(0x02,time,7);//设定时间
+ 155   1       PCF8536_wt(0x00,0x00);//写寄存器1，开始计时
+ 156   1      }
+ 157          /*************************************************************************
+ 158          ** 函数名称: Updata_time(void)
+ 159          ** 功能描述: 刷新时间寄存器及相关数组内容
+ 160          ** 输　入: 
+ 161          ** 输出  : 
+ 162          ** 全局变量: 
+ 163          ** 调用模块: 
+ 164          ** 说明：
+ 165          ** 注意：
+ 166          **************************************************************************/
+ 167          /*void Updata_time(void)
+ 168          {
+ 169           PCF8536_rd(0x02,time,7);//读取时间
+ 170           
+ 171           time[0]=time[0]&0x7F;//秒0x02
+ 172           time[1]=time[1]&0x7F;//分0x03
+ 173           time[2]=time[2]&0x3F;//时0x04
+ 174           time[3]=time[3]&0x3F;//日0x05
+C51 COMPILER V9.60.0.0   PCF8563                                                           01/04/2022 11:31:01 PAGE 4   
+
+ 175           time[4]=time[4]&0x07;//week 0x06
+ 176           time[5]=time[5]&0x1F;//月0x07
+ 177           //处理时间BCD转10进制
+ 178           time_tmp[7]=(time[0]&0x0F)+0x30;
+ 179           time_tmp[6]=(time[0]>>4)+0x30;//秒
+ 180           time_tmp[4]=(time[1]&0x0F)+0x30;
+ 181           time_tmp[3]=(time[1]>>4)+0x30;//分
+ 182           time_tmp[1]=(time[2]&0x0F)+0x30;
+ 183           time_tmp[0]=(time[2]>>4)+0x30;//时
+ 184           //处理日期BCD转10进制
+ 185           data_tmp[9]=(time[3]&0x0F)+0x30;
+ 186           data_tmp[8]=(time[3]>>4)+0x30;//日
+ 187           data_tmp[6]=(time[5]&0x0F)+0x30;
+ 188           data_tmp[5]=(time[5]>>4)+0x30;//月
+ 189           data_tmp[3]=(time[6]&0x0F)+0x30;
+ 190           data_tmp[2]=(time[6]>>4)+0x30;//年
+ 191           //处理星期
+ 192           week_tmp=week_list[time[4]&0x0F];
+ 193          }*/
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  4 ERROR(S)

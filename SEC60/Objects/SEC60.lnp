@@ -1,0 +1,6 @@
+".\Objects\main.obj",
+".\Objects\software.obj",
+".\Objects\hardware.obj",
+".\Objects\key.obj" 
+TO ".\Objects\SEC60" 
+PRINT(".\Listings\SEC60.m51") RAMSIZE(256) 

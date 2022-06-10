@@ -1,0 +1,6 @@
+".\Objects\main.obj",
+".\Objects\LCD1602.obj",
+".\Objects\IIC.obj",
+".\Objects\delay.obj" 
+TO ".\Objects\PCF8563OK" 
+PRINT(".\Listings\PCF8563OK.m51") RAMSIZE(256) 

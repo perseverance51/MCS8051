@@ -1,0 +1,3 @@
+".\Objects\main.obj" 
+TO ".\Objects\PCA_EXIT" 
+PRINT(".\Listings\PCA_EXIT.m51") RAMSIZE(256) 

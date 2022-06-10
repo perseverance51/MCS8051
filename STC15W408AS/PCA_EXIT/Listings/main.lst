@@ -1,0 +1,136 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              05/10/2022 10:48:53 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          //用CCP/PCA功能扩展外部中断的测试程序
+   2          //若无特别说明,工作频率一般为11.0592MHz
+   3          
+   4          
+   5          #include "reg51.h"
+   6          #include "intrins.h"
+   7          
+   8          typedef unsigned char BYTE;
+   9          typedef unsigned int WORD;
+  10          
+  11          sfr P0M1 = 0x93;
+  12          sfr P0M0 = 0x94;
+  13          sfr P1M1 = 0x91;
+  14          sfr P1M0 = 0x92;
+  15          sfr P2M1 = 0x95;
+  16          sfr P2M0 = 0x96;
+  17          sfr P3M1 = 0xb1;
+  18          sfr P3M0 = 0xb2;
+  19          sfr P4M1 = 0xb3;
+  20          sfr P4M0 = 0xb4;
+  21          sfr P5M1 = 0xC9;
+  22          sfr P5M0 = 0xCA;
+  23          sfr P6M1 = 0xCB;
+  24          sfr P6M0 = 0xCC;
+  25          sfr P7M1 = 0xE1;
+  26          sfr P7M0 = 0xE2;
+  27          
+  28          sfr P_SW1       = 0xA2;             //外设功能切换寄存器1
+  29          
+  30          #define CCP_S0 0x10                 //P_SW1.4
+  31          #define CCP_S1 0x20                 //P_SW1.5
+  32          
+  33          sfr CCON        =   0xD8;           //PCA控制寄存器
+  34          sbit CCF0       =   CCON^0;         //PCA模块0中断标志
+  35          sbit CCF1       =   CCON^1;         //PCA模块1中断标志
+  36          sbit CR         =   CCON^6;         //PCA定时器运行控制位
+  37          sbit CF         =   CCON^7;         //PCA定时器溢出标志
+  38          sfr CMOD        =   0xD9;           //PCA模式寄存器
+  39          sfr CL          =   0xE9;           //PCA定时器低字节
+  40          sfr CH          =   0xF9;           //PCA定时器高字节
+  41          sfr CCAPM0      =   0xDA;           //PCA模块0模式寄存器
+  42          sfr CCAP0L      =   0xEA;           //PCA模块0捕获寄存器 LOW
+  43          sfr CCAP0H      =   0xFA;           //PCA模块0捕获寄存器 HIGH
+  44          sfr CCAPM1      =   0xDB;           //PCA模块1模式寄存器
+  45          sfr CCAP1L      =   0xEB;           //PCA模块1捕获寄存器 LOW
+  46          sfr CCAP1H      =   0xFB;           //PCA模块1捕获寄存器 HIGH
+  47          sfr PCAPWM0     =   0xf2;
+  48          sfr PCAPWM1     =   0xf3;
+  49          
+  50          sbit PCA_LED    =   P1^0;           //PCA测试LED
+  51          
+  52          void PCA_isr() interrupt 7
+  53          {
+  54   1          CCF0 = 0;                       //清中断标志
+C51 COMPILER V9.60.0.0   MAIN                                                              05/10/2022 10:48:53 PAGE 2   
+
+  55   1          PCA_LED = !PCA_LED;             //测试LED取反
+  56   1      }
+  57          
+  58          void main()
+  59          {
+  60   1          P0M0 = 0x00;
+  61   1          P0M1 = 0x00;
+  62   1          P1M0 = 0x00;
+  63   1          P1M1 = 0x00;
+  64   1          P2M0 = 0x00;
+  65   1          P2M1 = 0x00;
+  66   1          P3M0 = 0x00;
+  67   1          P3M1 = 0x00;
+  68   1          P4M0 = 0x00;
+  69   1          P4M1 = 0x00;
+  70   1          P5M0 = 0x00;
+  71   1          P5M1 = 0x00;
+  72   1          P6M0 = 0x00;
+  73   1          P6M1 = 0x00;
+  74   1          P7M0 = 0x00;
+  75   1          P7M1 = 0x00;
+  76   1      
+  77   1          ACC = P_SW1;
+  78   1          ACC &= ~(CCP_S0 | CCP_S1);      //CCP_S0=0 CCP_S1=0
+  79   1          P_SW1 = ACC;                    //(P1.2/ECI, P1.1/CCP0, P1.0/CCP1, P3.7/CCP2)
+  80   1          
+  81   1      //  ACC = P_SW1;
+  82   1      //  ACC &= ~(CCP_S0 | CCP_S1);      //CCP_S0=1 CCP_S1=0
+  83   1      //  ACC |= CCP_S0;                  //(P3.4/ECI_2, P3.5/CCP0_2, P3.6/CCP1_2, P3.7/CCP2_2)
+  84   1      //  P_SW1 = ACC;  
+  85   1      //  
+  86   1      //  ACC = P_SW1;
+  87   1      //  ACC &= ~(CCP_S0 | CCP_S1);      //CCP_S0=0 CCP_S1=1
+  88   1      //  ACC |= CCP_S1;                  //(P2.4/ECI_3, P2.5/CCP0_3, P2.6/CCP1_3, P2.7/CCP2_3)
+  89   1      //  P_SW1 = ACC;  
+  90   1      
+  91   1          CCON = 0;                       //初始化PCA控制寄存器
+  92   1                                          //PCA定时器停止
+  93   1                                          //清除CF标志
+  94   1                                          //清除模块中断标志
+  95   1          CL = 0;                         //复位PCA寄存器
+  96   1          CH = 0;
+  97   1          CMOD = 0x00;                    //设置PCA时钟源
+  98   1                                          //禁止PCA定时器溢出中断
+  99   1          CCAPM0 = 0x11;                  //PCA模块0为下降沿触发
+ 100   1      //  CCAPM0 = 0x21;                  //PCA模块0为上升沿沿触发
+ 101   1      //  CCAPM0 = 0x31;                  //PCA模块0为上升沿/下降沿触发
+ 102   1      
+ 103   1          CR = 1;                         //PCA定时器开始工作
+ 104   1          EA = 1;
+ 105   1      
+ 106   1          while (1);
+ 107   1      }
+ 108          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     62    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+C51 COMPILER V9.60.0.0   MAIN                                                              05/10/2022 10:48:53 PAGE 3   
+
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

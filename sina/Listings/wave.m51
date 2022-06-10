@@ -1,0 +1,214 @@
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                    12/26/2021  15:39:51  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0, INVOKED BY:
+C:\KEIL_V5\C51\BIN\BL51.EXE .\Objects\wave2.obj TO .\Objects\wave PRINT (.\Listings\wave.m51) RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  .\Objects\wave2.obj (WAVE2)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_STARTUP)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_INIT)
+
+
+LINK MAP OF MODULE:  .\Objects\wave (WAVE2)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+                    0008H     0018H                  *** GAP ***
+            BIT     0020H.0   0000H.1   UNIT         ?BI?WAVE2
+                    0020H.1   0000H.7                *** GAP ***
+            IDATA   0021H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     0100H     UNIT         ?CO?WAVE2
+            CODE    0103H     008CH     UNIT         ?C_C51STARTUP
+            CODE    018FH     004BH     UNIT         ?PR?MAIN?WAVE2
+            CODE    01DAH     0027H     UNIT         ?PR?TRIANGLE?WAVE2
+            CODE    0201H     0019H     UNIT         ?PR?SIN?WAVE2
+            CODE    021AH     0018H     UNIT         ?PR?KEYSCAN?WAVE2
+            CODE    0232H     0018H     UNIT         ?PR?SQUARE?WAVE2
+            CODE    024AH     0015H     UNIT         ?PR?JUCHIBO?WAVE2
+            CODE    025FH     0012H     UNIT         ?PR?_DELAY?WAVE2
+            CODE    0271H     000CH     UNIT         ?PR?_CONVERSION_ONCE_0832?WAVE2
+            CODE    027DH     0003H     UNIT         ?C_INITSEG
+
+
+
+OVERLAY MAP OF MODULE:   .\Objects\wave (WAVE2)
+
+
+SEGMENT
+  +--> CALLED SEGMENT
+---------------------
+?C_C51STARTUP
+  +--> ?PR?MAIN?WAVE2
+  +--> ?C_INITSEG
+
+?PR?MAIN?WAVE2
+  +--> ?PR?KEYSCAN?WAVE2
+  +--> ?PR?TRIANGLE?WAVE2
+  +--> ?PR?SQUARE?WAVE2
+  +--> ?PR?JUCHIBO?WAVE2
+  +--> ?PR?SIN?WAVE2
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/26/2021  15:39:51  PAGE 2
+
+
+
+?PR?KEYSCAN?WAVE2
+  +--> ?PR?_DELAY?WAVE2
+
+?PR?TRIANGLE?WAVE2
+  +--> ?PR?_CONVERSION_ONCE_0832?WAVE2
+
+?PR?_CONVERSION_ONCE_0832?WAVE2
+  +--> ?PR?_DELAY?WAVE2
+
+?PR?SQUARE?WAVE2
+  +--> ?PR?_CONVERSION_ONCE_0832?WAVE2
+  +--> ?PR?_DELAY?WAVE2
+
+?PR?JUCHIBO?WAVE2
+  +--> ?PR?_CONVERSION_ONCE_0832?WAVE2
+
+?PR?SIN?WAVE2
+  +--> ?CO?WAVE2
+  +--> ?PR?_CONVERSION_ONCE_0832?WAVE2
+
+
+
+SYMBOL TABLE OF MODULE:  .\Objects\wave (WAVE2)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        WAVE2
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0090H         PUBLIC        P1
+  C:0271H         PUBLIC        _conversion_once_0832
+  C:025FH         PUBLIC        _delay
+  C:0232H         PUBLIC        square
+  B:0020H.0       PUBLIC        flag
+  C:018FH         PUBLIC        main
+  C:0003H         PUBLIC        dat
+  C:0201H         PUBLIC        sin
+  C:01DAH         PUBLIC        triangle
+  C:024AH         PUBLIC        juchibo
+  C:021AH         PUBLIC        keyscan
+  -------         PROC          _DELAY
+  D:0006H         SYMBOL        N
+  -------         DO            
+  D:0004H         SYMBOL        i
+  -------         ENDDO         
+  C:025FH         LINE#         25
+  C:025FH         LINE#         26
+  C:025FH         LINE#         28
+  C:0270H         LINE#         29
+  -------         ENDPROC       _DELAY
+  -------         PROC          _CONVERSION_ONCE_0832
+  D:0007H         SYMBOL        out_data
+  C:0271H         LINE#         31
+  C:0271H         LINE#         32
+  C:0271H         LINE#         33
+  C:0276H         LINE#         34
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/26/2021  15:39:51  PAGE 3
+
+
+  -------         ENDPROC       _CONVERSION_ONCE_0832
+  -------         PROC          KEYSCAN
+  -------         DO            
+  D:0003H         SYMBOL        key
+  -------         ENDDO         
+  C:021AH         LINE#         36
+  C:021AH         LINE#         37
+  C:021AH         LINE#         39
+  C:0220H         LINE#         40
+  C:0220H         LINE#         41
+  C:0227H         LINE#         42
+  C:0229H         LINE#         43
+  C:022DH         LINE#         44
+  C:022FH         LINE#         46
+  C:022FH         LINE#         47
+  C:0231H         LINE#         48
+  -------         ENDPROC       KEYSCAN
+  -------         PROC          TRIANGLE
+  -------         DO            
+  D:0003H         SYMBOL        k
+  -------         ENDDO         
+  C:01DAH         LINE#         50
+  C:01DAH         LINE#         51
+  C:01DAH         LINE#         53
+  C:01E6H         LINE#         54
+  C:01EEH         LINE#         55
+  C:01F8H         LINE#         56
+  C:0200H         LINE#         57
+  -------         ENDPROC       TRIANGLE
+  -------         PROC          SQUARE
+  C:0232H         LINE#         58
+  C:0232H         LINE#         59
+  C:0232H         LINE#         60
+  C:0237H         LINE#         61
+  C:023EH         LINE#         62
+  C:0243H         LINE#         63
+  -------         ENDPROC       SQUARE
+  -------         PROC          JUCHIBO
+  -------         DO            
+  D:0003H         SYMBOL        j
+  -------         ENDDO         
+  C:024AH         LINE#         66
+  C:024AH         LINE#         67
+  C:024AH         LINE#         69
+  C:0256H         LINE#         70
+  C:025EH         LINE#         71
+  -------         ENDPROC       JUCHIBO
+  -------         PROC          SIN
+  -------         DO            
+  D:0003H         SYMBOL        i
+  -------         ENDDO         
+  C:0201H         LINE#         72
+  C:0201H         LINE#         73
+  C:0201H         LINE#         75
+  C:020DH         LINE#         76
+  C:020DH         LINE#         77
+  C:0216H         LINE#         78
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/26/2021  15:39:51  PAGE 4
+
+
+  C:0219H         LINE#         79
+  -------         ENDPROC       SIN
+  -------         PROC          MAIN
+  -------         DO            
+  D:0007H         SYMBOL        temp
+  -------         ENDDO         
+  C:018FH         LINE#         80
+  C:018FH         LINE#         81
+  C:018FH         LINE#         83
+  C:018FH         LINE#         84
+  C:018FH         LINE#         85
+  C:0192H         LINE#         86
+  C:01A2H         LINE#         87
+  C:01A2H         LINE#         88
+  C:01A2H         LINE#         89
+  C:01A5H         LINE#         90
+  C:01B0H         LINE#         91
+  C:01B0H         LINE#         92
+  C:01B3H         LINE#         93
+  C:01BEH         LINE#         94
+  C:01BEH         LINE#         95
+  C:01C1H         LINE#         96
+  C:01CCH         LINE#         97
+  C:01CCH         LINE#         98
+  C:01CFH         LINE#         99
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        WAVE2
+
+Program Size: data=9.1 xdata=0 code=640
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

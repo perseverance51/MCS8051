@@ -1,0 +1,5 @@
+"uart.obj",
+"PCF8563.obj",
+"main.obj" 
+TO "海振电子 PCF8563模块程序" 
+RAMSIZE(256) 

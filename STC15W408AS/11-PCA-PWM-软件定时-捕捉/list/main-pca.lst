@@ -1,0 +1,229 @@
+C51 COMPILER V9.60.0.0   MAIN_PCA                                                          05/11/2022 20:49:48 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN_PCA
+OBJECT MODULE PLACED IN .\list\main-pca.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main-pca.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\list\main
+                    --pca.lst) TABS(2) OBJECT(.\list\main-pca.obj)
+
+line level    source
+
+   1          #include  "config.h"
+   2          #include  "timer.h"
+   3          #include  "USART.h"
+   4          #include  "PCA.h"
+   5          #include <stdio.h>         // 为使用KEIL自带的库函数printf而加入
+   6          /*************  功能说明  **************
+   7          
+   8          
+   9          P26为捕捉. 可以连接到P2.7用来测试捕捉,捕捉的时间从串口1输出. 也可以从外部输入一个信号来捕捉.
+  10          PCA2  为16位软件定时, 定时时间为30000个PCA时钟, 并且从P2.7高速输出信号,输出周期为60000个PCA时钟.
+  11                P2.7可以连接到P2.6用来测试捕捉,捕捉的时间从串口1输出.
+  12          
+  13          串口1把收到的数据原样返回.
+  14          串口2未启用
+  15          
+  16          定时器0产生1ms的基准,作为程序运行的节拍.
+  17          
+  18          ******************************************/
+  19          
+  20          /*************  本地常量声明  **************/
+  21          
+  22          
+  23          /*************  本地变量声明  **************/
+  24          
+  25          u8  cnt0;
+  26          u16 Cap_time; //上一次捕捉时间
+  27          u8  pwm0;   //pwm
+  28          bit B_PWM0_Dir; //方向, 0为+, 1为-.
+  29          
+  30          /*************  本地函数声明  **************/
+  31          
+  32          
+  33          
+  34          /*************  外部函数和变量声明 *****************/
+  35          
+  36          
+  37          
+  38          extern  bit B_Timer0_1ms;
+  39          
+  40          void  Timer_config(void)
+  41          {
+  42   1        TIM_InitTypeDef   TIM_InitStructure;          //结构定义
+  43   1        TIM_InitStructure.TIM_Mode      = TIM_16BitAutoReload;  //指定工作模式,   TIM_16BitAutoReload,TIM_16Bit,TI
+             -M_8BitAutoReload,TIM_16BitAutoReloadNoMask
+  44   1        TIM_InitStructure.TIM_Polity    = PolityLow;      //指定中断优先级, PolityHigh,PolityLow
+  45   1        TIM_InitStructure.TIM_Interrupt = ENABLE;       //中断是否允许,   ENABLE或DISABLE
+  46   1        TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_12T;    //指定时钟源,     TIM_CLOCK_1T,TIM_CLOCK_12T,TIM_CLOCK_
+             -Ext
+  47   1        TIM_InitStructure.TIM_ClkOut    = DISABLE;        //是否输出高速脉冲, ENABLE或DISABLE
+  48   1        TIM_InitStructure.TIM_Value     = 65536UL - ((1000 * MAIN_Fosc) / 12000); //初值, 1000us
+  49   1        TIM_InitStructure.TIM_Run       = ENABLE;       //是否初始化后启动定时器, ENABLE或DISABLE
+  50   1        Timer_Inilize(Timer0,&TIM_InitStructure);       //初始化Timer0    Timer0,Timer1,Timer2
+  51   1      }
+  52          
+C51 COMPILER V9.60.0.0   MAIN_PCA                                                          05/11/2022 20:49:48 PAGE 2   
+
+  53          void  UART_config(void)
+  54          {
+  55   1        COMx_InitDefine   COMx_InitStructure;         //结构定义
+  56   1        COMx_InitStructure.UART_Mode      = UART_8bit_BRTx;   //模式,       UART_ShiftRight,UART_8bit_BRTx,UART_9b
+             -it,UART_9bit_BRTx
+  57   1        COMx_InitStructure.UART_BRT_Use   = BRT_Timer1;     //使用波特率,   BRT_Timer1, BRT_Timer2 (注意: 串口2固定
+             -使用BRT_Timer2)
+  58   1        COMx_InitStructure.UART_BaudRate  = 115200ul;     //波特率, 一般 110 ~ 115200
+  59   1        COMx_InitStructure.UART_RxEnable  = ENABLE;       //接收允许,   ENABLE或DISABLE
+  60   1        COMx_InitStructure.BaudRateDouble = DISABLE;      //波特率加倍, ENABLE或DISABLE
+  61   1        COMx_InitStructure.UART_Interrupt = ENABLE;       //中断允许,   ENABLE或DISABLE
+  62   1        COMx_InitStructure.UART_Polity    = PolityLow;      //中断优先级, PolityLow,PolityHigh
+  63   1        COMx_InitStructure.UART_P_SW      = UART1_SW_P30_P31; //切换端口,   UART1_SW_P30_P31,UART1_SW_P36_P37,UAR
+             -T1_SW_P16_P17(必须使用内部时钟)
+  64   1        COMx_InitStructure.UART_RXD_TXD_Short = DISABLE;    //内部短路RXD与TXD, 做中继, ENABLE,DISABLE
+  65   1        USART_Configuration(USART1, &COMx_InitStructure);   //初始化串口1 USART1,USART2
+  66   1      
+  67   1      //  COMx_InitStructure.UART_Mode      = UART_8bit_BRTx;   //模式,       UART_ShiftRight,UART_8bit_BRTx,UART_
+             -9bit,UART_9bit_BRTx
+  68   1      //  COMx_InitStructure.UART_BaudRate  = 57600ul;      //波特率,     110 ~ 115200
+  69   1      //  COMx_InitStructure.UART_RxEnable  = ENABLE;       //接收允许,   ENABLE或DISABLE
+  70   1      //  COMx_InitStructure.UART_Interrupt = ENABLE;       //中断允许,   ENABLE或DISABLE
+  71   1      //  COMx_InitStructure.UART_Polity    = PolityLow;      //中断优先级, PolityLow,PolityHigh
+  72   1      //  COMx_InitStructure.UART_P_SW      = UART2_SW_P10_P11; //切换端口,   UART2_SW_P10_P11,UART2_SW_P46_P47
+  73   1      //  USART_Configuration(USART2, &COMx_InitStructure);   //初始化串口2 USART1,USART2
+  74   1      
+  75   1        printf("STC15F2K60S2 PCA Test Prgramme from SUART1!\r\n");//SUART1发送一个字符串
+  76   1      //  PrintString1("STC15F2K60S2 PCA Test Prgramme from SUART1!\r\n");  //SUART1发送一个字符串
+  77   1      //  PrintString2("STC15F2K60S2 PCA Test Prgramme from SUART2!\r\n");  //SUART2发送一个字符串
+  78   1      }
+  79          
+  80          
+  81          void  PCA_config(void)
+  82          {
+  83   1        PCA_InitTypeDef   PCA_InitStructure;
+  84   1      
+  85   1        PCA_InitStructure.PCA_Clock    = PCA_Clock_12T;   //PCA_Clock_1T, PCA_Clock_2T, PCA_Clock_4T, PCA_Clock_6T
+             -, PCA_Clock_8T, PCA_Clock_12T, PCA_Clock_Timer0_OF, PCA_Clock_ECI
+  86   1        PCA_InitStructure.PCA_IoUse    = PCA_P24_P25_P26_P27; //PCA_P12_P11_P10_P37, PCA_P34_P35_P36_P37, PCA_P24
+             -_P25_P26_P27
+  87   1        PCA_InitStructure.PCA_Interrupt_Mode = DISABLE;   //ENABLE, DISABLE
+  88   1        PCA_InitStructure.PCA_Polity   = PolityHigh;    //优先级设置  PolityHigh,PolityLow
+  89   1        PCA_InitStructure.PCA_RUN      = DISABLE;     //ENABLE, DISABLE
+  90   1        PCA_Init(PCA_Counter,&PCA_InitStructure); //定时器时钟源选择
+  91   1      
+  92   1        PCA_InitStructure.PCA_Mode     = PCA_Mode_PWM;    //PCA_Mode_PWM, PCA_Mode_Capture, PCA_Mode_SoftTimer, PCA
+             -_Mode_HighPulseOutput
+  93   1        PCA_InitStructure.PCA_PWM_Wide = PCA_PWM_8bit;    //PCA_PWM_8bit, PCA_PWM_7bit, PCA_PWM_6bit
+  94   1        PCA_InitStructure.PCA_Interrupt_Mode = DISABLE;   //PCA_Rise_Active, PCA_Fall_Active, ENABLE, DISABLE
+  95   1        PCA_InitStructure.PCA_Value    = 128 << 8;      //对PWM输出占空比50%，
+  96   1        PCA_Init(PCA0,&PCA_InitStructure); //PWM输出
+  97   1      
+  98   1        PCA_InitStructure.PCA_Mode     = PCA_Mode_Capture;  //PCA_Mode_PWM, PCA_Mode_Capture, PCA_Mode_SoftTimer, 
+             -PCA_Mode_HighPulseOutput
+  99   1        PCA_InitStructure.PCA_PWM_Wide = 0;         //PCA_PWM_8bit, PCA_PWM_7bit, PCA_PWM_6bit
+ 100   1        PCA_InitStructure.PCA_Interrupt_Mode = PCA_Fall_Active | ENABLE;  //(PCA_Rise_Active, PCA_Fall_Active) or 
+             -(ENABLE, DISABLE)
+ 101   1        PCA_InitStructure.PCA_Value    = 0;         //对于捕捉, 这个值没意义
+ 102   1        PCA_Init(PCA1,&PCA_InitStructure);  //捕获模式
+ 103   1      
+ 104   1        PCA_InitStructure.PCA_Mode     = PCA_Mode_HighPulseOutput;  //PCA_Mode_PWM, PCA_Mode_Capture, PCA_Mode_Sof
+             -tTimer, PCA_Mode_HighPulseOutput
+C51 COMPILER V9.60.0.0   MAIN_PCA                                                          05/11/2022 20:49:48 PAGE 3   
+
+ 105   1        PCA_InitStructure.PCA_PWM_Wide = PCA_PWM_8bit;          //PCA_PWM_8bit, PCA_PWM_7bit, PCA_PWM_6bit
+ 106   1        PCA_InitStructure.PCA_Interrupt_Mode = ENABLE;    //PCA_Rise_Active, PCA_Fall_Active, ENABLE, DISABLE
+ 107   1        PCA_InitStructure.PCA_Value    = 30000;       //对于软件定时, 为匹配比较值
+ 108   1        PCA_Init(PCA2,&PCA_InitStructure);  //高速脉冲输出
+ 109   1      
+ 110   1        CR = 1;
+ 111   1      }
+ 112          
+ 113          
+ 114          /******************** task A **************************/
+ 115          void main(void)
+ 116          {
+ 117   1        u8  i;
+ 118   1        u32 j;
+ 119   1        
+ 120   1        Timer_config();
+ 121   1        UART_config();
+ 122   1        PCA_config();
+ 123   1        EA = 1;
+ 124   1        
+ 125   1        Cap_time = 0;
+ 126   1        pwm0 = 64;
+ 127   1        B_PWM0_Dir = 0;
+ 128   1      
+ 129   1        while (1)
+ 130   1        {
+ 131   2          if(B_Timer0_1ms)
+ 132   2          {
+ 133   3            B_Timer0_1ms = 0;
+ 134   3      
+ 135   3            if(B_Capture1)
+ 136   3            {
+ 137   4              B_Capture1 = 0;
+ 138   4              j = CCAP1_tmp - Cap_time; //计算时间差
+ 139   4              Cap_time = CCAP1_tmp;
+ 140   4              printf("PCA_PULSE: %lu \r\n",j);
+ 141   4      //        TX1_write2buff(j/10000 + '0');
+ 142   4      //        TX1_write2buff(j%10000/1000 + '0');
+ 143   4      //        TX1_write2buff(j%1000/100 + '0');
+ 144   4      //        TX1_write2buff(j%100/10 + '0');
+ 145   4      //        TX1_write2buff(j%10 + '0');
+ 146   4      //        PrintString1("\r\n");
+ 147   4            }
+ 148   3      
+ 149   3            cnt0++;
+ 150   3            if((cnt0 & 15) == 15) //16ms
+ 151   3            {
+ 152   4              if(B_PWM0_Dir)
+ 153   4              {
+ 154   5                  if(--pwm0 <= 8)   B_PWM0_Dir = 0;
+ 155   5              }
+ 156   4              else  if(++pwm0 >= 248) B_PWM0_Dir = 1;
+ 157   4              UpdatePwm(PCA0,pwm0);
+ 158   4            }
+ 159   3      
+ 160   3            if(COM1.RX_TimeOut > 0)   //超时计数
+ 161   3            {
+ 162   4              if(--COM1.RX_TimeOut == 0)
+ 163   4              {
+ 164   5                if(COM1.RX_Cnt > 0)
+ 165   5                {
+ 166   6                  for(i=0; i<COM1.RX_Cnt; i++)  TX1_write2buff(RX1_Buffer[i]);  //收到的数据原样返回
+C51 COMPILER V9.60.0.0   MAIN_PCA                                                          05/11/2022 20:49:48 PAGE 4   
+
+ 167   6                }
+ 168   5                COM1.RX_Cnt = 0;
+ 169   5              }
+ 170   4            }
+ 171   3      //      if(COM2.RX_TimeOut > 0)   //超时计数
+ 172   3      //      {
+ 173   3      //        if(--COM2.RX_TimeOut == 0)
+ 174   3      //        {
+ 175   3      //          if(COM2.RX_Cnt > 0)
+ 176   3      //          {
+ 177   3      //            for(i=0; i<COM2.RX_Cnt; i++)  TX2_write2buff(RX2_Buffer[i]);  //收到的数据原样返回
+ 178   3      //          }
+ 179   3      //          COM2.RX_Cnt = 0;
+ 180   3      //        }
+ 181   3      //      }
+ 182   3          }
+ 183   2        }
+ 184   1      }
+ 185          
+ 186          
+ 187          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    362    ----
+   CONSTANT SIZE    =     64    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      4      31
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

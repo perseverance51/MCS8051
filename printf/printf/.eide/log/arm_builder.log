@@ -1,0 +1,12 @@
+[2021-11-06 22:08:01]	link failed !, exit code: 3
+  at unify_builder.Program.Main (System.String[] args) [0x012d3] in <0145ce9df5474e8894a187804b43ab23>:0 
+
+[2021-11-06 22:09:26]	link failed !, exit code: 3
+  at unify_builder.Program.Main (System.String[] args) [0x012d3] in <0145ce9df5474e8894a187804b43ab23>:0 
+
+[2021-11-06 22:10:21]	link failed !, exit code: 3
+  at unify_builder.Program.Main (System.String[] args) [0x012d3] in <0145ce9df5474e8894a187804b43ab23>:0 
+
+[2021-11-06 22:16:23]	link failed !, exit code: 3
+  at unify_builder.Program.Main (System.String[] args) [0x012d3] in <0145ce9df5474e8894a187804b43ab23>:0 
+

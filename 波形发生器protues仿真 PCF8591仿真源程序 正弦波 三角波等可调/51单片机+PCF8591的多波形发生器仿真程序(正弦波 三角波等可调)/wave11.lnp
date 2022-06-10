@@ -1,0 +1,7 @@
+"delay.obj",
+"keyscan.obj",
+"PCF8591.obj",
+"wave.obj",
+"DAswitch.obj" 
+TO "wave11" 
+RAMSIZE(256) 

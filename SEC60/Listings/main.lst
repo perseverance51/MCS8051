@@ -1,0 +1,75 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              05/07/2022 10:36:13 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include "hardware.h"  //此头文件已包含了<reg51.h>头文件
+   2          #include "key.h" 
+   3          
+   4          extern  uchar  segment[];
+   5          void main()
+   6          {
+   7   1        TMOD = 0X11;       //设置定时器1和定时器0为工作方式1,16位定时器/计数器
+   8   1        /****
+   9   1        0X11>0001 0001
+  10   1        0X11 设置的全部内容为：设置定时器/计数器的启动停止只由寄存器TRX（X=0或1）控制 >>> TRX为定时器X运行控制位
+  11   1                               设置定时器/计数器为定时器模式
+  12   1                               设置定时器0和定时器1为工作方式1,16位定时器/计数器
+  13   1        *****/
+  14   1        TH0 = (65536-45872)/256; //装初值，11.0592M晶振，定时50ms，计数个数 N = 45872（在计数时需要预先填装初始计
+             -数个数）
+  15   1        TL0 = (65536-45872)%256; //...
+  16   1        TH1 = (65536-45872)/256; //...
+  17   1        TL1 = (65536-45872)%256; //同上
+  18   1        /*****
+  19   1        THX、TLX为高八位和低八位寄存器。用来储存计数次数
+  20   1        X=0或1
+  21   1        计数个数 N = 中断时间 / 机器周期
+  22   1        机器周期 = 12 * （1/时钟频率）
+  23   1        例 ；时钟频率为11.0592MHz
+  24   1             机器周期 = 12 * （1/110592） = 1.09 us （约）
+  25   1             计数个数 N = 50 * 1000 / 1.09 = 45872 （约）<需要换算单位 * 1000>  1秒=1000毫秒(ms)
+  26   1          1秒=1,000,000 微秒(μs)
+  27   1        1毫秒=1000微秒     
+  28   1        ******/
+  29   1        
+  30   1        ET0 = 1;//定时器/计数器0中断允许位 | 打开
+  31   1        ET1 = 1;//定时器/计数器1中断允许位 | 打开
+  32   1        TR0 = 1;//定时器0运行控制位 | 允许定时器0运行
+  33   1        TR1 = 1;//定时器1运行控制位 | 允许定时器1运行
+  34   1        EA = 0; //全局中断允许位 | 打开总中断（相当于中断的总开关，打开之后其他中断发生时才能有效）
+  35   1         P0=segment[0]; //开始运行显示0
+  36   1        while(1)  //主循环 不断对数码管服务函数扫描
+  37   1        {
+  38   2          KeyRead();
+  39   2              if(Trg==1) {
+  40   3                  count++;
+  41   3                  if(count>=10) {  //超过0~9，数码管显示回到0
+  42   4                      count=0;  
+  43   4        }
+  44   3      }
+  45   2       SEGDisplay();//数码管服务函数(不断对数码管进行扫描)
+  46   2      }
+  47   1        }
+  48          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     64    ----
+   CONSTANT SIZE    =   ----    ----
+C51 COMPILER V9.60.0.0   MAIN                                                              05/07/2022 10:36:13 PAGE 2   
+
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

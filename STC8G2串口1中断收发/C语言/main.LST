@@ -1,0 +1,208 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              04/23/2022 14:28:53 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE INCDIR(..\C语言) DEBUG OBJECTEXTEND TABS
+                    -(2)
+
+line level    source
+
+   1          
+   2          /*************  功能说明  **************
+   3           使用说明：使用前确认MAIN_Fosc(时钟频率）和 波特率
+   4          双串口全双工中断方式收发通讯程序。
+   5          设置Timer2做波特率发生器
+   6          通过PC向MCU发送数据, MCU收到后通过串口把收到的数据原样返回.
+   7          
+   8          ******************************************/
+   9          
+  10          
+  11          #define   MAIN_Fosc     32000000uL  //定义主时钟
+  12          #include "stdio.h"
+  13          #include  "STC15Fxxxx.H"
+  14          //#include <STC8.H>
+  15          
+  16          #define   BaudRate1     115200uL    //波特率
+  17          #define   UART1_BUF_LENGTH  32
+  18          #define   Timer2_Reload (65536UL -(MAIN_Fosc / 4 / BaudRate1))    //Timer2 重装值
+  19          
+  20          u8  TX1_Cnt;  //发送计数
+  21          u8  RX1_Cnt;  //接收计数
+  22          bit B_TX1_Busy; //发送忙标志
+  23          
+  24          u8  idata RX1_Buffer[UART1_BUF_LENGTH]; //接收缓冲
+  25          
+  26          
+  27          void  UART1_config(); // 选择波特率使用Timer2做波特率
+  28           char putchar(unsigned char c);//串口打印函数
+  29          //void  PrintString1(u8 *puts);
+  30          void  delay_ms(unsigned int ms);//延时函数
+  31          
+  32          //========================================================================
+  33          // 函数: void main(void)
+  34          // 描述: 主函数。
+  35          //========================================================================
+  36          void main(void)
+  37          {
+  38   1        P1M1 |=0x00; P1M0 |=0x01;//设置P10为推挽输出
+  39   1      //  P0M1 = 0; P0M0 = 0; //设置为准双向口
+  40   1      //  P1M1 = 0; P1M0 = 0; //设置为准双向口
+  41   1      //  P2M1 = 0; P2M0 = 0; //设置为准双向口
+  42   1      //  P3M1 = 0; P3M0 = 0; //设置为准双向口
+  43   1      //  P4M1 = 0; P4M0 = 0; //设置为准双向口
+  44   1      //  P5M1 = 0; P5M0 = 0; //设置为准双向口
+  45   1      //  P6M1 = 0; P6M0 = 0; //设置为准双向口
+  46   1      //  P7M1 = 0; P7M0 = 0; //设置为准双向口
+  47   1        S1_USE_P30P31();
+  48   1        UART1_config(); // 选择波特率, 2: 使用Timer2做波特率, 其它值: 使用Timer1做波特率.
+  49   1        EA = 1; //允许总中断
+  50   1      
+  51   1        printf("STC15F2K60S2 UART1 Test Prgramme!\r\n");  //UART1发送一个字符串
+  52   1      
+  53   1        while (1)
+  54   1        {
+C51 COMPILER V9.60.0.0   MAIN                                                              04/23/2022 14:28:53 PAGE 2   
+
+  55   2          printf("\t perseverance51 \r\n"); 
+  56   2          delay_ms(500);
+  57   2          P10 = ~P10;
+  58   2          if((TX1_Cnt != RX1_Cnt) && (!B_TX1_Busy)) //收到数据, 发送空闲
+  59   2          {
+  60   3            SBUF = RX1_Buffer[TX1_Cnt];   //把收到的数据远样返回
+  61   3            B_TX1_Busy = 1;
+  62   3            if(++TX1_Cnt >= UART1_BUF_LENGTH) TX1_Cnt = 0;
+  63   3          }
+  64   2        }
+  65   1      }
+  66          
+  67          
+  68          //========================================================================
+  69          // 函数: void PrintString1(u8 *puts)
+  70          // 描述: 串口1发送字符串函数。
+  71          // 参数: puts:  字符串指针.
+  72          // 返回: none.
+  73          // 版本: VER1.0
+  74          // 日期: 2014-11-28
+  75          // 备注: 
+  76          //========================================================================
+  77          ///*
+  78          //void PrintString1(u8 *puts) //发送一个字符串
+  79          //{
+  80          //    for (; *puts != 0;  puts++)     //遇到停止符0结束
+  81          //  {
+  82          //    SBUF = *puts;
+  83          //    B_TX1_Busy = 1;
+  84          //    while(B_TX1_Busy);
+  85          //  }
+  86          //}
+  87          //*/
+  88          //----------------------------------------------------------   
+  89          //  函数名称：putchar(unsigned char c)
+  90          //  函数功能：串口发送一个字节
+  91          //    功能：包含stdio.h实现printf打印
+  92          //----------------------------------------------------------  
+  93           char putchar(unsigned char c)
+  94          {
+  95   1             SBUF = c;          //发送数据
+  96   1            B_TX1_Busy = 1;
+  97   1          while(B_TX1_Busy);
+  98   1      //     while(!TI);          //等待发送完成
+  99   1      //     TI=0;              //清零发送标志位;
+ 100   1        return c;
+ 101   1      }
+ 102          
+ 103          //========================================================================
+ 104          // 函数: void UART1_config(u8 brt)
+ 105          // 描述: UART1初始化函数。
+ 106          // 参数: brt: 选择波特率, 2: 使用Timer2做波特率, 其它值: 使用Timer1做波特率.
+ 107          // 返回: none.
+ 108          // 版本: VER1.0
+ 109          // 日期: 2014-11-28
+ 110          // 备注: 
+ 111          //========================================================================
+ 112          void  UART1_config()  // 选择波特率使用Timer2做波特率
+ 113          {
+ 114   1        /*********** 波特率使用定时器2 *****************/
+ 115   1          SCON = 0x50;    //8位数据,可变波特率
+ 116   1          AUXR |= 0x01;   //S1 BRT Use Timer2;
+C51 COMPILER V9.60.0.0   MAIN                                                              04/23/2022 14:28:53 PAGE 3   
+
+ 117   1          AUXR |= 0x04;   //定时器时钟1T模式
+ 118   1        TH2 = Timer2_Reload  / 256;
+ 119   1        TL2 = Timer2_Reload  % 256;
+ 120   1          AUXR |= 0x10;   //定时器2开始计时
+ 121   1      
+ 122   1      //SCON = (SCON & 0x3f) | 0x40;  //UART1模式, 0x00: 同步移位输出, 0x40: 8位数据,可变波特率, 0x80: 9位数据,固
+             -定波特率, 0xc0: 9位数据,可变波特率
+ 123   1      //  PS  = 1;  //高优先级中断
+ 124   1        ES  = 1;  //允许中断
+ 125   1        REN = 1;  //允许接收
+ 126   1        P_SW1 &= 0x3f;//串口在[P3.0/RxD,P3.1/TxD]
+ 127   1        P_SW1 |= 0x00;    //UART1 switch to, 0x00: P3.0 P3.1, 0x40: P3.6 P3.7, 0x80: P1.6 P1.7 (必须使用内部时钟)
+ 128   1      //  PCON2 |=  (1<<4); //内部短路RXD与TXD, 做中继, ENABLE,DISABLE
+ 129   1        PCON2 &=0x3f;//主时钟不对外输出时钟,
+ 130   1        B_TX1_Busy = 0;
+ 131   1        TX1_Cnt = 0;
+ 132   1        RX1_Cnt = 0;
+ 133   1      }
+ 134          
+ 135          
+ 136          //========================================================================
+ 137          // 函数: void UART1_int (void) interrupt UART1_VECTOR
+ 138          // 描述: UART1中断函数。
+ 139          // 参数: UART1_VECTOR（4）
+ 140          // 返回: none.
+ 141          // 版本: VER1.0
+ 142          // 日期: 2014-11-28
+ 143          // 备注: 
+ 144          //========================================================================
+ 145          void UART1_int (void) interrupt UART1_VECTOR
+ 146          {
+ 147   1        if(RI)
+ 148   1        {
+ 149   2          RI = 0;
+ 150   2          RX1_Buffer[RX1_Cnt] = SBUF;
+ 151   2          if(++RX1_Cnt >= UART1_BUF_LENGTH) RX1_Cnt = 0;  //防溢出
+ 152   2        }
+ 153   1      
+ 154   1        if(TI)
+ 155   1        {
+ 156   2          TI = 0;
+ 157   2          B_TX1_Busy = 0;
+ 158   2        }
+ 159   1      }
+ 160          
+ 161          //========================================================================
+ 162          // 函数: void  delay_ms(unsigned char ms)
+ 163          // 描述: 延时函数。
+ 164          // 参数: ms,要延时的ms数, 这里只支持1~255ms. 自动适应主时钟.
+ 165          // 返回: none.
+ 166          // 版本: VER1.0
+ 167          // 日期: 2013-4-1
+ 168          // 备注: 
+ 169          //========================================================================
+ 170          void  delay_ms(unsigned int ms)
+ 171          {
+ 172   1           unsigned int i;
+ 173   1         do{
+ 174   2              i = MAIN_Fosc / 13000;
+ 175   2            while(--i)  ;   //14T per loop
+ 176   2           }while(--ms);
+ 177   1      }
+C51 COMPILER V9.60.0.0   MAIN                                                              04/23/2022 14:28:53 PAGE 4   
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    193    ----
+   CONSTANT SIZE    =     56    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      2    ----
+   IDATA SIZE       =     32    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

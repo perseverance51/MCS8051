@@ -1,0 +1,56 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              05/11/2022 23:32:54 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          //假定测试芯片的工作频率为18.432MHz
+   2          
+   3          //注意:测试本示例时,需在ISP下载时将低压复位功能关闭
+   4          
+   5          #include "reg51.h"
+   6          #include "intrins.h"
+   7          
+   8          sbit ELVD = IE^6;                   //低压检测中断使能位
+   9          sbit P11 = P1^1;                    //测试口
+  10          
+  11          #define LVDF    0x20                //PCON.5,低压检测中断标志位
+  12          
+  13          //-----------------------------------------
+  14          
+  15          void LVD_ISR() interrupt 6 using 1
+  16          {
+  17   1          P11 = !P11;                     //测试口
+  18   1          PCON &= ~LVDF;                  //向PCON.5写0清LVD中断
+  19   1      }
+  20          
+  21          void main()
+  22          {
+  23   1          PCON &= ~LVDF;                  //上电后需要清LVD中断标志位
+  24   1          ELVD = 1;                       //使能LVD中断
+  25   1          EA = 1;                         //打开总中断开关
+  26   1          P11= 1;
+  27   1          while (1)
+  28   1          {
+  29   2              _nop_();
+  30   2              _nop_();
+  31   2          }
+  32   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     19    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

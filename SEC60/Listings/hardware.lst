@@ -1,0 +1,77 @@
+C51 COMPILER V9.60.0.0   HARDWARE                                                          04/28/2022 08:59:14 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE HARDWARE
+OBJECT MODULE PLACED IN .\Objects\hardware.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE hardware.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\
+                    -hardware.lst) TABS(2) OBJECT(.\Objects\hardware.obj)
+
+line level    source
+
+   1          #include "hardware.h"
+   2          #include "software.h"
+   3          //共阴数码管段码
+   4          uchar code segment[] = {  //定义无符号字符型类型数组来储存段码
+   5              0x3F,  //"0"
+   6              0x06,  //"1"
+   7              0x5B,  //"2"
+   8              0x4F,  //"3"
+   9              0x66,  //"4"
+  10              0x6D,  //"5"
+  11              0x7D,  //"6"
+  12              0x07,  //"7"
+  13              0x7F,  //"8"
+  14              0x6F  //"9"
+  15          };
+  16          void SEGDisplay()    //数码管扫描函数
+  17          {
+  18   1        uchar i;  //定义i变量
+  19   1        for(i=0;i<4;i++)
+  20   1        {
+  21   2          switch(i) 
+  22   2          {                            
+  23   3             case(0):      //位选，第一个数码管 
+  24   3              LSA=1;
+  25   3              LSB=0;
+  26   3              LSC=0;
+  27   3                  P0 = segment[count/1000];  //1000位数拆分
+  28   3               break;
+  29   3            case(1):          //位选，第一个数码管
+  30   3              LSA=1;
+  31   3              LSB=0;
+  32   3              LSC=1;
+  33   3                P0 = segment[count%1000/100];  //100位数拆分
+  34   3               break;
+  35   3                case(2):          //位选，第一个数码管
+  36   3              LSA=0;
+  37   3              LSB=1;
+  38   3              LSC=1;
+  39   3                P0 = segment[count%1000%100/10];  //10位数拆分
+  40   3               break;
+  41   3              case(3):          //位选，第一个数码管
+  42   3              LSA=1;
+  43   3              LSB=1;
+  44   3              LSC=1;
+  45   3                P0 = segment[count%1000%100%10];  //个位数拆分
+  46   3               break;
+  47   3          }
+  48   2          delayms(5);   //延时一会（视觉残留）
+  49   2          P0=0x00;      //消影
+  50   2        }
+  51   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+C51 COMPILER V9.60.0.0   HARDWARE                                                          04/28/2022 08:59:14 PAGE 2   
+
+   CODE SIZE        =    206    ----
+   CONSTANT SIZE    =     10    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       1
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

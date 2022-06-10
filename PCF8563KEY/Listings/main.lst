@@ -1,0 +1,448 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              01/08/2022 11:31:04 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE src\main.c OPTIMIZE(8,SPEED) BROWSE INCDIR(.\inc) DEBUG OBJECTEXTEND PRI
+                    -NT(.\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          
+   2          #include <reg52.h>
+   3          #include "LCD1602.h"
+   4          #include "IIC.h"
+   5          #include "delay.h"
+   6          #define uchar unsigned char
+   7          #define uint unsigned int
+   8            
+   9          unsigned char KEY_NUM = 0;
+  10          bit Flag_KEY_Set = 0;
+  11          unsigned char KEY2_Count = 0;
+  12          sbit Buzzer = P3^7;
+  13          uchar flags = 1; //1秒定时标志
+  14          static uchar cnt = 0;  //用来记录中断次数，设置的中断定时为1ms，中断200次即一秒钟
+  15          unsigned char *weeklist[7]= {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
+  16          
+  17          unsigned char write_buff[8],read_buff[8];
+  18          
+  19          
+  20          //按键 IO设置
+  21          sbit KEY1 = P3^2;
+  22          sbit KEY2 = P3^3;
+  23          sbit KEY3 = P3^4;
+  24          sbit KEY4 = P3^5;
+  25          
+  26          //****************************************************
+  27          //蜂鸣器程序
+  28          //****************************************************
+  29          void Buzzer_Di()
+  30          {
+  31   1        Buzzer = 0;
+  32   1        Delay_ms(3);
+  33   1        Buzzer = 1;
+  34   1        Delay_ms(3);
+  35   1      }
+  36          
+  37          //-----------时间预设定值---------
+  38          /*
+  39          void time_init()
+  40          {
+  41              iic_send_add_byte(0x02,0x30);         //0秒
+  42              iic_send_add_byte(0x03,0x26);         //0分钟
+  43              iic_send_add_byte(0x04,0x11);          //0小时
+  44              iic_send_add_byte(0x05,0x04);  //3号
+  45              iic_send_add_byte(0x06,0x02);  //week
+  46              iic_send_add_byte(0x07,0x01);           //1月  20世纪的
+  47              iic_send_add_byte(0x08,0x22);         //2022年
+  48          }
+  49          */
+  50          //----------------PCF8563初始化-----------------
+  51          void pcf_init()
+  52          {
+  53   1          iic_send_add_byte(0x00,0x00);  //启动时钟
+  54   1      }
+C51 COMPILER V9.60.0.0   MAIN                                                              01/08/2022 11:31:04 PAGE 2   
+
+  55          
+  56          //----------------BCD转10进制-----------
+  57          //uchar bcd_dec(uchar bat)
+  58          //{
+  59          //    return ( (bat/16*10) + (bat%16) );
+  60          //}
+  61          //------------LCD1602显示：年,月,日,小时,分钟,秒,
+  62          void display_time()
+  63          {
+  64   1          unsigned char *weeklist[7]={"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
+  65   1          LCD_Write_String(1,0,"20");
+  66   1          LCD1602_WriteData(PCF8563Buffer.Year/10 +'0');
+  67   1          LCD1602_WriteData(PCF8563Buffer.Year%10 +'0');
+  68   1          LCD1602_WriteData('-');
+  69   1          LCD1602_WriteData(PCF8563Buffer.Month/10 + 0x30);
+  70   1          LCD1602_WriteData(PCF8563Buffer.Month%10 + 0x30);
+  71   1          LCD1602_WriteData('-');
+  72   1          LCD1602_WriteData(PCF8563Buffer.Day/10 + 0x30);
+  73   1          LCD1602_WriteData(PCF8563Buffer.Day%10 + 0x30);
+  74   1          LCD_Write_String(13,0,weeklist[PCF8563Buffer.Week -1]);
+  75   1      
+  76   1          LCD1602_WriteCom(0xc0 + 4);//第二行第四列
+  77   1          LCD1602_WriteData(PCF8563Buffer.Hour/10 + '0');
+  78   1          LCD1602_WriteData(PCF8563Buffer.Hour%10 + '0');
+  79   1          LCD1602_WriteData(':');
+  80   1          LCD1602_WriteData(PCF8563Buffer.Minute/10 + 0x30);
+  81   1          LCD1602_WriteData(PCF8563Buffer.Minute%10 + 0x30);
+  82   1          LCD1602_WriteData(':');
+  83   1          LCD1602_WriteData(PCF8563Buffer.Second/10 + 0x30);
+  84   1          LCD1602_WriteData(PCF8563Buffer.Second%10 + 0x30);
+  85   1      
+  86   1      }
+  87          //****************************************************
+  88          //按键扫描程序
+  89          //****************************************************
+  90          void Scan_Key()
+  91          {
+  92   1        if( KEY1 == 0 )           //按键1扫描
+  93   1        {
+  94   2          Delay_ms(10);         //延时去抖
+  95   2          if( KEY1 == 0 )
+  96   2          {
+  97   3            Buzzer_Di();  //蜂鸣器响声
+  98   3            while(KEY1 == 0);     //等待松手
+  99   3            KEY_NUM = 1;
+ 100   3          }
+ 101   2        }
+ 102   1      
+ 103   1        if( KEY2 == 0 )           //按键2扫描
+ 104   1        {
+ 105   2          Delay_ms(10);         //延时去抖
+ 106   2          if( KEY2 == 0 )
+ 107   2          {
+ 108   3            Buzzer_Di();
+ 109   3            while(KEY2 == 0);     //等待松手
+ 110   3            KEY_NUM = 2;
+ 111   3          }
+ 112   2        }
+ 113   1      
+ 114   1        if( KEY3 == 0 )           //按键2扫描
+ 115   1        {
+ 116   2          Delay_ms(10);         //延时去抖
+C51 COMPILER V9.60.0.0   MAIN                                                              01/08/2022 11:31:04 PAGE 3   
+
+ 117   2          if( KEY3 == 0 )
+ 118   2          {
+ 119   3            Buzzer_Di();
+ 120   3            while(KEY3 == 0);     //等待松手
+ 121   3            KEY_NUM = 3;
+ 122   3          }
+ 123   2        }
+ 124   1      
+ 125   1        if( KEY4 == 0 )           //按键2扫描
+ 126   1        {
+ 127   2          Delay_ms(10);         //延时去抖
+ 128   2          if( KEY4 == 0 )
+ 129   2          {
+ 130   3            Buzzer_Di();
+ 131   3            while(KEY4 == 0);     //等待松手
+ 132   3            KEY_NUM = 4;
+ 133   3          }
+ 134   2        }
+ 135   1      }
+ 136          void TimeInit()
+ 137          {
+ 138   1          EA = 1;                       //打开中断总开关
+ 139   1          ET0 = 1;                      //打开T0中断开关
+ 140   1          TMOD = 0x01;    //设置定时器工作在模式1
+ 141   1          TH0=(65536-5000)/256;  //高四位寄存器的值；//5000us=5ms
+ 142   1          TL0=(65536-5000)%256;  //低四位寄存器的值；
+ 143   1          TR0 = 1;                      //允许定时器T0工作
+ 144   1      }
+ 145          void main()
+ 146          {
+ 147   1         // uchar sec,min,hour,day,mon,year,week,sec1,min1,hour1,day1,mon1,year1,*week1;
+ 148   1          //PCF8563读出的变量和代转换成的十进制变量
+ 149   1        uchar SetVal;
+ 150   1          TimeInit();
+ 151   1          LCD1602_Init();
+ 152   1      //  iic_send_add_byte(0x00,0x20);  // 关闭时钟
+ 153   1      //   Delay_ms(1000);
+ 154   1      //   time_init();    //时钟芯片初始时间设置
+ 155   1          pcf_init();
+ 156   1          Delay_ms(1000);
+ 157   1          while(1)
+ 158   1          {
+ 159   2              if(flags==1&& Flag_KEY_Set == 0) {
+ 160   3                Flag_Time_Refresh = 0;
+ 161   3                ReadRTC(&PCF8563Buffer);
+ 162   3                display_time();   //LCD1602显示时间
+ 163   3                  flags=0;
+ 164   3              }
+ 165   2             Scan_Key();            //按键扫描
+ 166   2                  switch( KEY_NUM )
+ 167   2          {
+ 168   3            case 1:           //按键1执行程序
+ 169   3                KEY_NUM = 0;    //清空按键标志
+ 170   3                Flag_KEY_Set = ~Flag_KEY_Set; //设置按键标志位翻转
+ 171   3                if(Flag_KEY_Set)
+ 172   3                {           
+ 173   4                  LCD1602_WriteCom(0x0f); //LCD1602指针闪烁开0d或0f(带下划线)
+ 174   4                  LCD1602_WriteCom(0x80 + 4); //指针设置到第一行第4列
+ 175   4                  KEY2_Count = 0;       //按键S2计数清零
+ 176   4                }
+ 177   3                else
+ 178   3                {
+C51 COMPILER V9.60.0.0   MAIN                                                              01/08/2022 11:31:04 PAGE 4   
+
+ 179   4                  LCD1602_WriteCom(0x0c); //退出设置，LCD1602指针闪烁关
+ 180   4                }
+ 181   3                break;
+ 182   3            case 2:           //按键2执行程序
+ 183   3                KEY_NUM = 0;    //清空按键标志
+ 184   3                if(Flag_KEY_Set)      //在设置状态时运行
+ 185   3                {
+ 186   4                  KEY2_Count++;
+ 187   4                  if(KEY2_Count == 7)
+ 188   4                    KEY2_Count = 0;
+ 189   4                  switch(KEY2_Count)
+ 190   4                  {
+ 191   5                    case 0:
+ 192   5                        LCD1602_WriteCom(0x80 + 4); //指针指向年，闪烁
+ 193   5                        break;
+ 194   5                    case 1:
+ 195   5                        LCD1602_WriteCom(0x80 + 7); //指针指向月，闪烁
+ 196   5                        break;
+ 197   5                    case 2:
+ 198   5                        LCD1602_WriteCom(0x80+ 10); //指针指向日，闪烁
+ 199   5                        break;
+ 200   5                    case 3:
+ 201   5                        LCD1602_WriteCom(0x80 + 14);  //指针指向星期，闪烁
+ 202   5                        break;
+ 203   5                    case 4:
+ 204   5                        LCD1602_WriteCom(0xc0 + 5); //指针指向小时，闪烁
+ 205   5                        break;
+ 206   5                    case 5:
+ 207   5                        LCD1602_WriteCom(0xc0 + 8); //指针指向分钟，闪烁
+ 208   5                        break;
+ 209   5                    case 6:
+ 210   5                        LCD1602_WriteCom(0xc0 + 11);  //指针指向秒钟，闪烁
+ 211   5                        break;
+ 212   5                    default : break;
+ 213   5                  } 
+ 214   4                }         
+ 215   3                break;//切换设置位置
+ 216   3            case 3:           //按键3执行程序
+ 217   3                KEY_NUM = 0;    //清空按键标志
+ 218   3                if(Flag_KEY_Set)      //在设置状态时运行
+ 219   3                {
+ 220   4                  switch(KEY2_Count)
+ 221   4                  {
+ 222   5                    case 0:
+ 223   5                        PCF8563Buffer.Year++;
+ 224   5                        if(PCF8563Buffer.Year >= 99)
+ 225   5                        {
+ 226   6                          PCF8563Buffer.Year = 0;
+ 227   6                        }
+ 228   5                        SetVal=  ((PCF8563Buffer.Year/ 10) << 4) +(PCF8563Buffer.Year % 10);//年
+ 229   5                        iic_send_add_byte(0x08,   SetVal);//年存入必须转BCD码
+ 230   5                        display_time();
+ 231   5                        
+ 232   5                        LCD1602_WriteCom(0x80 + 4); //指针指向年，闪烁
+ 233   5                        break;
+ 234   5                    case 1:
+ 235   5                        PCF8563Buffer.Month++;
+ 236   5                        if(PCF8563Buffer.Month >= 13)
+ 237   5                        {
+ 238   6                          PCF8563Buffer.Month = 1;
+ 239   6                        }
+ 240   5                        iic_send_add_byte(0x07, PCF8563Buffer.Month );
+C51 COMPILER V9.60.0.0   MAIN                                                              01/08/2022 11:31:04 PAGE 5   
+
+ 241   5                        display_time();
+ 242   5        
+ 243   5                        LCD1602_WriteCom(0x80 + 7); //指针指向月，闪烁
+ 244   5                        break;
+ 245   5                    case 2:
+ 246   5                        PCF8563Buffer.Day++;
+ 247   5                        if(PCF8563Buffer.Day >= 32)
+ 248   5                        {
+ 249   6                          PCF8563Buffer.Day = 1;
+ 250   6                        }
+ 251   5                        iic_send_add_byte( 0x05, PCF8563Buffer.Day );
+ 252   5                        display_time();
+ 253   5        
+ 254   5                        LCD1602_WriteCom(0x80 + 10);  //指针指向日，闪烁
+ 255   5                        break;
+ 256   5                    case 3:
+ 257   5                        PCF8563Buffer.Week++;
+ 258   5                        if(PCF8563Buffer.Week >= 8)
+ 259   5                        {
+ 260   6                          PCF8563Buffer.Week = 1;
+ 261   6                        }
+ 262   5                        iic_send_add_byte(0x06, PCF8563Buffer.Week );
+ 263   5                        display_time();
+ 264   5        
+ 265   5                        LCD1602_WriteCom(0x80 + 14);  //指针指向星期，闪烁
+ 266   5                        break;
+ 267   5                    case 4:
+ 268   5                        PCF8563Buffer.Hour++;
+ 269   5                        if(PCF8563Buffer.Hour >= 24)
+ 270   5                        {
+ 271   6                          PCF8563Buffer.Hour = 0;
+ 272   6                        }
+ 273   5                        iic_send_add_byte(0x04, PCF8563Buffer.Hour );
+ 274   5                        display_time();
+ 275   5        
+ 276   5                        LCD1602_WriteCom(0xc0 + 5); //指针指向小时，闪烁
+ 277   5                        break;
+ 278   5                    case 5:
+ 279   5                        PCF8563Buffer.Minute++;
+ 280   5                        if(PCF8563Buffer.Minute >= 60)
+ 281   5                        {
+ 282   6                          PCF8563Buffer.Minute = 0;
+ 283   6                        }
+ 284   5                        SetVal =  ((PCF8563Buffer.Minute/ 10) << 4) +(PCF8563Buffer.Minute % 10);//BCD转码，分钟
+ 285   5                        iic_send_add_byte( 0x03, SetVal );
+ 286   5                        display_time();
+ 287   5        
+ 288   5                        LCD1602_WriteCom(0xc0 + 8); //指针指向分钟，闪烁
+ 289   5                        break;
+ 290   5                    case 6:
+ 291   5                        PCF8563Buffer.Second++;
+ 292   5                        if(PCF8563Buffer.Second >= 60)
+ 293   5                        {
+ 294   6                          PCF8563Buffer.Second = 0;
+ 295   6                        }
+ 296   5                        SetVal =  ((PCF8563Buffer.Second/ 10) << 4) +(PCF8563Buffer.Second % 10);//BCD转码，分钟
+ 297   5                        iic_send_add_byte(0x02, SetVal);
+ 298   5                        display_time();
+ 299   5        
+ 300   5                        LCD1602_WriteCom(0xc0 + 11);  //指针指向秒钟，闪烁
+ 301   5                        break;
+ 302   5                    default : LCD1602_WriteCom(0x0c); break;//关闭闪烁
+C51 COMPILER V9.60.0.0   MAIN                                                              01/08/2022 11:31:04 PAGE 6   
+
+ 303   5                  }
+ 304   4                }
+ 305   3                break;
+ 306   3            case 4:           //按键4执行程序
+ 307   3                KEY_NUM = 0;    //清空按键标志
+ 308   3                if(Flag_KEY_Set)      //在设置状态时运行
+ 309   3                {
+ 310   4                  switch(KEY2_Count)
+ 311   4                  {
+ 312   5                    case 0:
+ 313   5                        PCF8563Buffer.Year--;
+ 314   5                        if(PCF8563Buffer.Year == 255)
+ 315   5                        {
+ 316   6                          PCF8563Buffer.Year = 99;
+ 317   6                        }
+ 318   5                        SetVal =  ((PCF8563Buffer.Year/ 10) << 4) +(PCF8563Buffer.Year % 10);//年
+ 319   5                        iic_send_add_byte(0x08,SetVal);//年存入必须转BCD码
+ 320   5                        display_time();
+ 321   5                        
+ 322   5                        LCD1602_WriteCom(0x80 + 4); //指针指向年，闪烁
+ 323   5                        break;
+ 324   5                    case 1:
+ 325   5                        PCF8563Buffer.Month--;
+ 326   5                        if(PCF8563Buffer.Month == 0)
+ 327   5                        {
+ 328   6                          PCF8563Buffer.Month = 12;
+ 329   6                        }
+ 330   5                        iic_send_add_byte(0x07 , PCF8563Buffer.Month );
+ 331   5                        display_time();
+ 332   5        
+ 333   5                        LCD1602_WriteCom(0x80 + 6); //指针指向月，闪烁
+ 334   5                        break;
+ 335   5                    case 2:
+ 336   5                        PCF8563Buffer.Day--;
+ 337   5                        if(PCF8563Buffer.Day == 0)
+ 338   5                        {
+ 339   6                          PCF8563Buffer.Day = 31;
+ 340   6                        }
+ 341   5                        iic_send_add_byte( 0x05, PCF8563Buffer.Day );
+ 342   5                        display_time();
+ 343   5        
+ 344   5                        LCD1602_WriteCom(0x80 + 10);  //指针指向日，闪烁
+ 345   5                        break;
+ 346   5                    case 3:
+ 347   5                        PCF8563Buffer.Week--;
+ 348   5                        if(PCF8563Buffer.Week == 0)
+ 349   5                        {
+ 350   6                          PCF8563Buffer.Week = 7;
+ 351   6                        }
+ 352   5                        iic_send_add_byte( 0x06, PCF8563Buffer.Week );
+ 353   5                    display_time();   //LCD1602显示时间
+ 354   5        
+ 355   5                        LCD1602_WriteCom(0x80 + 14);  //指针指向星期，闪烁
+ 356   5                        break;
+ 357   5                    case 4:
+ 358   5                        PCF8563Buffer.Hour--;
+ 359   5                        if(PCF8563Buffer.Hour == 255)
+ 360   5                        {
+ 361   6                          PCF8563Buffer.Hour = 23;
+ 362   6                        }
+ 363   5                        iic_send_add_byte(0x04, PCF8563Buffer.Hour );
+ 364   5                        display_time();  //LCD1602显示时间
+C51 COMPILER V9.60.0.0   MAIN                                                              01/08/2022 11:31:04 PAGE 7   
+
+ 365   5        
+ 366   5                        LCD1602_WriteCom(0xc0 + 5); //指针指向小时，闪烁
+ 367   5                        break;
+ 368   5                    case 5:
+ 369   5                        PCF8563Buffer.Minute--;
+ 370   5                        if(PCF8563Buffer.Minute == 255)
+ 371   5                        {
+ 372   6                          PCF8563Buffer.Minute = 59;
+ 373   6                        }
+ 374   5                        SetVal =  ((PCF8563Buffer.Minute/ 10) << 4) +(PCF8563Buffer.Minute % 10);//BCD转码，分钟
+ 375   5                        iic_send_add_byte( 0x03, SetVal );
+ 376   5                        display_time();  //LCD1602显示时间
+ 377   5        
+ 378   5                        LCD1602_WriteCom(0xc0 + 8); //指针指向分钟，闪烁
+ 379   5                        break;
+ 380   5                    case 6:
+ 381   5                        PCF8563Buffer.Second--;
+ 382   5                        if(PCF8563Buffer.Second == 255)
+ 383   5                        {
+ 384   6                          PCF8563Buffer.Second = 59;
+ 385   6                        }
+ 386   5                        SetVal =  ((PCF8563Buffer.Second/ 10) << 4) +(PCF8563Buffer.Second % 10);//BCD转码，分钟
+ 387   5                        iic_send_add_byte(0x02, SetVal);
+ 388   5                      
+ 389   5                        display_time();
+ 390   5        
+ 391   5                        LCD1602_WriteCom(0xc0 + 11);  //指针指向秒钟，闪烁
+ 392   5                        break;
+ 393   5                    default : break;
+ 394   5                  }
+ 395   4                }
+ 396   3                break;
+ 397   3            default : break;
+ 398   3          } 
+ 399   2          }
+ 400   1      }
+ 401          void InterruptTimer0() interrupt 1
+ 402          {
+ 403   1      
+ 404   1          TH0=(65536-5000)/256;  //高四位寄存器的值；//5000us=5ms
+ 405   1          TL0=(65536-5000)%256;  //低四位寄存器的值；
+ 406   1          cnt++;                                     //中断次数计数值加1
+ 407   1          if(cnt>=200)                                 //中断次数达到200次即为1秒
+ 408   1          {
+ 409   2              cnt = 0;                               //清零，重新记录中断次数
+ 410   2              flags = 1;                             //设置1秒定时标志位1
+ 411   2          }
+ 412   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1169    ----
+   CONSTANT SIZE    =     52    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     41      22
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

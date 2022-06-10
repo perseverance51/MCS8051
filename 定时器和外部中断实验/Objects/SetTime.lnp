@@ -1,0 +1,3 @@
+".\Objects\main.obj" 
+TO ".\Objects\SetTime" 
+PRINT(".\Listings\SetTime.m51") RAMSIZE(256) 

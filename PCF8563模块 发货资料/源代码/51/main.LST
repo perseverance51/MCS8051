@@ -1,0 +1,90 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              01/04/2022 14:32:25 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          #include <reg52.h>
+   2          
+   3          extern void uart_init(void);
+   4          extern void P8563_init();
+   5          extern void P8563_gettime();
+   6          extern void uart_test(unsigned char length);
+   7          
+   8          unsigned char TX_buf[10];
+   9          unsigned char jj,Rx_Byte,Length;
+  10          bit CmdValid;
+  11          unsigned char RX_buf[10];
+  12            
+  13          void main(void)
+  14          {
+  15   1          uart_init();
+  16   1      
+  17   1            P8563_init();
+  18   1        //  WDT_CONTR = 0x30;
+  19   1          while(1)
+  20   1            {
+  21   2              //WDT_CONTR = 0x3c;
+  22   2              //WDT_CONTR = 0x30;
+  23   2              P8563_gettime();
+  24   2              /*TX_buf[0] = 0x01;
+  25   2              TX_buf[1] = 0x02;
+  26   2              TX_buf[2] = 0x02;
+  27   2              TX_buf[3] = 0x03; 
+  28   2              uart_test(4);    */
+  29   2          }
+  30   1      } 
+  31          /*void ser() interrupt 4
+  32          { 
+  33              if(RI)
+  34              {
+  35                    RI=0;
+  36                    RX_buf[Rx_Byte]=SBUF;
+  37                  if(RX_buf[0]=='\n') 
+  38                      Rx_Byte=0;
+  39                  if(RX_buf[0]==' ')
+  40                      Rx_Byte=0;
+  41                    if( RX_buf[0] == 0xff)
+  42                          Rx_Byte = 0;      
+  43                    else
+  44                      {   
+  45                          Length = RX_buf[0];
+  46                        if(Rx_Byte ==Length)
+  47                          {
+  48                                jj=0;
+  49                                    CmdValid = 1;
+  50                          }
+  51                        Rx_Byte++;  
+  52                      }   
+  53              }   
+  54                else if(!RI && TI)
+  55              {
+C51 COMPILER V9.60.0.0   MAIN                                                              01/04/2022 14:32:25 PAGE 2   
+
+  56                    TI=0;
+  57                    if(jj<4)
+  58                          SBUF=TX_buf[jj++];//将接受的数据发出去
+  59                  else 
+  60                  {
+  61                      Rx_Byte=0;
+  62                      jj = 0;
+  63                  }
+  64              } 
+  65          }       */
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     11    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     23    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

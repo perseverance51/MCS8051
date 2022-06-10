@@ -1,0 +1,164 @@
+C51 COMPILER V9.60.0.0   MAIN4                                                             05/08/2022 15:44:06 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN4
+OBJECT MODULE PLACED IN .\Objects\main4.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main4.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\mai
+                    -n4.lst) TABS(2) OBJECT(.\Objects\main4.obj)
+
+line level    source
+
+   1          //#include <reg51.h>
+   2          #include <intrins.h>
+   3          #include <stdio.h>         // 为使用KEIL自带的库函数printf而加入
+   4          #include <STC15F2K60S2.H>
+   5          #include <string.h> 
+   6          #define uchar unsigned char
+   7          #define uint  unsigned int
+   8          #define delayNOP(); {_nop_();_nop_();_nop_();_nop_();};
+   9          
+  10          void delay(uchar x);  //x*0.14MS
+  11          void delay1(int ms);
+  12          
+  13          
+  14          sbit IRIN = P3^2;         //红外接收器数据线
+  15          
+  16          
+  17          uchar IRCOM[7];
+  18          
+  19          sbit LCD_RS = P2^6;             
+  20          sbit LCD_RW = P2^5;
+  21          sbit LCD_EN = P2^7;
+  22          //sfr AUXR  = 0x8E; 
+  23          sfr BRT = 0x9C; //S2 Baud-Rate Timer 
+  24          
+  25          uchar code  cdis1[ ] = {" Red Control "};
+  26          uchar code  cdis2[ ] = {"  IR-CODE: --H  "};
+  27          
+  28          void UART_init(void)
+  29          {     
+  30   1        SCON = 0x50;    //8位数据,可变波特率
+  31   1        AUXR |= 0x01;   //串口1选择定时器2为波特率发生器
+  32   1        AUXR &= 0xFB;   //定时器时钟12T模式
+  33   1        T2L = 0xE8;   //设置定时初始值
+  34   1        T2H = 0xFF;   //设置定时初始值
+  35   1        AUXR |= 0x10;   //定时器2开始计时
+  36   1        TI=1;     // 很关键，使用printf函数时必须有此命令
+  37   1      } 
+  38          
+  39          
+  40          /*******************************************************************/
+  41          main()
+  42          {
+  43   1          IE = 0x81;                 //允许总中断中断,使能 INT0 外部中断
+  44   1          TCON = 0x01;               //触发方式为脉冲负边沿触发    
+  45   1          IRIN=1;                    //I/O口初始化   
+  46   1         
+  47   1        UART_init();
+  48   1         delay1(10);                 //延时
+  49   1         printf ("stc408as\n"); 
+  50   1         while(1) ;
+  51   1      } //end main
+  52          /**********************************************************/
+  53          void IR_IN() interrupt 0 using 0
+  54          {
+C51 COMPILER V9.60.0.0   MAIN4                                                             05/08/2022 15:44:06 PAGE 2   
+
+  55   1        unsigned char j,k,N=0;
+  56   1           EX0 = 0;   
+  57   1         delay(15);
+  58   1         if (IRIN==1) 
+  59   1           { EX0 =1;
+  60   2           return;
+  61   2          } 
+  62   1                                 //确认IR信号出现
+  63   1        while (!IRIN)            //等IR变为高电平，跳过9ms的前导低电平信号。
+  64   1          {delay(1);}
+  65   1      
+  66   1       for (j=0;j<4;j++)         //收集四组数据
+  67   1       { 
+  68   2        for (k=0;k<8;k++)        //每组数据有8位
+  69   2        {
+  70   3         while (IRIN)            //等 IR 变为低电平，跳过4.5ms的前导高电平信号。
+  71   3           {delay(1);}
+  72   3          while (!IRIN)          //等 IR 变为高电平
+  73   3           {delay(1);}
+  74   3           while (IRIN)           //计算IR高电平时长
+  75   3            {
+  76   4          delay(1);
+  77   4          N++;           
+  78   4          if (N>=30)
+  79   4         { EX0=1;
+  80   5         return;}                  //0.14ms计数过长自动离开。
+  81   4            }                        //高电平计数完毕                
+  82   3           IRCOM[j]=IRCOM[j] >> 1;                  //数据最高位补“0”
+  83   3           if (N>=8) {IRCOM[j] = IRCOM[j] | 0x80;}  //数据最高位补“1”
+  84   3           N=0;
+  85   3        }//end for k
+  86   2       }//end for j
+  87   1         
+  88   1         if (IRCOM[2]!=~IRCOM[3])
+  89   1         { EX0=1;
+  90   2           return; }
+  91   1      
+  92   1         IRCOM[5]=IRCOM[2] & 0x0F;     //取键码的低四位
+  93   1         IRCOM[6]=IRCOM[2] >> 4;       //右移4次，高四位变为低四位
+  94   1      
+  95   1         if(IRCOM[5]>9)
+  96   1          { IRCOM[5]=IRCOM[5];}
+  97   1         else
+  98   1          IRCOM[5]=IRCOM[5];
+  99   1      
+ 100   1         if(IRCOM[6]>9)
+ 101   1          { IRCOM[6]=IRCOM[6];}
+ 102   1         else
+ 103   1          IRCOM[6]=IRCOM[6];
+ 104   1        printf("RECE_IR DATA:%02bx-%02bx-%02bx-%02bx \n", IRCOM[0], IRCOM[1],IRCOM[2], IRCOM[3]); 
+ 105   1       //  printf ("rece_ir:%s\n",IRCOM); 
+ 106   1            memset(IRCOM, 0, sizeof(IRCOM));          //清空数组   
+ 107   1           EX0 = 1; 
+ 108   1      } 
+ 109          
+ 110          
+ 111          /**********************************************************/
+ 112          void delay(unsigned char x)    //x*0.14MS
+ 113          {
+ 114   1       unsigned char i;
+ 115   1        while(x--)
+ 116   1       {
+C51 COMPILER V9.60.0.0   MAIN4                                                             05/08/2022 15:44:06 PAGE 3   
+
+ 117   2        for (i = 0; i<13; i++) {}
+ 118   2       }
+ 119   1      }
+ 120          
+ 121          /**********************************************************/
+ 122          void delay1(int ms)
+ 123          {
+ 124   1       unsigned char y;
+ 125   1        while(ms--)
+ 126   1       {
+ 127   2        for(y = 0; y<250; y++)
+ 128   2        {
+ 129   3         _nop_();
+ 130   3         _nop_();
+ 131   3         _nop_();
+ 132   3         _nop_();
+ 133   3        }
+ 134   2       }
+ 135   1      }
+ 136          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    361    ----
+   CONSTANT SIZE    =     80    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      7       3
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

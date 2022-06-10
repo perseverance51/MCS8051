@@ -1,0 +1,3 @@
+".\Objects\main.obj" 
+TO ".\Objects\system_time" 
+PRINT(".\Listings\system_time.m51") RAMSIZE(256) 

@@ -1,0 +1,3 @@
+".\Objects\PWM_Driver_DC_Motor.obj" 
+TO ".\Objects\PWM_Driver_DC_Motor" 
+PRINT(".\Listings\PWM_Driver_DC_Motor.m51") RAMSIZE(256) 

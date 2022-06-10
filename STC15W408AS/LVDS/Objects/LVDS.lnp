@@ -1,0 +1,3 @@
+".\Objects\main.obj" 
+TO ".\Objects\LVDS" 
+PRINT(".\Listings\LVDS.m51") RAMSIZE(256) 

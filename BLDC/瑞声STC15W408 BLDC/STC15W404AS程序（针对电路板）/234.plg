@@ -1,0 +1,49 @@
+<html>
+<body>
+<pre>
+<h1>礦ision Build Log</h1>
+<h2>Project:</h2>
+E:\项目\四轴飞行器\电调\自制电调\STC15W404AS程序（针对电路板）\234.uvproj
+Project File Date:  01/30/2015
+
+<h2>Output:</h2>
+Rebuild target 'Target 1'
+compiling main.c...
+MAIN.C(317): error C202: 'cnt': undefined identifier
+Target not created
+Rebuild target 'Target 1'
+compiling main.c...
+MAIN.C(310): warning C280: 'i': unreferenced local variable
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_SENDDATA?MAIN
+*** WARNING L15: MULTIPLE CALL TO SEGMENT
+    SEGMENT: ?PR?QIDONG?MAIN
+    CALLER1: ?PR?T0_ISR?MAIN
+    CALLER2: ?C_C51STARTUP
+Program Size: data=9.0 xdata=8 code=1068
+creating hex file from "234"...
+"234" - 0 Error(s), 3 Warning(s).
+Rebuild target 'Target 1'
+compiling main.c...
+MAIN.C(310): warning C280: 'i': unreferenced local variable
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_SENDDATA?MAIN
+Program Size: data=13.0 xdata=0 code=962
+creating hex file from "234"...
+"234" - 0 Error(s), 2 Warning(s).
+Rebuild target 'Target 1'
+compiling main.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_SENDDATA?MAIN
+Program Size: data=12.0 xdata=0 code=962
+creating hex file from "234"...
+"234" - 0 Error(s), 1 Warning(s).
+Rebuild target 'Target 1'
+compiling main.c...
+linking...
+Program Size: data=12.0 xdata=0 code=954
+creating hex file from "234"...
+"234" - 0 Error(s), 0 Warning(s).

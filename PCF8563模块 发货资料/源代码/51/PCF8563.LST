@@ -1,0 +1,251 @@
+C51 COMPILER V9.60.0.0   PCF8563                                                           01/03/2022 22:33:30 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE PCF8563
+OBJECT MODULE PLACED IN PCF8563.OBJ
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE PCF8563.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          #include <reg52.h>
+   2          #include <absacc.h>
+   3          #include <intrins.h>
+   4          
+   5          #define uchar unsigned char
+   6          extern uchar TX_buf[10];
+   7          extern void uart_test(unsigned char length);
+   8          sbit SDA=P1^0;
+   9          sbit SCL=P1^1;
+  10          
+  11          uchar g8563_Store[6]; /*时间交换区,全局变量声明*/
+  12          uchar code c8563_Store[6]={0x13,0x09,0x22,0x10,0x40,0x00}; /*写入时间初值：星期一 07:59:00*/
+  13          
+  14          /********************************************
+  15          内部函数，延时1
+  16          ********************************************/
+  17          void Delay()
+  18          {
+  19   1          _nop_();_nop_(); _nop_();_nop_();_nop_();_nop_();/*根据晶振频率制定延时时间*/
+  20   1      }
+  21          /********************************************
+  22          内部函数，I2C开始
+  23          ********************************************/
+  24          void Start()
+  25          { 
+  26   1          SDA=1;
+  27   1            SCL=1;
+  28   1            Delay();
+  29   1            SDA=0;
+  30   1            Delay();
+  31   1            SCL=0;
+  32   1      }
+  33          /********************************************
+  34          内部函数，I2C结束
+  35          ********************************************/
+  36          void Stop()
+  37          {
+  38   1          SDA=0;
+  39   1            SCL=0;
+  40   1            Delay();
+  41   1            SCL=1;
+  42   1            Delay();
+  43   1            SDA=1;
+  44   1            Delay();
+  45   1      }
+  46          /********************************************
+  47          内部函数，输出ACK ,每个字节传输完成，输出ack=0,结束读书据，ack=1;
+  48          ********************************************/
+  49          void WriteACK(uchar ack)
+  50          {
+  51   1          SDA=ack;
+  52   1            Delay();
+  53   1            SCL=1;
+  54   1            Delay();
+  55   1            SCL=0;
+C51 COMPILER V9.60.0.0   PCF8563                                                           01/03/2022 22:33:30 PAGE 2   
+
+  56   1      }
+  57          /********************************************
+  58          内部函数，等待ACK
+  59          ********************************************/
+  60          void WaitACK()
+  61          {  
+  62   1          uchar errtime=20;
+  63   1            SDA=1;
+  64   1            Delay(); /*读ACK*/
+  65   1            SCL=1;
+  66   1            Delay();
+  67   1            while(SDA)
+  68   1            {  
+  69   2              errtime--;
+  70   2                  if(!errtime) 
+  71   2                  Stop();
+  72   2            }
+  73   1            SCL=0;
+  74   1            Delay();
+  75   1      }
+  76          /********************************************
+  77          内部函数.输出数据字节
+  78          入口:B=数据
+  79          ********************************************/
+  80          void writebyte(uchar wdata)
+  81          {
+  82   1          uchar i;
+  83   1            for(i=0;i<8;i++)
+  84   1            {
+  85   2                  if(wdata&0x80) 
+  86   2                  SDA=1;
+  87   2                  else 
+  88   2                  SDA=0;
+  89   2                  wdata<<=1;
+  90   2                  SCL=1;
+  91   2                  Delay();
+  92   2                  SCL=0;
+  93   2            }
+  94   1            WaitACK();     //I2C器件或通讯出错，将会退出I2C通讯
+  95   1      }
+  96          /********************************************
+  97          内部函数.输入数据
+  98          出口:B
+  99          ********************************************/
+ 100          uchar Readbyte()
+ 101          {
+ 102   1          uchar i,bytedata;
+ 103   1            SDA=1;
+ 104   1            for(i=0;i<8;i++)
+ 105   1            {
+ 106   2                  SCL=1; 
+ 107   2                  bytedata<<=1;
+ 108   2                  bytedata|=SDA;
+ 109   2                  SCL=0;
+ 110   2                  Delay();
+ 111   2            }
+ 112   1            return(bytedata);
+ 113   1      }
+ 114          /********************************************
+ 115          输出数据->pcf8563
+ 116          ********************************************/
+ 117          void writeData(uchar address,uchar mdata)
+C51 COMPILER V9.60.0.0   PCF8563                                                           01/03/2022 22:33:30 PAGE 3   
+
+ 118          {
+ 119   1          Start();
+ 120   1            writebyte(0xa2); /*写命令*/
+ 121   1          writebyte(address); /*写地址*/
+ 122   1            writebyte(mdata); /*写数据*/
+ 123   1          Stop();
+ 124   1      }
+ 125          /********************************************
+ 126          输入数据<-pcf8563
+ 127          ********************************************/
+ 128          /*uchar ReadData(uchar address) //单字节
+ 129          {  
+ 130              uchar rdata;
+ 131                Start();
+ 132                writebyte(0xa2); //写命令
+ 133                writebyte(address); //写地址
+ 134                Start();
+ 135                writebyte(0xa3); //读命令
+ 136                rdata=Readbyte();
+ 137                WriteACK(1);
+ 138                Stop();
+ 139                return(rdata);
+ 140          } */
+ 141          void ReadData1(uchar address,uchar count,uchar * buff) /*多字节*/
+ 142          {  
+ 143   1          uchar i;
+ 144   1            Start();
+ 145   1            writebyte(0xa2); /*写命令*/
+ 146   1            writebyte(address); /*写地址*/
+ 147   1            Start();
+ 148   1            writebyte(0xa3); /*读命令*/
+ 149   1            for(i=0;i<count;i++)
+ 150   1            {
+ 151   2                buff[i]=Readbyte();
+ 152   2                  if(i<count-1) 
+ 153   2                  WriteACK(0);
+ 154   2            }
+ 155   1            WriteACK(1);
+ 156   1              Stop();
+ 157   1      }  
+ 158          /********************************************
+ 159          内部函数,读入时间到内部缓冲区
+ 160          ********************************************/
+ 161          void P8563_Read()
+ 162          {   
+ 163   1          uchar time[7];
+ 164   1            ReadData1(0x02,0x07,time);
+ 165   1            g8563_Store[0]=time[0]&0x7f; /*秒 */
+ 166   1            g8563_Store[1]=time[1]&0x7f; /*分 */
+ 167   1            g8563_Store[2]=time[2]&0x3f; /*小时 */
+ 168   1          g8563_Store[3]=time[3]&0x3f; /*日 */
+ 169   1            g8563_Store[4]=time[5]&0x1f; /*月 */
+ 170   1          g8563_Store[5]=time[6]; /*年  */
+ 171   1      
+ 172   1            TX_buf[0] = g8563_Store[5];
+ 173   1          TX_buf[1] = g8563_Store[4];
+ 174   1          TX_buf[2] = g8563_Store[3];
+ 175   1            TX_buf[3] = g8563_Store[2]; 
+ 176   1          TX_buf[4] = g8563_Store[1]; 
+ 177   1          TX_buf[5] = g8563_Store[0]; 
+ 178   1              uart_test(6);   
+ 179   1      }
+C51 COMPILER V9.60.0.0   PCF8563                                                           01/03/2022 22:33:30 PAGE 4   
+
+ 180          /********************************************
+ 181          读入时间到内部缓冲区----外部调用 
+ 182          ********************************************/
+ 183          void P8563_gettime()
+ 184          {
+ 185   1            P8563_Read();
+ 186   1            if(g8563_Store[0]==0)
+ 187   1                  P8563_Read(); /*如果为秒=0，为防止时间变化，再读一次*/
+ 188   1      } 
+ 189          /********************************************
+ 190          写时间修改值
+ 191          ********************************************/
+ 192          void P8563_settime()
+ 193          {
+ 194   1            //uchar i;
+ 195   1            writeData(8,g8563_Store[0]); //年 
+ 196   1          writeData(7,g8563_Store[1]); //月 
+ 197   1          writeData(5,g8563_Store[2]); //日 
+ 198   1          writeData(4,g8563_Store[3]); //时 
+ 199   1            writeData(3,g8563_Store[4]); //分  
+ 200   1          writeData(2,g8563_Store[5]); //秒 
+ 201   1      }
+ 202          /********************************************
+ 203          P8563的初始化-----外部调用
+ 204          ********************************************/
+ 205          void P8563_init()
+ 206          {
+ 207   1          uchar i;
+ 208   1          // P8563_settime();
+ 209   1      for(i=0;i<=5;i++) g8563_Store[i]=c8563_Store[i]; /*初始化时间*/
+ 210   1              P8563_settime();  
+ 211   1         // if((ReadData(0x0a)&0x3f)!=0x08) /*检查是否第一次启动，是则初始化时间*/
+ 212   1         // {
+ 213   1      //      P3_4 = 0;
+ 214   1       //       for(i=0;i<=3;i++) g8563_Store[i]=c8563_Store[i]; /*初始化时间*/
+ 215   1       //       P8563_settime();
+ 216   1       //       writeData(0x0,0x00);
+ 217   1       //       writeData(0xa,0x8); /*8:00报警*/
+ 218   1       //       writeData(0x1,0x12); /*报警有效*/
+ 219   1        //      writeData(0xd,0xf0);  //编程输出32.768K的频率
+ 220   1        //  }
+ 221   1      }
+ 222          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    386    ----
+   CONSTANT SIZE    =      6    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      6      10
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

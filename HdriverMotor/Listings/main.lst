@@ -1,0 +1,143 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              06/09/2022 09:47:32 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          #include <intrins.h>
+   3          
+   4          typedef unsigned char   uchar;
+   5          typedef unsigned int    uint;
+   6          sbit LED = P1^0;
+   7          //uchar const sequence[8] = {0x02,0x06,0x04,0x0c,0x08,0x09,0x01,0x03};
+   8          uchar const sequence[] = {0x06,0x0c,0x09,0x03};
+   9          //0010,0b0110,0100,0b1100,1000,0b1001,0001,0b0011
+  10          #define out_port  (P2)
+  11          sbit  interruptPin = P3^2;
+  12          #define HIGH  (1)
+  13          #define LOW (0)
+  14          #define  Speed 120//速度
+  15          #define FOSC 12000000L
+  16          #define T1MS (65536-FOSC/12/1000)   //1ms timer calculation method in 12T mode
+  17          static volatile unsigned char keyFlag = 0  ;//按键状态
+  18          static volatile unsigned long currentMillis = 0;
+  19          //unsigned long previousMillis;        // 保存上一回的时间戳
+  20          void fanzhuan();
+  21          void zhengzhuan();
+  22          void Stop();
+  23          
+  24          void exint0() interrupt 0           //(location at 0003H)
+  25          {
+  26   1           keyFlag++;
+  27   1          keyFlag%=3;
+  28   1      }
+  29          /* Timer0 interrupt routine */
+  30          void tm0_isr() interrupt 1
+  31          {
+  32   1          TL0 = T1MS;                     //reload timer0 low byte
+  33   1          TH0 = T1MS >> 8;                //reload timer0 high byte
+  34   1        currentMillis ++;
+  35   1      
+  36   1      }
+  37          
+  38          void Timer0Init(void)   //1毫秒@12.000MHz
+  39          {
+  40   1        AUXR &= 0x7F;   //定时器时钟12T模式
+  41   1        TMOD &= 0xF0;   //设置定时器模式
+  42   1        TL0 = 0x18;   //设置定时初始值
+  43   1        TH0 = 0xFC;   //设置定时初始值
+  44   1        TF0 = 0;    //清除TF0标志
+  45   1        TR0 = 1;    //定时器0开始计时
+  46   1      }
+  47          
+  48          void delay(unsigned long interval)
+  49          {
+  50   1          unsigned long previousMillis = currentMillis  ;
+  51   1        while(interval>0)
+  52   1          if (currentMillis - previousMillis >= interval)
+  53   1          {
+  54   2            interval --;
+C51 COMPILER V9.60.0.0   MAIN                                                              06/09/2022 09:47:32 PAGE 2   
+
+  55   2          }  
+  56   1      }
+  57          /*
+  58          void delay(unsigned int t)
+  59          {
+  60            unsigned int count = 0;
+  61            TMOD |= 0x01;
+  62            TH0 = 0xFC;
+  63            TL0 = 0x66;
+  64            TR0 = 1;
+  65            while (1)
+  66            {
+  67              if (TF0 == 1)
+  68              {
+  69                count++;
+  70                TF0 = 0;
+  71                TH0 = 0xFC;
+  72                TL0 = 0x66;
+  73              }
+  74              if (count >= t)
+  75              {
+  76                break;
+  77              }
+  78            }
+  79          }
+  80          */
+  81          void main() {
+  82   1        Timer0Init();
+  83   1          IT0 = 1;                        //set INT0 int type (1:Falling 0:Low level)
+  84   1          EX0 = 1;                        //enable INT0 interrupt
+  85   1          EA = 1;                         //open global interrupt switch
+  86   1           out_port = 0x00;
+  87   1        while(1)
+  88   1       {
+  89   2         if(keyFlag)keyFlag==1? zhengzhuan():fanzhuan(); else  Stop();      
+  90   2       } 
+  91   1      }
+  92          
+  93          void Stop(){
+  94   1        //这里可以填写其他控制代码
+  95   1           out_port = 0X0f;
+  96   1           LED= LOW;
+  97   1        }
+  98          
+  99          void zhengzhuan(){ 
+ 100   1              static unsigned char i=0;
+ 101   1              i = i<4 ? i+1 : 0;
+ 102   1               out_port = sequence[i];
+ 103   1                LED = !LED;
+ 104   1      delay(Speed);//此数值必须大于100，否则仿真的时候会抖动 .
+ 105   1      
+ 106   1            }
+ 107              
+ 108          void fanzhuan(){
+ 109   1        static unsigned char k=0;
+ 110   1        k = k>0 ? k-1 : 3;  
+ 111   1           out_port = sequence[k];
+ 112   1           LED= !LED;
+ 113   1      delay(Speed);//此数值必须大于100，否则仿真的时候会抖动 .
+ 114   1      
+ 115   1           }  
+
+C51 COMPILER V9.60.0.0   MAIN                                                              06/09/2022 09:47:32 PAGE 3   
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    324    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     11       8
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

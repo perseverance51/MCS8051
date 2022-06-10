@@ -1,0 +1,165 @@
+C51 COMPILER V9.60.0.0   ADC2                                                              04/10/2022 13:29:13 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE ADC2
+OBJECT MODULE PLACED IN ..\output\ADC2.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ..\source\ADC2.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Lis
+                    -tings\ADC2.lst) TABS(2) OBJECT(..\output\ADC2.obj)
+
+line level    source
+
+   1          /***********************************************************
+   2          程序功能：ADC采集电压信号（0-5V或3.3V）
+   3          ***********************************************************/
+   4          #include "reg51.h"
+   5          #include "intrins.h"
+   6          #include <stdio.h>         // 为使用KEIL自带的库函数printf而加入
+   7          
+   8          sfr ADC_CONTR = 0XBC;
+   9          sfr ADC_RES   = 0XBD;
+  10          sfr ADC_LOW2  = 0XBE;
+  11          sfr P1ASF     = 0X9D;
+  12          sfr AUXR = 0x8E; //辅助寄存器
+  13          typedef unsigned char BYTE;
+  14          typedef unsigned int WORD;
+  15           
+  16          #define ADC_POWER   0X80
+  17          #define ADC_FLAG    0X10
+  18          #define ADC_START   0X08
+  19          #define ADC_SPEEDLL 0X00
+  20          #define ADC_SPEEDL  0X20
+  21          #define ADC_SPEEDH  0X40
+  22          #define ADC_SPEEDHH 0X60
+  23           
+  24          void InitADC();
+  25          void Delay(WORD n);
+  26          WORD GetADCResult(BYTE ch);
+  27          void DisplayADCResult(BYTE Channel);//选择0-7通道其中一个作为转换对象
+  28           
+  29           void delay_ms(WORD t)//利用定时器作为延时
+  30          {
+  31   1        WORD count = 0;
+  32   1        TMOD |= 0x01;
+  33   1        TH0 = 0xFC;
+  34   1        TL0 = 0x66;
+  35   1        TR0 = 1;
+  36   1        while (1)
+  37   1        {
+  38   2          if (TF0 == 1)
+  39   2          {
+  40   3            count++;
+  41   3            TF0 = 0;
+  42   3            TH0 = 0xFC;
+  43   3            TL0 = 0x66;
+  44   3          }
+  45   2          if (count >= t)
+  46   2          {
+  47   3            break;
+  48   3          }
+  49   2        }
+  50   1      }
+  51          
+  52           /*----------------------------
+  53          初始化串口
+  54          ----------------------------*/
+C51 COMPILER V9.60.0.0   ADC2                                                              04/10/2022 13:29:13 PAGE 2   
+
+  55          void InitUart()
+  56          {
+  57   1      //下面代码设置定时器1
+  58   1        TMOD = 0x20;  // 0010 0000 定时器1工作于方式2（8位自动重装方式）
+  59   1        TH1  = 0xFD;  // 波特率：9600 /11.0592MHZ
+  60   1        TL1  = 0xFD;  // 波特率：9600 /11.0592MHZ
+  61   1        TR1  = 1;
+  62   1        //下面代码设置定串口
+  63   1        AUXR = 0x00;             // 很关键，8051定时器速度，使用定时器1作为波特率发生器，S1ST2=0
+  64   1        SCON = 0x50;  // 0101 0000 SM0.SM1=01(最普遍的8位通信）,REN=1（允许接受）
+  65   1        TI=1;     // 很关键，使用printf函数时必须有此命令
+  66   1      }
+  67          void main()
+  68          {
+  69   1         InitUart();   //Init UART, use to show ADC result
+  70   1        InitADC();
+  71   1        while(1)
+  72   1        {
+  73   2          delay_ms(1000);
+  74   2          DisplayADCResult(1);    
+  75   2        }
+  76   1      }
+  77          //平均滤波//
+  78          #define N 100
+  79          float AD_average(BYTE Channel)
+  80          {
+  81   1        float value=0;
+  82   1        BYTE count;
+  83   1        for(count=0;count<100;count++)
+  84   1        {
+  85   2        value+=GetADCResult(Channel);   //100次采样
+  86   2        }
+  87   1      //value/=202.5;
+  88   1      // value/=205;
+  89   1      // value/=2048;
+  90   1      // value/=512;
+  91   1       value/=100;       //求平均
+  92   1       value=value*5.0/1024;//val/1024*5
+  93   1       return value;
+  94   1      }
+  95          
+  96          void DisplayADCResult(BYTE Channel)
+  97          {
+  98   1        float ADResult;
+  99   1      //  WORD Result;
+ 100   1        ADResult=AD_average(Channel)*100;//电压值放大100倍
+ 101   1      //  Result=(int)ADResult;
+ 102   1      printf("电压值 = %.4f \n",ADResult); //保留浮点数小数点后4位
+ 103   1          
+ 104   1      }
+ 105           
+ 106          WORD GetADCResult(BYTE ch)
+ 107          {
+ 108   1        ADC_CONTR=ADC_POWER|ADC_SPEEDLL|ch|ADC_START;
+ 109   1        _nop_();
+ 110   1        _nop_();
+ 111   1        _nop_();
+ 112   1        _nop_();
+ 113   1        while(!(ADC_CONTR&ADC_FLAG));
+ 114   1        ADC_CONTR&=~ADC_FLAG;
+ 115   1       
+ 116   1        return ADC_RES*4+ADC_LOW2;
+C51 COMPILER V9.60.0.0   ADC2                                                              04/10/2022 13:29:13 PAGE 3   
+
+ 117   1      }
+ 118           
+ 119          void InitADC()
+ 120          {
+ 121   1        P1ASF = 0XFF;
+ 122   1        ADC_RES = 0;
+ 123   1        ADC_CONTR = ADC_POWER|ADC_SPEEDLL;
+ 124   1        Delay(2);
+ 125   1      }
+ 126           
+ 127          void Delay(WORD t)
+ 128          {
+ 129   1        WORD x;
+ 130   1        while(t--)
+ 131   1        {
+ 132   2          x = 5000;
+ 133   2          while(x--);
+ 134   2        }
+ 135   1      }
+ 136           
+ 137           
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    324    ----
+   CONSTANT SIZE    =     16    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       6
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

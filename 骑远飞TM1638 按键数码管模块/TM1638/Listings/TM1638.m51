@@ -1,0 +1,335 @@
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                    12/15/2021  16:44:07  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0, INVOKED BY:
+C:\KEIL_V5\C51\BIN\BL51.EXE .\Objects\main.obj TO .\Objects\TM1638 PRINT (.\Listings\TM1638.m51) RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  .\Objects\main.obj (MAIN)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_STARTUP)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?COPY)
+
+
+LINK MAP OF MODULE:  .\Objects\TM1638 (MAIN)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0010H     UNIT         ?DT?_TM1638_LEDCA?MAIN
+            DATA    0018H     000CH     UNIT         _DATA_GROUP_
+            DATA    0024H     0004H     UNIT         ?DT?TM1638_READKEY?MAIN
+            IDATA   0028H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     00F6H     UNIT         ?C?LIB_CODE
+            CODE    00F9H     00ECH     UNIT         ?PR?_TM1638_LEDCA?MAIN
+            CODE    01E5H     0079H     UNIT         ?PR?TM1638_READKEY?MAIN
+            CODE    025EH     0041H     UNIT         ?PR?_TM1638_LEDCC?MAIN
+            CODE    029FH     0041H     UNIT         ?PR?_WRITE_ONELED?MAIN
+            CODE    02E0H     0040H     UNIT         ?CO?MAIN
+            CODE    0320H     0025H     UNIT         ?PR?_TM1638_WRITE?MAIN
+            CODE    0345H     0021H     UNIT         ?PR?TM1638_READ?MAIN
+            CODE    0366H     0020H     UNIT         ?PR?INIT_TM1638?MAIN
+            CODE    0386H     001CH     UNIT         ?PR?MAIN?MAIN
+            CODE    03A2H     000EH     UNIT         ?PR?DELAY1000MS?MAIN
+            CODE    03B0H     000CH     UNIT         ?C_C51STARTUP
+            CODE    03BCH     0008H     UNIT         ?PR?_TM1638_WRITECOM?MAIN
+
+
+
+OVERLAY MAP OF MODULE:   .\Objects\TM1638 (MAIN)
+
+
+SEGMENT                             DATA_GROUP 
+  +--> CALLED SEGMENT             START    LENGTH
+-------------------------------------------------
+?C_C51STARTUP                     -----    -----
+  +--> ?PR?MAIN?MAIN
+
+?PR?MAIN?MAIN                     0018H    0001H
+  +--> ?PR?INIT_TM1638?MAIN
+  +--> ?PR?_WRITE_ONELED?MAIN
+
+?PR?INIT_TM1638?MAIN              -----    -----
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/15/2021  16:44:07  PAGE 2
+
+
+  +--> ?PR?_TM1638_WRITECOM?MAIN
+  +--> ?PR?_TM1638_WRITE?MAIN
+
+?PR?_TM1638_WRITE?MAIN            -----    -----
+  +--> ?PR?_TM1638_WRITECOM?MAIN
+
+?PR?_WRITE_ONELED?MAIN            0019H    000BH
+  +--> ?CO?MAIN
+  +--> ?PR?_TM1638_WRITECOM?MAIN
+  +--> ?PR?_TM1638_WRITE?MAIN
+
+
+
+SYMBOL TABLE OF MODULE:  .\Objects\TM1638 (MAIN)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        MAIN
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  C:01E5H         PUBLIC        TM1638_ReadKey
+  D:0090H         PUBLIC        P1
+  C:029FH         PUBLIC        _Write_oneLED
+  C:0366H         PUBLIC        init_TM1638
+  C:02E0H         PUBLIC        led_buffer
+  C:03A2H         PUBLIC        Delay1000ms
+  C:0386H         PUBLIC        main
+  C:00F9H         PUBLIC        _TM1638_LEDCA
+  C:025EH         PUBLIC        _TM1638_LEDCC
+  C:0300H         PUBLIC        LED_CA
+  C:02F0H         PUBLIC        LED_CC
+  C:0318H         SYMBOL        _?ix1000
+  C:03BCH         PUBLIC        _TM1638_WriteCOM
+  C:0345H         PUBLIC        TM1638_Read
+  B:0090H.1       PUBLIC        CLK
+  B:0090H.0       PUBLIC        DIO
+  C:0329H         PUBLIC        _TM1638_Write
+  B:0090H.2       PUBLIC        STB
+  C:0310H         PUBLIC        x
+  C:0320H         SYMBOL        L?0071
+  -------         PROC          L?0070
+  -------         ENDPROC       L?0070
+  C:0320H         SYMBOL        L?0071
+  -------         PROC          _TM1638_WRITE
+  D:0007H         SYMBOL        DATA
+  -------         DO            
+  D:0006H         SYMBOL        i
+  -------         ENDDO         
+  C:0329H         LINE#         37
+  C:0329H         LINE#         38
+  C:0329H         LINE#         40
+  C:0335H         LINE#         41
+  C:0335H         LINE#         42
+  C:0337H         LINE#         43
+  C:033BH         LINE#         44
+  C:033FH         LINE#         45
+  C:0341H         LINE#         46
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/15/2021  16:44:07  PAGE 3
+
+
+  C:0344H         LINE#         47
+  -------         ENDPROC       _TM1638_WRITE
+  -------         PROC          _TM1638_WRITECOM
+  D:0007H         SYMBOL        cmd
+  C:03BCH         LINE#         49
+  C:03BCH         LINE#         50
+  C:03BCH         LINE#         51
+  C:03BEH         LINE#         52
+  C:03C1H         LINE#         53
+  C:03C3H         LINE#         54
+  -------         ENDPROC       _TM1638_WRITECOM
+  -------         PROC          TM1638_READ
+  -------         DO            
+  D:0006H         SYMBOL        i
+  D:0007H         SYMBOL        Data
+  -------         ENDDO         
+  C:0345H         LINE#         56
+  C:0345H         LINE#         57
+  C:0345H         LINE#         58
+  C:0347H         LINE#         60
+  C:0349H         LINE#         61
+  C:0354H         LINE#         62
+  C:0354H         LINE#         63
+  C:0358H         LINE#         64
+  C:035AH         LINE#         65
+  C:035DH         LINE#         66
+  C:0360H         LINE#         67
+  C:0362H         LINE#         68
+  C:0365H         LINE#         69
+  C:0365H         LINE#         70
+  -------         ENDPROC       TM1638_READ
+  -------         PROC          TM1638_READKEY
+  -------         DO            
+  D:0024H         SYMBOL        c
+  D:0005H         SYMBOL        i
+  D:0004H         SYMBOL        key_value
+  -------         ENDDO         
+  C:01E5H         LINE#         72
+  C:01E5H         LINE#         73
+  C:01E5H         LINE#         75
+  C:01E7H         LINE#         76
+  C:01E9H         LINE#         78
+  C:01EBH         LINE#         79
+  C:01F0H         LINE#         80
+  C:01F5H         LINE#         81
+  C:0201H         LINE#         82
+  C:020DH         LINE#         83
+  C:020FH         LINE#         85
+  C:021AH         LINE#         86
+  C:0222H         LINE#         87
+  C:022DH         LINE#         88
+  C:0235H         LINE#         89
+  C:0240H         LINE#         90
+  C:0248H         LINE#         91
+  C:0253H         LINE#         92
+  C:025BH         LINE#         94
+  C:025DH         LINE#         95
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/15/2021  16:44:07  PAGE 4
+
+
+  -------         ENDPROC       TM1638_READKEY
+  -------         PROC          _TM1638_LEDCC
+  D:0005H         SYMBOL        LEDnums
+  -------         DO            
+  D:0004H         SYMBOL        i
+  -------         ENDDO         
+  C:025EH         LINE#         97
+  C:0260H         LINE#         98
+  C:0260H         LINE#         100
+  C:0260H         LINE#         101
+  C:0260H         LINE#         102
+  C:0263H         LINE#         103
+  C:026AH         LINE#         104
+  C:0273H         LINE#         105
+  C:0274H         LINE#         106
+  C:027DH         LINE#         107
+  C:027EH         LINE#         108
+  C:0281H         LINE#         109
+  C:028DH         LINE#         110
+  C:0292H         LINE#         111
+  C:0293H         LINE#         112
+  C:0298H         LINE#         113
+  C:0299H         LINE#         114
+  C:029CH         LINE#         115
+  C:029EH         LINE#         116
+  -------         ENDPROC       _TM1638_LEDCC
+  -------         PROC          _WRITE_ONELED
+  D:0019H         SYMBOL        num
+  D:001AH         SYMBOL        flag
+  -------         DO            
+  D:001BH         SYMBOL        TM1638_Addr_LED
+  D:0023H         SYMBOL        i
+  -------         ENDDO         
+  C:029FH         LINE#         117
+  C:02A3H         LINE#         118
+  C:02A3H         LINE#         119
+  C:02B6H         LINE#         121
+  C:02BBH         LINE#         122
+  C:02BDH         LINE#         123
+  C:02C7H         LINE#         125
+  C:02D1H         LINE#         126
+  C:02D2H         LINE#         128
+  C:02DCH         LINE#         130
+  C:02DDH         LINE#         131
+  C:02DFH         LINE#         132
+  -------         ENDPROC       _WRITE_ONELED
+  -------         PROC          _TM1638_LEDCA
+  D:0005H         SYMBOL        LEDnums
+  -------         DO            
+  D:0004H         SYMBOL        i
+  D:0008H         SYMBOL        datas
+  -------         ENDDO         
+  C:00F9H         LINE#         134
+  C:00FBH         LINE#         135
+  C:00FBH         LINE#         140
+  C:0107H         LINE#         141
+  C:015EH         LINE#         143
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/15/2021  16:44:07  PAGE 5
+
+
+  C:0161H         LINE#         144
+  C:016BH         LINE#         145
+  C:0177H         LINE#         146
+  C:0195H         LINE#         147
+  C:0195H         LINE#         148
+  C:0195H         LINE#         149
+  C:01A1H         LINE#         150
+  C:01AAH         LINE#         151
+  C:01AAH         LINE#         153
+  C:01AAH         LINE#         154
+  C:01AAH         LINE#         155
+  C:01ADH         LINE#         156
+  C:01B4H         LINE#         157
+  C:01BDH         LINE#         158
+  C:01C6H         LINE#         159
+  C:01C9H         LINE#         160
+  C:01D5H         LINE#         161
+  C:01DAH         LINE#         162
+  C:01DFH         LINE#         163
+  C:01E2H         LINE#         164
+  C:01E4H         LINE#         165
+  -------         ENDPROC       _TM1638_LEDCA
+  -------         PROC          INIT_TM1638
+  -------         DO            
+  D:0005H         SYMBOL        i
+  -------         ENDDO         
+  C:0366H         LINE#         168
+  C:0366H         LINE#         169
+  C:0366H         LINE#         171
+  C:036BH         LINE#         172
+  C:036BH         LINE#         173
+  C:036BH         LINE#         174
+  C:036EH         LINE#         175
+  C:036FH         LINE#         176
+  C:037BH         LINE#         177
+  C:0383H         LINE#         178
+  C:0385H         LINE#         179
+  -------         ENDPROC       INIT_TM1638
+  -------         PROC          DELAY1000MS
+  -------         DO            
+  D:0007H         SYMBOL        i
+  D:0006H         SYMBOL        j
+  D:0005H         SYMBOL        k
+  -------         ENDDO         
+  C:03A2H         LINE#         181
+  C:03A2H         LINE#         182
+  C:03A2H         LINE#         185
+  C:03A3H         LINE#         186
+  C:03A5H         LINE#         187
+  C:03A7H         LINE#         188
+  C:03A9H         LINE#         190
+  C:03A9H         LINE#         192
+  C:03A9H         LINE#         193
+  C:03ABH         LINE#         194
+  C:03ADH         LINE#         195
+  C:03AFH         LINE#         196
+  -------         ENDPROC       DELAY1000MS
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/15/2021  16:44:07  PAGE 6
+
+
+  -------         PROC          MAIN
+  -------         DO            
+  D:0018H         SYMBOL        i
+  -------         ENDDO         
+  C:0386H         LINE#         5
+  C:0386H         LINE#         7
+  C:0389H         LINE#         8
+  C:0389H         LINE#         9
+  C:0397H         LINE#         10
+  C:039EH         LINE#         12
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        MAIN
+
+  -------         MODULE        ?C?COPY
+  C:00D3H         PUBLIC        ?C?COPY
+  -------         ENDMOD        ?C?COPY
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?TM1638_READKEY?MAIN
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_TM1638_LEDCC?MAIN
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_TM1638_LEDCA?MAIN
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?DELAY1000MS?MAIN
+
+Program Size: data=41.0 xdata=0 code=964
+LINK/LOCATE RUN COMPLETE.  4 WARNING(S),  0 ERROR(S)

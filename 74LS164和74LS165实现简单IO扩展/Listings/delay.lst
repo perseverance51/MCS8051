@@ -1,0 +1,47 @@
+C51 COMPILER V9.60.0.0   DELAY                                                             04/05/2022 10:22:27 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE DELAY
+OBJECT MODULE PLACED IN .\Objects\delay.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE delay.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\del
+                    -ay.lst) TABS(2) OBJECT(.\Objects\delay.obj)
+
+line level    source
+
+   1          /**
+   2            ***************************************************************************************
+   3            * 文  件：延时函数实现源文件
+   4            * 芯  片：AT89S52
+   5            * 晶  振：12MHz
+   6            ***************************************************************************************
+   7            */
+   8           
+   9          #include "delay.h"  //延时函数实现头文件
+  10           
+  11          /**
+  12            ***************************************************************************************
+  13            * 函  数：延时ms函数
+  14            * 参  数：t：延时ms值，0~4294967295
+  15            * 返回值：无
+  16            ***************************************************************************************
+  17            */
+  18          void delay_ms(unsigned long t)  //延时ms函数
+  19          {
+  20   1        unsigned char i;  //计数变量
+  21   1        for(;t>0;t--)
+  22   1          for(i=200;i>0;i--);  //不精确，此处循环值需测试
+  23   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     69    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       4
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,59 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              12/16/2021 00:26:02 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          
+   2          #include  <REGX51.H>
+   3          #include  <tm1638.h>
+   4          #include  <intrins.h>
+   5          unsigned char num[8];   //各个数码管显示的值
+   6          //8个led的地址，依次为led1-led8
+   7          const unsigned char TM1638_LedAddrTab[] =
+   8          {
+   9            0xC1,0xC3,0xC5,0xC7,0xC9,0xCB,0xCD,0xCF
+  10          };
+  11          int main(void)
+  12          {
+  13   1        unsigned char i;
+  14   1        init_TM1638();                             //初始化TM1638
+  15   1        for(i=0;i<8;i++)
+  16   1        Write_DATA(2*i,tab[16]);//初始化寄存器,显示"--- ----" 
+  17   1        Delay1000ms();
+  18   1        
+  19   1        while(1)
+  20   1        {
+  21   2            for(i=0;i<8;i++){
+  22   3          Write_oneLED(i,1);//0-7位置.1对应SEG9,
+  23   3         Write_oneLED(i,2);//0-7位置.2对应SEG10,
+  24   3            } 
+  25   2      /*
+  26   2            for(i=0;i<8;i++){
+  27   2        Write_DATA(2*i,tab[i]);Delay1000ms();}  
+  28   2      
+  29   2        for(i=0;i<8;i++){
+  30   2        TM1638_display_Fix(i,18-i);Delay1000ms();}  
+  31   2      
+  32   2              for(i=0;i<8;i++)
+  33   2        Write_DATA(2*i,tab[17]);//初始化寄存器,熄灭
+  34   2      */
+  35   2      }
+  36   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    492    ----
+   CONSTANT SIZE    =     48    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     16      39
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

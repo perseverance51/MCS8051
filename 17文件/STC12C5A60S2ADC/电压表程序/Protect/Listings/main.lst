@@ -1,0 +1,88 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              04/10/2022 11:19:44 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN ..\output\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ..\source\main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Lis
+                    -tings\main.lst) TABS(2) OBJECT(..\output\main.obj)
+
+line level    source
+
+   1          /*------------------------------
+   2          *
+   3          使用STC12C5A60S2单片机内部ADC（10位：1024）制作电压表
+   4          方式：中断查询方式
+   5          2018年11月20日
+   6          开发者：画中仙
+   7          注意：
+   8          所有P1口都可以作为ADC的输入口，本实验使用P1.0作为ADC输入
+   9          
+  10          1.5V
+  11          */
+  12          #include <STC12C5A60S2.H>
+  13          
+  14          
+  15          unsigned int  ADC_VALUE,Voltage;   
+  16          
+  17          
+  18          
+  19          /*--------------------------------
+  20          *ADC初始化函数
+  21          *
+  22          具体通道只要修改  P1ASF=0XFF; 
+  23          */
+  24          void ADC_init()
+  25          {
+  26   1          P1ASF=0x01;        //设置输入通道
+  27   1        ADC_RES=0;         //清除当前值
+  28   1        ADC_CONTR=0x88;    //打开ADC电源并清除当前的显示
+  29   1          EADC=1;         //使能ADC
+  30   1      }
+  31          
+  32          void main()
+  33          {
+  34   1      
+  35   1        ADC_init();
+  36   1        EA=1;
+  37   1        while(1)
+  38   1        {
+  39   2      
+  40   2      
+  41   2        }
+  42   1      }
+  43          
+  44          
+  45           /**********************************
+  46          *
+  47          *函数名称：
+  48          *函数功能：
+  49          *函数参数：无
+  50          *函数返回：无
+  51          *备注： Voltage是测量转换的到的实际电压，在主循环中扫描即可
+  52          *
+  53          ***********************************/
+  54          void ADC_interrupt() interrupt 5
+C51 COMPILER V9.60.0.0   MAIN                                                              04/10/2022 11:19:44 PAGE 2   
+
+  55          {
+  56   1         ADC_CONTR &= !0x10;                 //ADC完成标志位
+  57   1         ADC_VALUE=(ADC_RES*4+ADC_RESL);    //获得ADC的采样值
+  58   1        
+  59   1         Voltage=(unsigned int)((long)ADC_VALUE*5000/1024);  //转换为0~5V的电压
+  60   1        
+  61   1           ADC_CONTR=0X88;     //打开ADC电源并清除当前的显示
+  62   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    128    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      4    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

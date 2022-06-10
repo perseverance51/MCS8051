@@ -1,0 +1,119 @@
+C51 COMPILER V9.60.0.0   TWI                                                               01/04/2022 11:31:01 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE TWI
+OBJECT MODULE PLACED IN .\Objects\TWI.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE TWI.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\TWI.l
+                    -st) TABS(2) OBJECT(.\Objects\TWI.obj)
+
+line level    source
+
+   1          /************************************************
+   2          文件：TWI.c
+   3          用途：TWI操作函数
+   4          ************************************************/
+   5          #include "config.h"
+*** ERROR C141 IN LINE 10 OF TWI.h: syntax error near ')', expected '<id>'
+*** ERROR C141 IN LINE 20 OF PCF8563.h: syntax error near ')', expected '<id>'
+   6          /*************************************************************************
+   7          ** 函数名称: twi_init(void)
+   8          ** 功能描述: i2c通信初始化
+   9          ** 输　入: 
+  10          ** 输出  : 
+  11          ** 全局变量: 无
+  12          ** 调用模块: 
+  13          ** 说明：
+  14          ** 注意：
+  15          **************************************************************************/
+  16          void twi_init(void)
+  17          {
+  18   1       TWCR= 0x00; //disable twi
+*** ERROR C202 IN LINE 18 OF TWI.c: 'TWCR': undefined identifier
+  19   1       TWBR= (1<<6) | (1<<5) | (1<<2); //set bit rate
+*** ERROR C202 IN LINE 19 OF TWI.c: 'TWBR': undefined identifier
+  20   1       TWSR= 0x00; //set prescale
+*** ERROR C202 IN LINE 20 OF TWI.c: 'TWSR': undefined identifier
+  21   1       TWAR= 0x00; //set slave address
+*** ERROR C202 IN LINE 21 OF TWI.c: 'TWAR': undefined identifier
+  22   1       TWCR= (1<<TWEN); //enable twi
+*** ERROR C202 IN LINE 22 OF TWI.c: 'TWCR': undefined identifier
+  23   1      }
+  24          /*************************************************************************
+  25          ** 函数名称: i2cstart(void)
+  26          ** 功能描述: i2c通信开始
+  27          ** 输　入: 
+  28          ** 输出  : 
+  29          ** 全局变量: 无
+  30          ** 调用模块: 
+  31          ** 说明：
+  32          ** 注意：
+  33          **************************************************************************/
+  34          void i2cstart(void)
+  35          { 
+  36   1        TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN); 
+*** ERROR C202 IN LINE 36 OF TWI.c: 'TWCR': undefined identifier
+  37   1          while (!(TWCR & (1<<TWINT)));
+*** ERROR C202 IN LINE 37 OF TWI.c: 'TWCR': undefined identifier
+  38   1      }
+  39          /*************************************************************************
+  40          ** 函数名称: unsigned char i2cwt(unsigned char data)
+  41          ** 功能描述: i2c写数据,返回TWI状态
+  42          ** 输　入: 
+  43          ** 输  出: TWI状态
+  44          ** 全局变量: 无
+  45          ** 调用模块: 
+C51 COMPILER V9.60.0.0   TWI                                                               01/04/2022 11:31:01 PAGE 2   
+
+  46          ** 说明：
+  47          ** 注意：
+  48          **************************************************************************/
+  49          unsigned char i2cwt(unsigned char data)
+*** ERROR C141 IN LINE 49 OF TWI.c: syntax error near ')', expected '<id>'
+  50          { 
+  51   1        TWDR = data;
+*** ERROR C202 IN LINE 51 OF TWI.c: 'TWDR': undefined identifier
+*** ERROR C141 IN LINE 51 OF TWI.c: syntax error near 'data', expected 'sizeof'
+  52   1          TWCR = (1<<TWINT) | (1<<TWEN);
+  53   1          while (!(TWCR & (1<<TWINT)));
+*** ERROR C202 IN LINE 53 OF TWI.c: 'TWCR': undefined identifier
+  54   1          _nop_();
+  55   1          return(TWSR&0b11111000);
+*** ERROR C202 IN LINE 55 OF TWI.c: 'TWSR': undefined identifier
+*** ERROR C251 IN LINE 55 OF TWI.c: illegal octal digit
+  56   1      }
+  57          /*************************************************************************
+  58          ** 函数名称: unsigned char i2crd(void)
+  59          ** 功能描述: i2c读数据
+  60          ** 输　入: 
+  61          ** 输出  : 读取的数据
+  62          ** 全局变量: 无
+  63          ** 调用模块: 
+  64          ** 说明：
+  65          ** 注意：
+  66          **************************************************************************/
+  67          unsigned char i2crd(void)
+  68          {
+  69   1          TWCR= (1<<TWINT) | (1<<TWEA) | (1<<TWEN);
+*** ERROR C202 IN LINE 69 OF TWI.c: 'TWCR': undefined identifier
+  70   1          while (!(TWCR & (1<<TWINT)));
+*** ERROR C202 IN LINE 70 OF TWI.c: 'TWCR': undefined identifier
+  71   1          return(TWDR);
+*** ERROR C202 IN LINE 71 OF TWI.c: 'TWDR': undefined identifier
+  72   1      }
+  73          /*************************************************************************
+  74          ** 函数名称: i2cstop(void)
+  75          ** 功能描述: i2c停止
+  76          ** 输　入: 
+  77          ** 输出  : 
+  78          ** 全局变量: 无
+  79          ** 调用模块: 
+  80          ** 说明：
+  81          ** 注意：
+  82          **************************************************************************/
+  83          void i2cstop(void)
+  84          { 
+  85   1         TWCR = (1<<TWINT) | (1<<TWSTO) | (1<<TWEN);
+*** ERROR C202 IN LINE 85 OF TWI.c: 'TWCR': undefined identifier
+  86   1      }
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  19 ERROR(S)

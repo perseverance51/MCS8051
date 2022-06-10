@@ -1,0 +1,3 @@
+".\Objects\ledcontrol.obj" 
+TO ".\Objects\ledcontrol" 
+PRINT(".\Listings\ledcontrol.m51") RAMSIZE(256) 

@@ -1,0 +1,4 @@
+"main.obj",
+"LCD12864.obj",
+"delay.obj" 
+TO "aa" 

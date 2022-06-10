@@ -1,0 +1,65 @@
+C51 COMPILER V9.60.0.0   ADC                                                               02/09/2022 11:08:54 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE ADC
+OBJECT MODULE PLACED IN .\Objects\ADC.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ADC.C OPTIMIZE(8,SPEED) BROWSE INCDIR(..\STC15USART _PWM) DEBUG OBJECTEX
+                    -TEND PRINT(.\Listings\ADC.lst) TABS(2) OBJECT(.\Objects\ADC.obj)
+
+line level    source
+
+   1          #include "ADC.h"
+   2          
+   3          //#define Timer0_Reload (65536UL -(MAIN_Fosc /4000))    //Timer 0 中断频率, 5000次/秒
+   4          
+   5          
+   6          
+   7          void Timer0Init(void) //4毫秒@16MHz
+   8          {
+   9   1        AUXR |= 0x80;   //定时器时钟1T模式
+  10   1        TMOD &= 0xF0;   //设置定时器模式
+  11   1        TL0 = 0x00;   //设置定时初始值
+  12   1        TH0 = 0x06;   //设置定时初始值
+  13   1        TF0 = 0;    //清除TF0标志
+  14   1        TR0 = 1;    //定时器0开始计时
+  15   1        
+  16   1        ET0 = 1;  //Timer0 interrupt enable
+  17   1        TF0 = 0;    //清除TF0标志
+  18   1        TR0 = 1;    //定时器0开始计时
+  19   1        EA = 1 ;
+  20   1      }
+  21          
+  22          //========================================================================
+  23          // 函数: u16  Get_ADC10bitResult(u8 channel)
+  24          // 描述: 查询法读一次ADC结果.
+  25          // 参数: channel: 选择要转换的ADC.
+  26          // 返回: 10位ADC结果.
+  27          // 版本: V1.0, 2012-10-22
+  28          //========================================================================
+  29          unsigned int  Get_ADC10bitResult(unsigned char channel) //channel = 0~7
+  30          {
+  31   1        ADC_RES = 0;
+  32   1        ADC_RESL = 0;
+  33   1      
+  34   1        ADC_CONTR = (ADC_CONTR & 0xe0) | 0x08 | channel;  //start the ADC
+  35   1        NOP(4);
+  36   1      
+  37   1        while((ADC_CONTR & 0x10) == 0)  ; //wait for ADC finish
+  38   1        ADC_CONTR &= ~0x10;   //清除ADC结束标志
+  39   1        return  (((unsigned int)ADC_RES << 2) | (ADC_RESL & 3));
+  40   1      }
+  41          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     71    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

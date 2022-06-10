@@ -1,0 +1,5 @@
+".\Objects\main.obj",
+".\Objects\iic.obj",
+".\Objects\LCD1602.obj" 
+TO ".\Objects\pcf85" 
+PRINT(".\Listings\pcf85.m51") RAMSIZE(256) 

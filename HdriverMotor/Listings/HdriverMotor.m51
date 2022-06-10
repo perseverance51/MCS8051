@@ -1,0 +1,200 @@
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                    06/09/2022  09:47:33  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0, INVOKED BY:
+C:\KEIL_V5\C51\BIN\BL51.EXE .\Objects\main.obj TO .\Objects\HdriverMotor PRINT (.\Listings\HdriverMotor.m51) RAMSIZE (25
+>> 6)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  .\Objects\main.obj (MAIN)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_STARTUP)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?ULCMP)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_INIT)
+
+
+LINK MAP OF MODULE:  .\Objects\HdriverMotor (MAIN)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     000BH     UNIT         ?DT?MAIN
+            DATA    0013H     0008H     UNIT         _DATA_GROUP_
+            IDATA   001BH     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     0003H     ABSOLUTE     
+                    0006H     0005H                  *** GAP ***
+            CODE    000BH     0003H     ABSOLUTE     
+            CODE    000EH     008CH     UNIT         ?C_C51STARTUP
+            CODE    009AH     0062H     UNIT         ?PR?_DELAY?MAIN
+            CODE    00FCH     003BH     UNIT         ?PR?TM0_ISR?MAIN
+            CODE    0137H     0029H     UNIT         ?PR?ZHENGZHUAN?MAIN
+            CODE    0160H     0029H     UNIT         ?PR?FANZHUAN?MAIN
+            CODE    0189H     0026H     UNIT         ?PR?MAIN?MAIN
+            CODE    01AFH     0018H     UNIT         ?PR?EXINT0?MAIN
+            CODE    01C7H     0016H     UNIT         ?C_INITSEG
+            CODE    01DDH     0011H     UNIT         ?PR?TIMER0INIT?MAIN
+            CODE    01EEH     0011H     UNIT         ?C?LIB_CODE
+            CODE    01FFH     0006H     UNIT         ?PR?STOP?MAIN
+
+
+
+OVERLAY MAP OF MODULE:   .\Objects\HdriverMotor (MAIN)
+
+
+SEGMENT                          DATA_GROUP 
+  +--> CALLED SEGMENT          START    LENGTH
+----------------------------------------------
+?C_C51STARTUP                  -----    -----
+  +--> ?PR?MAIN?MAIN
+  +--> ?C_INITSEG
+
+?PR?MAIN?MAIN                  -----    -----
+  +--> ?PR?TIMER0INIT?MAIN
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  06/09/2022  09:47:33  PAGE 2
+
+
+  +--> ?PR?ZHENGZHUAN?MAIN
+  +--> ?PR?FANZHUAN?MAIN
+  +--> ?PR?STOP?MAIN
+
+?PR?ZHENGZHUAN?MAIN            -----    -----
+  +--> ?PR?_DELAY?MAIN
+
+?PR?_DELAY?MAIN                0013H    0008H
+
+?PR?FANZHUAN?MAIN              -----    -----
+  +--> ?PR?_DELAY?MAIN
+
+
+
+SYMBOL TABLE OF MODULE:  .\Objects\HdriverMotor (MAIN)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        MAIN
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0090H         PUBLIC        P1
+  D:00A0H         PUBLIC        P2
+  D:00B0H         PUBLIC        P3
+  B:00A8H.7       PUBLIC        EA
+  C:009AH         PUBLIC        _delay
+  C:0189H         PUBLIC        main
+  C:01FFH         PUBLIC        Stop
+  D:0089H         PUBLIC        TMOD
+  D:008EH         PUBLIC        AUXR
+  C:00FCH         PUBLIC        tm0_isr
+  D:000AH         SYMBOL        keyFlag
+  C:0137H         PUBLIC        zhengzhuan
+  B:0088H.5       PUBLIC        TF0
+  C:01DDH         PUBLIC        Timer0Init
+  D:008CH         PUBLIC        TH0
+  B:00A8H.0       PUBLIC        EX0
+  B:0088H.0       PUBLIC        IT0
+  D:008AH         PUBLIC        TL0
+  B:0090H.0       PUBLIC        LED
+  B:0088H.4       PUBLIC        TR0
+  C:01AFH         PUBLIC        exint0
+  D:000BH         PUBLIC        sequence
+  C:0160H         PUBLIC        fanzhuan
+  D:000FH         SYMBOL        currentMillis
+  -------         PROC          EXINT0
+  C:01AFH         LINE#         24
+  C:01B5H         LINE#         26
+  C:01B7H         LINE#         27
+  C:01C0H         LINE#         28
+  -------         ENDPROC       EXINT0
+  -------         PROC          TM0_ISR
+  C:00FCH         LINE#         30
+  C:010BH         LINE#         32
+  C:010EH         LINE#         33
+  C:0111H         LINE#         34
+  C:012AH         LINE#         36
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  06/09/2022  09:47:33  PAGE 3
+
+
+  -------         ENDPROC       TM0_ISR
+  -------         PROC          TIMER0INIT
+  C:01DDH         LINE#         38
+  C:01DDH         LINE#         39
+  C:01DDH         LINE#         40
+  C:01E0H         LINE#         41
+  C:01E3H         LINE#         42
+  C:01E6H         LINE#         43
+  C:01E9H         LINE#         44
+  C:01EBH         LINE#         45
+  C:01EDH         LINE#         46
+  -------         ENDPROC       TIMER0INIT
+  -------         PROC          _DELAY
+  D:0013H         SYMBOL        interval
+  -------         DO            
+  D:0017H         SYMBOL        previousMillis
+  -------         ENDDO         
+  C:009AH         LINE#         48
+  C:00A2H         LINE#         49
+  C:00A2H         LINE#         50
+  C:00B2H         LINE#         51
+  C:00C5H         LINE#         52
+  C:00E1H         LINE#         53
+  C:00E1H         LINE#         54
+  C:00F9H         LINE#         55
+  C:00FBH         LINE#         56
+  -------         ENDPROC       _DELAY
+  -------         PROC          MAIN
+  C:0189H         LINE#         81
+  C:0189H         LINE#         82
+  C:018CH         LINE#         83
+  C:018EH         LINE#         84
+  C:0190H         LINE#         85
+  C:0192H         LINE#         86
+  C:0195H         LINE#         87
+  C:0195H         LINE#         88
+  C:0195H         LINE#         89
+  C:01ADH         LINE#         90
+  -------         ENDPROC       MAIN
+  -------         PROC          STOP
+  C:01FFH         LINE#         93
+  C:01FFH         LINE#         95
+  C:0202H         LINE#         96
+  C:0204H         LINE#         97
+  -------         ENDPROC       STOP
+  -------         PROC          ZHENGZHUAN
+  -------         DO            
+  D:0008H         SYMBOL        i
+  -------         ENDDO         
+  C:0137H         LINE#         99
+  C:0137H         LINE#         101
+  C:014CH         LINE#         102
+  C:0153H         LINE#         103
+  C:0155H         LINE#         104
+  -------         ENDPROC       ZHENGZHUAN
+  -------         PROC          FANZHUAN
+  -------         DO            
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  06/09/2022  09:47:33  PAGE 4
+
+
+  D:0009H         SYMBOL        k
+  -------         ENDDO         
+  C:0160H         LINE#         108
+  C:0160H         LINE#         110
+  C:0175H         LINE#         111
+  C:017CH         LINE#         112
+  C:017EH         LINE#         113
+  -------         ENDPROC       FANZHUAN
+  -------         ENDMOD        MAIN
+
+  -------         MODULE        ?C?ULCMP
+  C:01EEH         PUBLIC        ?C?ULCMP
+  -------         ENDMOD        ?C?ULCMP
+
+Program Size: data=28.0 xdata=0 code=512
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

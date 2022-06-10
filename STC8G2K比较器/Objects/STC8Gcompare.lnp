@@ -1,0 +1,3 @@
+".\Objects\main.obj" 
+TO ".\Objects\STC8Gcompare" 
+PRINT(".\Listings\STC8Gcompare.m51") RAMSIZE(256) 

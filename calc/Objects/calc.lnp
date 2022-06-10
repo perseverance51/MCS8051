@@ -1,0 +1,5 @@
+".\Objects\main.obj",
+".\Objects\KEYPAD.obj",
+".\Objects\LCD.obj" 
+TO ".\Objects\calc" 
+PRINT(".\Listings\calc.m51") RAMSIZE(256) 

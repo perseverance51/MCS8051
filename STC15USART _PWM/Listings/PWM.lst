@@ -1,0 +1,141 @@
+C51 COMPILER V9.60.0.0   PWM                                                               02/04/2022 14:08:03 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE PWM
+OBJECT MODULE PLACED IN .\Objects\PWM.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE PWM.C OPTIMIZE(8,SPEED) BROWSE INCDIR(..\STC15USART _PWM) DEBUG OBJECTEX
+                    -TEND PRINT(.\Listings\PWM.lst) TABS(2) OBJECT(.\Objects\PWM.obj)
+
+line level    source
+
+   1          #include "PWM.h"
+   2          
+   3          
+   4          volatile u16    CCAP0_tmp,PWM0_high,PWM0_low;
+   5          volatile u16    CCAP1_tmp,PWM1_high,PWM1_low;
+   6          volatile u16    CCAP2_tmp,PWM2_high,PWM2_low;
+   7          volatile u16  pwm0,pwm1,pwm2;
+   8          
+   9          //========================================================================
+  10          // 函数: void PWMn_SetHighReg(unsigned int high)
+  11          // 描述: 更新占空比数据。
+  12          // 参数: high:  占空比数据，即PWM输出高电平的PCA时钟脉冲个数。
+  13          // 返回: 无
+  14          // 版本: VER1.0
+  15          // 日期: 2013-5-15
+  16          // 备注: 
+  17          //========================================================================
+  18          void PWMn_Update(u8 PCA_id, u16 pwm)
+  19          {
+  20   1        if(pwm > PWM_HIGH_MAX)  pwm = PWM_HIGH_MAX; //如果写入大于最大占空比数据，强制为最大占空比。
+  21   1        if(pwm < PWM_HIGH_MIN)  pwm = PWM_HIGH_MIN; //如果写入小于最小占空比数据，强制为最小占空比。
+  22   1      
+  23   1        if(PCA_id == PCA0)
+  24   1        {
+  25   2          CR = 0;           //停止PCA一会， 一般不会影响PWM。
+  26   2          PWM0_high = pwm;      //数据在正确范围，则装入占空比寄存器。
+  27   2          PWM0_low = PWM_DUTY - pwm;  //计算并保存PWM输出低电平的PCA时钟脉冲个数。
+  28   2          CR = 1;           //启动PCA。
+  29   2        }
+  30   1        else if(PCA_id == PCA1)
+  31   1        {
+  32   2          CR = 0;           //停止PCA。
+  33   2          PWM1_high = pwm;      //数据在正确范围，则装入占空比寄存器。
+  34   2          PWM1_low = PWM_DUTY - pwm;  //计算并保存PWM输出低电平的PCA时钟脉冲个数。
+  35   2          CR = 1;           //启动PCA。
+  36   2        }
+  37   1        else if(PCA_id == PCA2)
+  38   1        {
+  39   2          CR = 0;           //停止PCA。
+  40   2          PWM2_high = pwm;      //数据在正确范围，则装入占空比寄存器。
+  41   2          PWM2_low = PWM_DUTY - pwm;  //计算并保存PWM输出低电平的PCA时钟脉冲个数。
+  42   2          CR = 1;           //启动PCA。
+  43   2        }
+  44   1      }
+  45          
+  46          //========================================================================
+  47          // 函数: void PCA_Init(void)
+  48          // 描述: PCA初始化程序.
+  49          // 参数: none
+  50          // 返回: none.
+  51          // 版本: V1.0, 2013-11-22
+  52          //========================================================================
+  53          void  PCA_Init(void)
+  54          {
+C51 COMPILER V9.60.0.0   PWM                                                               02/04/2022 14:08:03 PAGE 2   
+
+  55   1        CR = 0;
+  56   1        AUXR1 = (AUXR1 & ~(3<<4)) | PCA_P24_P25_P26_P27;  //切换IO口
+  57   1        CCAPM0 = (PCA_Mode_HighPulseOutput | ENABLE); //16位软件定时、高速脉冲输出、中断模式
+  58   1        CCAPM1 = (PCA_Mode_HighPulseOutput | ENABLE);
+  59   1        CCAPM2 = (PCA_Mode_HighPulseOutput | ENABLE);
+  60   1      
+  61   1        CH = 0;
+  62   1        CL = 0;
+  63   1        CMOD  = (CMOD  & ~(7<<1)) | PCA_Clock_1T;     //选择时钟源
+  64   1        PPCA  = 1;  // 高优先级中断
+  65   1      
+  66   1        pwm0 = (PWM_DUTY / 4 * 1);  //给PWM一个初值
+  67   1        pwm1 = (PWM_DUTY / 4 * 2);
+  68   1        pwm2 = (PWM_DUTY / 4 * 3);
+  69   1      
+  70   1        PWMn_Update(PCA0,pwm0);
+  71   1        PWMn_Update(PCA1,pwm1);
+  72   1        PWMn_Update(PCA2,pwm2);
+  73   1      
+  74   1        CR    = 1;  // 运行PCA定时器
+  75   1      }
+  76          //======================================================================
+  77          
+  78          //========================================================================
+  79          // 函数: void PCA_Handler (void) interrupt 7
+  80          // 描述: PCA中断处理程序.
+  81          // 参数: None
+  82          // 返回: none.
+  83          // 版本: V1.0, 2012-11-22
+  84          //========================================================================
+  85          void  PCA_Handler (void) interrupt 7
+  86          {
+  87   1        if(CCF0)    //PCA模块0中断
+  88   1        {
+  89   2          CCF0 = 0;   //清PCA模块0中断标志
+  90   2          if(P25) CCAP0_tmp += PWM0_high; //输出为高电平，则给影射寄存器装载高电平时间长度
+  91   2          else  CCAP0_tmp += PWM0_low;  //输出为低电平，则给影射寄存器装载低电平时间长度
+  92   2          CCAP0L = (u8)CCAP0_tmp;     //将影射寄存器写入捕获寄存器，先写CCAP0L
+  93   2          CCAP0H = (u8)(CCAP0_tmp >> 8);  //后写CCAP0H
+  94   2        }
+  95   1      
+  96   1        if(CCF1)  //PCA模块1中断
+  97   1        {
+  98   2          CCF1 = 0;   //清PCA模块1中断标志
+  99   2          if(P26) CCAP1_tmp += PWM1_high; //输出为高电平，则给影射寄存器装载高电平时间长度
+ 100   2          else  CCAP1_tmp += PWM1_low;  //输出为低电平，则给影射寄存器装载低电平时间长度
+ 101   2          CCAP1L = (u8)CCAP1_tmp;     //将影射寄存器写入捕获寄存器，先写CCAP0L
+ 102   2          CCAP1H = (u8)(CCAP1_tmp >> 8);  //后写CCAP0H
+ 103   2        }
+ 104   1      
+ 105   1        if(CCF2)  //PCA模块2中断
+ 106   1        {
+ 107   2          CCF2 = 0;   //清PCA模块1中断标志
+ 108   2          if(P27) CCAP2_tmp += PWM2_high; //输出为高电平，则给影射寄存器装载高电平时间长度
+ 109   2          else  CCAP2_tmp += PWM2_low;  //输出为低电平，则给影射寄存器装载低电平时间长度
+ 110   2          CCAP2L = (u8)CCAP2_tmp;     //将影射寄存器写入捕获寄存器，先写CCAP0L
+ 111   2          CCAP2H = (u8)(CCAP2_tmp >> 8);  //后写CCAP0H
+ 112   2        }
+ 113   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+C51 COMPILER V9.60.0.0   PWM                                                               02/04/2022 14:08:03 PAGE 3   
+
+   CODE SIZE        =    304    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     24    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

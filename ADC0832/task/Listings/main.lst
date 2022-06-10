@@ -1,0 +1,216 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              12/25/2021 11:29:38 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <reg52.h>
+   2          #include <intrins.h>
+   3          
+   4          /*已知数据类型重新定义*/
+   5          #define uchar unsigned char
+   6          #define uint unsigned int
+   7          
+   8          
+   9          /*引脚定义*/
+  10          //LCD1602
+  11          #define LCD1602_DB P0 //LCD1602数据总线
+  12          sbit LCD1602_RS = P2^0;  //RS端
+  13          sbit LCD1602_RW = P2^1;  //RW端
+  14          sbit LCD1602_EN = P2^2;  //EN端
+  15          
+  16          //ADC0832
+  17          sbit cs = P1^0;//片选使能，低电平有效
+  18          sbit clk = P1^1;//芯片时钟输入
+  19          sbit dio = P1^2;//数据输入DI与输出DO
+  20          
+  21          //延时2us
+  22          void Delay_2us(void)
+  23          {
+  24   1        _nop_();
+  25   1        _nop_();
+  26   1      }
+  27          /*=================================================
+  28          *函数名称：Read_Busy
+  29          *函数功能：判断1602液晶忙，并等待
+  30          =================================================*/
+  31          void Read_Busy()
+  32          {
+  33   1        uchar busy;
+  34   1        LCD1602_DB = 0xff;//复位数据总线
+  35   1        LCD1602_RS = 0;   //拉低RS
+  36   1        LCD1602_RW = 1;   //拉高RW读
+  37   1        do
+  38   1        {
+  39   2          LCD1602_EN = 1;//使能EN
+  40   2          busy = LCD1602_DB;//读回数据
+  41   2          LCD1602_EN = 0;  //拉低使能以便于下一次产生上升沿
+  42   2        }while(busy & 0x80); //判断状态字BIT7位是否为1，为1则表示忙，程序等待
+  43   1      }
+  44          /*=================================================
+  45          *函数名称：LCD1602_Write_Cmd
+  46          *函数功能：写LCD1602命令
+  47          *调用：Read_Busy();
+  48          *输入：cmd:要写的命令
+  49          =================================================*/
+  50          void LCD1602_Write_Cmd(uchar cmd)
+  51          {
+  52   1        Read_Busy();   //判断忙，忙则等待
+  53   1        LCD1602_RS = 0;
+  54   1        LCD1602_RW = 0; //拉低RS、RW操作时序情况1602课件下中文使用说明基本操作时序章节
+C51 COMPILER V9.60.0.0   MAIN                                                              12/25/2021 11:29:38 PAGE 2   
+
+  55   1        LCD1602_DB = cmd;//写入命令
+  56   1        LCD1602_EN = 1;  //拉高使能端 数据被传输到LCD1602内
+  57   1        LCD1602_EN = 0;  //拉低使能以便于下一次产生上升沿
+  58   1      }
+  59          /*=================================================
+  60          *函数名称：LCD1602_Write_Dat
+  61          *函数功能：写LCD1602数据
+  62          *调用：Read_Busy();
+  63          *输入：dat：需要写入的数据
+  64          =================================================*/
+  65          void LCD1602_Write_Dat(uchar dat)
+  66          {
+  67   1        Read_Busy();
+  68   1        LCD1602_RS = 1;
+  69   1        LCD1602_RW = 0;
+  70   1        LCD1602_DB = dat;
+  71   1        LCD1602_EN = 1;
+  72   1        LCD1602_EN = 0;
+  73   1      }
+  74          
+  75          /*=================================================
+  76          *函数名称：LCD1602_Dis_Str
+  77          *函数功能：在指定位置显示字符串
+  78          *调用：LCD1602_Write_Cmd(); LCD1602_Write_Dat();
+  79          *输入：x：要显示的横坐标取值0-40，y：要显示的行坐标取值0-1（0为第一行,1为第二行）
+  80              *str：需要显示的字符串
+  81          =================================================*/
+  82          void LCD1602_Dis_Str(uchar x, uchar y, uchar *str)
+  83          {
+  84   1        if(y) x |= 0x40;
+  85   1        x |= 0x80;
+  86   1        LCD1602_Write_Cmd(x);
+  87   1        while(*str != '\0')
+  88   1        {
+  89   2          LCD1602_Write_Dat(*str++);
+  90   2        }
+  91   1      }
+  92          /*=================================================
+  93          *函数名称：Init_LCD1602
+  94          *函数功能：1602初始化
+  95          *调用： LCD1602_Write_Cmd();
+  96          =================================================*/
+  97          void Init_LCD1602()
+  98          {
+  99   1        LCD1602_Write_Cmd(0x38); // 设置16*2显示，5*7点阵，8位数据接口
+ 100   1        LCD1602_Write_Cmd(0x0c); //开显示
+ 101   1        LCD1602_Write_Cmd(0x06); //读写一字节后地址指针加1
+ 102   1        LCD1602_Write_Cmd(0x01); //清除显示
+ 103   1      }
+ 104          /*****************************************
+ 105          函数简介：获取ADC0832数据
+ 106          函数名称：ADC_read_data(bit channel)
+ 107          参数说明：ch为入口参数，ch=0选择通道0，ch=1选择通道1
+ 108          函数返回：返回读取到的二进制ADC数据，格式为unsigned char
+ 109                当返回一直0时，转换数据有误
+ 110          ******************************************/
+ 111          uchar ADC_read_data(bit channel)
+ 112          {
+ 113   1        uchar i,dat0=0,dat1=0;
+ 114   1        //------第1次下降沿之前di置高，启动信号---------
+ 115   1      
+ 116   1        cs=0;     //片选信号置低，启动AD转换芯片
+C51 COMPILER V9.60.0.0   MAIN                                                              12/25/2021 11:29:38 PAGE 3   
+
+ 117   1        clk=0;      //时钟置低平
+ 118   1        
+ 119   1        dio=1;      //开始信号为高电平
+ 120   1        Delay_2us();
+ 121   1        clk=1;      //产生一个正脉冲,在时钟上升沿，输入开始信号（DI=1）
+ 122   1        Delay_2us();
+ 123   1          clk=0;      //第1个时钟下降沿
+ 124   1        dio=1;
+ 125   1        
+ 126   1        Delay_2us();
+ 127   1        clk=1;        // 第2个下降沿输入DI=1，表示双通道单极性输入
+ 128   1        Delay_2us();   
+ 129   1        //------在第2个下降沿，模拟信号输入模式选择（1：单模信号，0：双模差分信号）---------    
+ 130   1        clk=0;  
+ 131   1        dio=channel;         // 第3个下降沿,设置DI，选择通道;
+ 132   1        Delay_2us();
+ 133   1        clk=1;
+ 134   1        Delay_2us();
+ 135   1      
+ 136   1         //------在第3个下降沿，模拟信号输入通道选择（1：通道CH1，0：通道CH0）------------  
+ 137   1        
+ 138   1        clk=0;
+ 139   1        dio=1;          //第四个下降沿之前，DI置高，准备接收数 
+ 140   1        Delay_2us();  
+ 141   1        for(i=0;i<8;i++)                 //第4~11共8个下降沿读数据（MSB->LSB）
+ 142   1        {
+ 143   2          clk=1;
+ 144   2          Delay_2us();
+ 145   2          clk=0;
+ 146   2          Delay_2us();
+ 147   2          dat0=dat0<<1|dio;
+ 148   2        }
+ 149   1        for(i=0;i<8;i++)                 //第11~18共8个下降沿读数据（LSB->MSB）
+ 150   1        {
+ 151   2          dat1=dat1|((uchar)(dio)<<i);
+ 152   2          clk=1;
+ 153   2          Delay_2us();
+ 154   2          clk=0;
+ 155   2          Delay_2us();
+ 156   2        } 
+ 157   1        cs=1;         
+ 158   1        return (dat0==dat1)?dat0:0;     //判断dat0与dat1是否相等
+ 159   1      }
+ 160          
+ 161          void main()
+ 162          {
+ 163   1        uchar adc = 0;
+ 164   1        uint voltage = 0;
+ 165   1        uchar LED_buffer1[16] = {"    ADC:        "};//ADC显示缓冲
+ 166   1        uchar LED_buffer2[16] = {"Voltage:      V "};//电压显示缓冲
+ 167   1        Init_LCD1602();//1602初始化
+ 168   1        while(1)
+ 169   1        {
+ 170   2          adc = ADC_read_data(0);//读取adc值
+ 171   2          voltage = adc * 500.0 / 255;//将adc值换算成电压
+ 172   2          
+ 173   2          LED_buffer1[9] = adc / 100 + '0';   //取adc百位,整型转ASCII码，补0
+ 174   2          LED_buffer1[10] = adc % 100 / 10 + '0'; //取adc十位
+ 175   2          LED_buffer1[11] = adc % 10 + '0';   //取adc个位
+ 176   2      
+ 177   2          LED_buffer2[9] = voltage / 100 + '0';   //取电压个位
+ 178   2          LED_buffer2[10] = '.';//小数点
+C51 COMPILER V9.60.0.0   MAIN                                                              12/25/2021 11:29:38 PAGE 4   
+
+ 179   2          LED_buffer2[11] = voltage / 10 % 10 + '0';  //取电压十分位
+ 180   2          LED_buffer2[12] = voltage % 10 + '0'; //取电压百分位
+ 181   2          
+ 182   2          
+ 183   2          LCD1602_Dis_Str(0, 0, &LED_buffer1[0]); //显示字符串
+ 184   2          LCD1602_Dis_Str(0, 1, &LED_buffer2[0]); //显示字符串
+ 185   2        }
+ 186   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    452    ----
+   CONSTANT SIZE    =     32    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      38
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       1
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,38 @@
+<html>
+<body>
+<pre>
+<h1>礦ision3 Build Log</h1>
+<h2>Project:</h2>
+C:\Documents and Settings\Owner\桌面\新建文件夹\DHT11_090627\51_DHT11\51_DHT21.uv2
+Project File Date:  06/27/2009
+
+<h2>Output:</h2>
+Build target 'Target 1'
+compiling 51_DHT21.c...
+51_DHT21.C(170): warning C280: 'i': unreferenced local variable
+51_DHT21.C(170): warning C280: 'j': unreferenced local variable
+linking...
+Program Size: data=56.0 xdata=0 code=632
+creating hex file from "51_DHT11"...
+"51_DHT11" - 0 Error(s), 2 Warning(s).
+Build target 'Target 1'
+compiling 51_DHT21.c...
+51_DHT21.C(170): warning C280: 'i': unreferenced local variable
+51_DHT21.C(170): warning C280: 'j': unreferenced local variable
+linking...
+Program Size: data=56.0 xdata=0 code=632
+creating hex file from "51_DHT11"...
+"51_DHT11" - 0 Error(s), 2 Warning(s).
+Build target 'Target 1'
+linking...
+Program Size: data=56.0 xdata=0 code=632
+creating hex file from "51_DHT11"...
+"51_DHT11" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+compiling 51_DHT21.c...
+51_DHT21.C(170): warning C280: 'i': unreferenced local variable
+51_DHT21.C(170): warning C280: 'j': unreferenced local variable
+linking...
+Program Size: data=56.0 xdata=0 code=632
+creating hex file from "51_DHT11"...
+"51_DHT11" - 0 Error(s), 2 Warning(s).

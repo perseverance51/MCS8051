@@ -1,0 +1,5 @@
+".\Objects\main.obj",
+".\Objects\Software_SPI.obj",
+".\Objects\st7920.obj" 
+TO ".\Objects\lcd12864SPI" 
+PRINT(".\Listings\lcd12864SPI.m51") RAMSIZE(256) 

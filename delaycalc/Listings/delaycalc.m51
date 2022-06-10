@@ -1,0 +1,175 @@
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                    06/09/2022  11:01:56  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0, INVOKED BY:
+C:\KEIL_V5\C51\BIN\BL51.EXE .\Objects\main2.obj TO .\Objects\delaycalc PRINT (.\Listings\delaycalc.m51) RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL WITH FLOATING POINT ARITHMETIC
+
+
+INPUT MODULES INCLUDED:
+  .\Objects\main2.obj (MAIN2)
+  C:\KEIL_V5\C51\LIB\C51FPS.LIB (?C?FPMUL)
+  C:\KEIL_V5\C51\LIB\C51FPS.LIB (?C?FCAST)
+  C:\KEIL_V5\C51\LIB\C51FPS.LIB (?C?CASTF)
+  C:\KEIL_V5\C51\LIB\C51FPS.LIB (?C?FPGETOPN)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_STARTUP)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?LNEG)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C?ULCMP)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_INIT)
+
+
+LINK MAP OF MODULE:  .\Objects\delaycalc (MAIN2)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     000CH     UNIT         _DATA_GROUP_
+            DATA    0014H     0004H     UNIT         ?DT?MAIN2
+            IDATA   0018H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     0007H     UNIT         ?C_INITSEG
+                    000AH     0001H                  *** GAP ***
+            CODE    000BH     0003H     ABSOLUTE     
+            CODE    000EH     01E4H     UNIT         ?C?LIB_CODE
+            CODE    01F2H     00A0H     UNIT         ?PR?_DELAY?MAIN2
+            CODE    0292H     008CH     UNIT         ?C_C51STARTUP
+            CODE    031EH     003BH     UNIT         ?PR?TM0_ISR?MAIN2
+            CODE    0359H     0012H     UNIT         ?PR?TIMER0INIT?MAIN2
+            CODE    036BH     0012H     UNIT         ?PR?MAIN?MAIN2
+
+
+
+OVERLAY MAP OF MODULE:   .\Objects\delaycalc (MAIN2)
+
+
+SEGMENT                          DATA_GROUP 
+  +--> CALLED SEGMENT          START    LENGTH
+----------------------------------------------
+?C_C51STARTUP                  -----    -----
+  +--> ?PR?MAIN?MAIN2
+  +--> ?C_INITSEG
+
+?PR?MAIN?MAIN2                 -----    -----
+  +--> ?PR?TIMER0INIT?MAIN2
+  +--> ?PR?_DELAY?MAIN2
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  06/09/2022  11:01:56  PAGE 2
+
+
+
+?PR?_DELAY?MAIN2               0008H    000CH
+
+
+
+SYMBOL TABLE OF MODULE:  .\Objects\delaycalc (MAIN2)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        MAIN2
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0090H         PUBLIC        P1
+  D:00A0H         PUBLIC        P2
+  D:00B0H         PUBLIC        P3
+  B:00A8H.7       PUBLIC        EA
+  D:00A8H         PUBLIC        IE
+  C:01F2H         PUBLIC        _delay
+  D:00B8H         PUBLIC        IP
+  C:036BH         PUBLIC        main
+  D:0098H         PUBLIC        SCON
+  D:0089H         PUBLIC        TMOD
+  D:0088H         PUBLIC        TCON
+  C:031EH         PUBLIC        tm0_isr
+  B:00A8H.1       PUBLIC        ET0
+  B:0088H.5       PUBLIC        TF0
+  C:0359H         PUBLIC        Timer0Init
+  D:008CH         PUBLIC        TH0
+  D:008AH         PUBLIC        TL0
+  B:00A0H.0       PUBLIC        LED
+  B:0088H.4       PUBLIC        TR0
+  D:00C8H         PUBLIC        T2CON
+  D:0014H         SYMBOL        currentMillis
+  D:00D0H         PUBLIC        PSW
+  -------         PROC          TIMER0INIT
+  C:0359H         LINE#         8
+  C:0359H         LINE#         9
+  C:0359H         LINE#         11
+  C:035CH         LINE#         12
+  C:035FH         LINE#         13
+  C:0362H         LINE#         14
+  C:0364H         LINE#         15
+  C:0366H         LINE#         16
+  C:0368H         LINE#         17
+  C:036AH         LINE#         18
+  -------         ENDPROC       TIMER0INIT
+  -------         PROC          TM0_ISR
+  C:031EH         LINE#         21
+  C:032DH         LINE#         23
+  C:0330H         LINE#         24
+  C:0333H         LINE#         25
+  C:034CH         LINE#         26
+  -------         ENDPROC       TM0_ISR
+  -------         PROC          _DELAY
+  D:0008H         SYMBOL        interval
+  -------         DO            
+  D:000CH         SYMBOL        previousMillis
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  06/09/2022  11:01:56  PAGE 3
+
+
+  D:0010H         SYMBOL        temp
+  -------         ENDDO         
+  C:01F2H         LINE#         28
+  C:01FAH         LINE#         29
+  C:01FAH         LINE#         30
+  C:020AH         LINE#         31
+  C:022CH         LINE#         32
+  C:0242H         LINE#         33
+  C:0242H         LINE#         34
+  C:0262H         LINE#         35
+  C:0262H         LINE#         36
+  C:027AH         LINE#         37
+  C:028FH         LINE#         38
+  C:028FH         LINE#         39
+  C:0291H         LINE#         40
+  -------         ENDPROC       _DELAY
+  -------         PROC          MAIN
+  C:036BH         LINE#         42
+  C:036BH         LINE#         43
+  C:036EH         LINE#         44
+  C:036EH         LINE#         45
+  C:036EH         LINE#         46
+  C:0370H         LINE#         47
+  C:037BH         LINE#         48
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        MAIN2
+
+  -------         MODULE        ?C?FPMUL
+  C:000EH         PUBLIC        ?C?FPMUL
+  -------         ENDMOD        ?C?FPMUL
+
+  -------         MODULE        ?C?FCAST
+  C:011EH         PUBLIC        ?C?FCASTC
+  C:0119H         PUBLIC        ?C?FCASTI
+  C:0114H         PUBLIC        ?C?FCASTL
+  -------         ENDMOD        ?C?FCAST
+
+  -------         MODULE        ?C?CASTF
+  C:0152H         PUBLIC        ?C?CASTF
+  -------         ENDMOD        ?C?CASTF
+
+  -------         MODULE        ?C?LNEG
+  C:01D3H         PUBLIC        ?C?LNEG
+  -------         ENDMOD        ?C?LNEG
+
+  -------         MODULE        ?C?ULCMP
+  C:01E1H         PUBLIC        ?C?ULCMP
+  -------         ENDMOD        ?C?ULCMP
+
+Program Size: data=25.0 xdata=0 code=892
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

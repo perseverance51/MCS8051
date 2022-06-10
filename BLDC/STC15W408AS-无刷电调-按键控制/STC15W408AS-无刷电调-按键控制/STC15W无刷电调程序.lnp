@@ -1,0 +1,4 @@
+"STARTUP.obj",
+"main.obj" 
+TO "STC15W无刷电调程序" 
+RAMSIZE(256) 

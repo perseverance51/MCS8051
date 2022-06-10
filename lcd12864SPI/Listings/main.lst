@@ -1,0 +1,77 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              12/21/2021 22:52:31 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE SRC\main.c OPTIMIZE(8,SPEED) BROWSE INCDIR(.\SRC) DEBUG OBJECTEXTEND PRI
+                    -NT(.\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          /*  说明：
+   2            //如果有个别汉字是乱码，可以在汉字后面补上"\xfd"
+   3            //或者给Keil软件打汉字乱码补丁
+   4            //http://www.stcisp.com/keilfdfix/keilfdfix.zip
+   5            //Keil软件安装路径C:\Keil_v5\C51\BIN
+   6          
+   7          
+   8          */
+   9          
+  10          #include <STC89C5xRC.H>
+  11          #include "intrins.h"
+  12          #include "st7920.h"
+  13          
+  14          #define uint8_t unsigned char
+  15            
+  16          void Delay1ms()   //@11.0592MHz
+  17          {
+  18   1        unsigned char i, j;
+  19   1      
+  20   1        _nop_();
+  21   1        i = 2;
+  22   1        j = 199;
+  23   1        do
+  24   1        {
+  25   2          while (--j);
+  26   2        } while (--i);
+  27   1      }
+  28          
+  29          
+  30          void delay_ms(unsigned int i)
+  31          {
+  32   1        while(i--)
+  33   1          Delay1ms();
+  34   1      }
+  35          
+  36          
+  37          void main(void)
+  38          {
+  39   1        LCD_init();
+  40   1        LCD_clear();
+  41   1          LCD_write_string(0x0000, "书山有路勤为径；");
+  42   1        LCD_write_string(0x0100, "学海无涯苦作舟。");
+  43   1        LCD_write_string(0x0200, "莫愁前路无知己；");
+  44   1        LCD_write_string(0x0300, "天下谁能不识君。");
+  45   1      
+  46   1        while(1)
+  47   1        { 
+  48   2      
+  49   2        }
+  50   1      }
+  51          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+C51 COMPILER V9.60.0.0   MAIN                                                              12/21/2021 22:52:31 PAGE 2   
+
+   CODE SIZE        =     89    ----
+   CONSTANT SIZE    =     68    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

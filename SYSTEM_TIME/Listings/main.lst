@@ -1,0 +1,177 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              05/17/2022 10:36:26 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          /*
+   2          利用定时器0实现51单片机输出系统上电累计运行时间
+   3          u32:长整型的变量最大值是4294967295毫秒，
+   4          换算下来就是49天17时2分47秒，然后溢出从0开始继续计时
+   5          
+   6          */
+   7          //#include <reg51.h>
+   8          #include <STC89C5xRC.H>
+   9          #include <intrins.h>
+  10          
+  11          #define  interval  1000 //设置延时时间间隔
+  12          sbit RCK=P2^1;//定义74HC595存储寄存器时钟引脚:ST_CP
+  13          sbit SCK=P2^2;//定义74HC595移位寄存器时钟引脚:SH_CP
+  14          sbit SER=P2^3;//定义74HC595串行输入引脚:DS
+  15          sbit led=P2^0;
+  16           
+  17          typedef unsigned char u8;
+  18          typedef unsigned int u16;
+  19          typedef unsigned long u32;
+  20           
+  21          u32 sysRunmillis; //系统运行时间计数，保存单片机从上电复位以来运行的时间，单位是毫秒。该数值由定时器T0的中
+             -断响应子函数更新
+  22          u8 hour,min,sec;  //当前系统运行时间换算成小时数、分数和秒数
+  23          u8 strTime[]={0,0,0,0,0,0,0,0}; //保存时分秒每1位上的数字（0~9），分隔符‘-’的值是10
+  24           
+  25          u8 DigCode[]={0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f,0x40};//共阴极数码管段码
+  26           
+  27          //把全局变量sysRunmillis保存的毫秒数转换成时分秒格式，把时分秒的每一位数字（0~9）保存在数组strTime里。
+  28          void millis2time()
+  29          {
+  30   1        u32 t;
+  31   1        t = sysRunmillis/1000ul;    //毫秒转换为秒
+  32   1        hour = t/3600%24;       //计算小时数  
+  33   1        min = (t%3600)/60;      //计算分
+  34   1        sec = t%60;         //计算秒
+  35   1        //以下处理时、分、秒每1位，如时分秒数值小于10，补加0占位。
+  36   1        if(hour<10)
+  37   1        {
+  38   2          strTime[0]=0;
+  39   2          strTime[1]=hour;
+  40   2        }
+  41   1        else
+  42   1        {
+  43   2          strTime[0]=hour/10;
+  44   2          strTime[1]=hour%10;
+  45   2        }
+  46   1        if(min<10)
+  47   1        {
+  48   2          strTime[3]=0;
+  49   2          strTime[4]=min;
+  50   2        }
+  51   1        else
+  52   1        {
+  53   2          strTime[3]=min/10;
+C51 COMPILER V9.60.0.0   MAIN                                                              05/17/2022 10:36:26 PAGE 2   
+
+  54   2          strTime[4]=min%10;
+  55   2        }
+  56   1        if(sec<10)
+  57   1        {
+  58   2          strTime[6]=0;
+  59   2          strTime[7]=sec;
+  60   2        }
+  61   1        else
+  62   1        {
+  63   2          strTime[6]=sec/10;
+  64   2          strTime[7]=sec%10;
+  65   2        }
+  66   1      }
+  67           
+  68          //给74HC95发送数码管位选和段码数据
+  69          void _74HC595SendByte(u8 wei,u8 duan)
+  70          {
+  71   1        u8 i;
+  72   1        RCK=0;
+  73   1        for(i=0;i<8;i++)
+  74   1        {
+  75   2          SCK=0;
+  76   2          _nop_();
+  77   2          SER=wei>>7;
+  78   2          SCK=1;
+  79   2          _nop_();
+  80   2          wei<<=1;
+  81   2        }
+  82   1        for(i=0;i<8;i++)
+  83   1        {
+  84   2          SCK=0;
+  85   2          _nop_();
+  86   2          SER=duan>>7;
+  87   2          SCK=1;
+  88   2          _nop_();
+  89   2          duan<<=1;
+  90   2        }
+  91   1        RCK=1;
+  92   1      }
+  93           
+  94          //初始化定时器T0
+  95          void Timer0Init(void)   //1毫秒@12.000MHz
+  96          {
+  97   1        AUXR &= 0x7F;   //定时器时钟12T模式
+  98   1        TMOD &= 0xF0;   //设置定时器模式
+  99   1        //计数初值，每1毫秒中断1次
+ 100   1        TL0 = 0x20;   //设置定时初始值
+ 101   1        TH0 = 0xD1;   //设置定时初始值
+ 102   1      //    EA = 1;
+ 103   1      //    ET0 = 1;//T0的溢出中断允位
+ 104   1        IE |= 0x82;//代替前面2句
+ 105   1        TF0 = 0;    //清除TF0标志
+ 106   1        TR0 = 1;    //定时器0开始计时
+ 107   1      }
+ 108          
+ 109          
+ 110           
+ 111          void Timer0Interrupt() interrupt 1
+ 112          {
+ 113   1        //传统51单片机没有16位自动重载模式,Proteus仿真时需要加上下面2句
+ 114   1        TL0 = 0x20;   //设置定时初始值
+ 115   1        TH0 = 0xD1;   //设置定时初始值
+C51 COMPILER V9.60.0.0   MAIN                                                              05/17/2022 10:36:26 PAGE 3   
+
+ 116   1          sysRunmillis++; //每1毫秒加1
+ 117   1      }
+ 118           
+ 119          void delayms(u16 ms)   //延时毫秒
+ 120          {
+ 121   1          u32 temp;
+ 122   1        temp = sysRunmillis ;
+ 123   1          while(sysRunmillis - temp < ms );
+ 124   1      }
+ 125           
+ 126          void main()
+ 127          {
+ 128   1        u8 i;
+ 129   1        u32 previousMillis = 0;
+ 130   1          u32 currentMillis;
+ 131   1        Timer0Init();
+ 132   1        strTime[2]=10;
+ 133   1        strTime[5]=10;
+ 134   1      
+ 135   1        while(1)
+ 136   1        {
+ 137   2          currentMillis = sysRunmillis;
+ 138   2          millis2time();
+ 139   2          for(i=0;i<8;i++)
+ 140   2          {
+ 141   3            _74HC595SendByte(~(0x01<<i),DigCode[strTime[i]]);
+ 142   3          }
+ 143   2          if (currentMillis - previousMillis >= interval) {
+ 144   3          previousMillis = currentMillis;
+ 145   3            led=!led;
+ 146   3          }
+ 147   2        }
+ 148   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    523    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     26      16
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

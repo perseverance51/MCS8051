@@ -1,0 +1,3 @@
+".\Objects\main4.obj" 
+TO ".\Objects\RECE_IR" 
+PRINT(".\Listings\RECE_IR.m51") RAMSIZE(256) 

@@ -1,0 +1,136 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              02/03/2022 13:02:10 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE INCDIR(..\STC15simpleMPU6050) DEBUG OBJE
+                    -CTEXTEND PRINT(.\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          
+   2          
+   3          #include "stdio.h"
+   4          #include "config.h"
+   5          #include "STC15Fxxxx.H"
+   6          #include "MPU6050.H"
+   7          
+   8          //#include "usart.h"
+   9          #include "delay.h"
+  10          #define   BaudRate1   9600L
+  11          #define   UART1_BUF_LENGTH  32
+  12          #define RX1_Lenth   32      //´®¿Ú½ÓÊÕ»º³å³¤¶È
+  13          #define Timer1_Reload (65536UL -(MAIN_Fosc / 4 / BaudRate1))    //Timer 1 ÖØ×°Öµ£¬ ¶ÔÓ¦300KHZ
+  14          
+  15          u8  TX1_Cnt;  //·¢ËÍ¼ÆÊý
+  16          u8  RX1_Cnt;  //½ÓÊÕ¼ÆÊý
+  17          bit B_TX1_Busy; //·¢ËÍÃ¦±êÖ¾
+  18          
+  19          u8  idata RX1_Buffer[UART1_BUF_LENGTH]; //½ÓÊÕ»º³å
+  20          
+  21          void InitSerialPort(void)
+  22          { 
+  23   1        SCON = 0x50;      //8Î»Êý¾Ý£¬¿É±ä²¨ÌØÂÊ
+  24   1        AUXR |= 0x40;   //¶¨Ê±Æ÷Ê±ÖÓ1TÄ£Ê½
+  25   1        AUXR &= 0xFE;   //´®¿Ú1Ñ¡Ôñ¶¨Ê±Æ÷1Îª²¨ÌØÂÊ·¢ÉúÆ÷
+  26   1        TMOD &= 0x0F;   //ÉèÖÃ¶¨Ê±Æ÷Ä£Ê½
+  27   1        TH1 = (u8)(Timer1_Reload >> 8);
+  28   1        TL1 = (u8)Timer1_Reload;
+  29   1        
+  30   1        ET1 = 0;    //½ûÖ¹¶¨Ê±Æ÷%dÖÐ¶Ï
+  31   1        TR1 = 1;    //¶¨Ê±Æ÷1¿ªÊ¼¼ÆÊ±
+  32   1            ES=1;         //´®¿ÚÖÐ¶Ï¿ª¹Ø,²ÉÓÃ²éÑ¯·¨Ê±²»ÓÃ´ò¿ªÖÐ¶Ï      
+  33   1            REN=1;            //´®¿ÚÎª¹¤×÷·½Ê½1£¬ÔÊÐí½ÓÊÕÊý¾Ý
+  34   1            SM0=0;          //SM0 SM1´®¿Ú¹¤×÷·½Ê½Ñ¡Ôñ£¬01£º8Î»Òì²½ÊÕ·¢£¬²¨ÌØÂÊÓÉ¶¨Ê±Æ÷¾ö¶¨
+  35   1            SM1=1;
+  36   1        
+  37   1      }
+  38          //ÖØÐ´putcharº¯Êý,·½±ãµ÷ÓÃprintf´®¿Ú´òÓ¡Êä³ö
+  39           char putchar(unsigned char c)
+  40          {
+  41   1             SBUF = c;          //·¢ËÍÊý¾Ý
+  42   1           while(!TI);          //µÈ´ý·¢ËÍÍê³É
+  43   1           TI=0;              //ÇåÁã·¢ËÍ±êÖ¾Î»;
+  44   1        return c;
+  45   1      }
+  46          void  UART1_config(u8 brt)  // Ñ¡Ôñ²¨ÌØÂÊ, 2: Ê¹ÓÃTimer2×ö²¨ÌØÂÊ, ÆäËüÖµ: Ê¹ÓÃTimer1×ö²¨ÌØÂÊ.
+  47          {
+  48   1        /*********** ²¨ÌØÂÊÊ¹ÓÃ¶¨Ê±Æ÷2 *****************/
+  49   1        if(brt == 2)
+  50   1        {
+  51   2          AUXR |= 0x01;   //S1 BRT Use Timer2;
+  52   2          //Timer1_Reload;
+  53   2        }
+  54   1      
+C51 COMPILER V9.60.0.0   MAIN                                                              02/03/2022 13:02:10 PAGE 2   
+
+  55   1        /*********** ²¨ÌØÂÊÊ¹ÓÃ¶¨Ê±Æ÷1 *****************/
+  56   1        else
+  57   1        {
+  58   2          TR1 = 0;
+  59   2          AUXR &= ~0x01;    //S1 BRT Use Timer1;
+  60   2          AUXR |=  (1<<6);  //Timer1 set as 1T mode
+  61   2          TMOD &= ~(1<<6);  //Timer1 set As Timer
+  62   2          TMOD &= ~0x30;    //Timer1_16bitAutoReload;
+  63   2          TH1 = (u8)((65536UL - (MAIN_Fosc / 4) / BaudRate1) / 256);
+  64   2          TL1 = (u8)((65536UL - (MAIN_Fosc / 4) / BaudRate1) % 256);
+  65   2          ET1 = 0;  //½ûÖ¹ÖÐ¶Ï
+  66   2          INT_CLKO &= ~0x02;  //²»Êä³öÊ±ÖÓ
+  67   2          TR1  = 1;
+  68   2          
+  69   2        }
+  70   1        /*************************************************/
+  71   1          //SCON = 0x50;      //8Î»Êý¾Ý£¬¿É±ä²¨ÌØÂÊ
+  72   1        //SCON = (SCON & 0x3f) | 0x40;  //UART1Ä£Ê½, 0x00: Í¬²½ÒÆÎ»Êä³ö, 0x40: 8Î»Êý¾Ý,¿É±ä²¨ÌØÂÊ, 0x80: 9Î»Êý¾Ý,¹
+             -Ì¶¨²¨ÌØÂÊ, 0xc0: 9Î»Êý¾Ý,¿É±ä²¨ÌØÂÊ
+  73   1      //  PS  = 1;  //¸ßÓÅÏÈ¼¶ÖÐ¶Ï
+  74   1        ES  = 1;  //ÔÊÐíÖÐ¶Ï
+  75   1        REN = 1;  //ÔÊÐí½ÓÊÕ
+  76   1        P_SW1 &= 0x3f;
+  77   1        P_SW1 |= 0x80;    //UART1 switch to, 0x00: P3.0 P3.1, 0x40: P3.6 P3.7, 0x80: P1.6 P1.7 (±ØÐëÊ¹ÓÃÄÚ²¿Ê±ÖÓ)
+  78   1        PCON2 |=  (1<<4); //ÄÚ²¿¶ÌÂ·RXDÓëTXD, ×öÖÐ¼Ì, ENABLE,DISABLE
+  79   1      
+  80   1        B_TX1_Busy = 0;
+  81   1        TX1_Cnt = 0;
+  82   1        RX1_Cnt = 0;
+  83   1      }
+  84            void main(void)
+  85            {
+  86   1      
+  87   1        P0M1 = 0; P0M0 = 0; //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+  88   1        P1M1 = 0; P1M0 = 0; //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+  89   1        P2M1 = 0; P2M0 = 0; //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+  90   1        P3M1 = 0; P3M0 = 0; //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+  91   1        P4M1 = 0; P4M0 = 0; //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+  92   1        P5M1 = 0; P5M0 = 0; //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+  93   1        P6M1 = 0; P6M0 = 0; //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+  94   1        P7M1 = 0; P7M0 = 0; //ÉèÖÃÎª×¼Ë«Ïò¿Ú
+  95   1        UART1_config(1);  // Ñ¡Ôñ²¨ÌØÂÊ, 2: Ê¹ÓÃTimer2×ö²¨ÌØÂÊ, ÆäËüÖµ: Ê¹ÓÃTimer1×ö²¨ÌØÂÊ.
+  96   1          InitSerialPort();
+  97   1        //PrintString1("STC15W408AS UART1 Test Prgramme!\r\n"); //SUART1·¢ËÍÒ»¸ö×Ö·û´®
+  98   1        EA = 1; //ÔÊÐí×ÜÖÐ¶Ï
+  99   1        while (1)
+ 100   1        {
+ 101   2          delay_ms(500);
+ 102   2          printf("perseverance51 \r\n");  //SUART1·¢ËÍÒ»¸ö×Ö·û´®
+ 103   2          P10 = !P10;
+ 104   2        }
+ 105   1      }
+ 106          
+ 107          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    158    ----
+   CONSTANT SIZE    =     18    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      2    ----
+C51 COMPILER V9.60.0.0   MAIN                                                              02/03/2022 13:02:10 PAGE 3   
+
+   IDATA SIZE       =     32    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

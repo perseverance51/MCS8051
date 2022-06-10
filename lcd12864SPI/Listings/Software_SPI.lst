@@ -1,0 +1,173 @@
+C51 COMPILER V9.60.0.0   SOFTWARE_SPI                                                      12/21/2021 21:57:20 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE SOFTWARE_SPI
+OBJECT MODULE PLACED IN .\Objects\Software_SPI.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE SRC\Software_SPI.c OPTIMIZE(8,SPEED) BROWSE INCDIR(.\SRC) DEBUG OBJECTEX
+                    -TEND PRINT(.\Listings\Software_SPI.lst) TABS(2) OBJECT(.\Objects\Software_SPI.obj)
+
+line level    source
+
+   1          #include "Software_SPI.h"
+   2          
+   3          void SPI_Delay()  //每步的间隔 用于等待电平稳定和控制通讯速率
+   4          {
+   5   1      
+   6   1      }
+   7          
+   8          //MOSI拉高 移植时需修改
+   9          void MOSI_H()
+  10          {
+  11   1        SPI_MOSI = 1;
+  12   1      }
+  13          
+  14          //MOSI拉低 移植时需修改
+  15          void MOSI_L()
+  16          {
+  17   1        SPI_MOSI = 0;
+  18   1      }
+  19          
+  20          //MISO拉高 移植时需修改
+  21          void MISO_H()
+  22          {
+  23   1        SPI_MISO = 1;
+  24   1      }
+  25          
+  26          //MISO拉低 移植时需修改
+  27          void MISO_L()
+  28          {
+  29   1        SPI_MISO = 0;
+  30   1      }
+  31          
+  32          //SCK拉高 移植时需修改
+  33          void SPI_SCK_H()
+  34          {
+  35   1        SPI_SCK = 1;
+  36   1      }
+  37          
+  38          //SCK拉低 移植时需修改
+  39          void SPI_SCK_L()
+  40          {
+  41   1        SPI_SCK = 0;
+  42   1      }
+  43          
+  44          //读取MISO电平 移植时需修改
+  45          uint8_t MISO_Read()
+  46          {
+  47   1        SPI_MISO = 1;
+  48   1        SPI_Delay();
+  49   1        return SPI_MISO;
+  50   1      }
+  51          
+  52          //空闲时时钟极性(CPOL)    0为低电平 1为高电平
+  53          //数据有效时钟缘相位(CPHA)  0为奇数缘 1为偶数缘
+  54          
+C51 COMPILER V9.60.0.0   SOFTWARE_SPI                                                      12/21/2021 21:57:20 PAGE 2   
+
+  55          /* CPOL = 0, CPHA = 0, MSB first */
+  56          uint8_t SOFT_SPI_RW_MODE0(uint8_t write_dat)
+  57          {
+  58   1          uint8_t i, read_dat = 0;
+  59   1      
+  60   1        SPI_SCK_L();
+  61   1        SPI_Delay();
+  62   1          for( i = 0; i < 8; i++ )
+  63   1          {
+  64   2              if(write_dat & 0x80)
+  65   2                  MOSI_H();  
+  66   2              else                    
+  67   2                  MOSI_L();  
+  68   2              write_dat <<= 1;
+  69   2              SPI_Delay();
+  70   2              SPI_SCK_H(); 
+  71   2              read_dat <<= 1;  
+  72   2          read_dat |= MISO_Read();
+  73   2              SPI_SCK_L(); 
+  74   2          }
+  75   1          return read_dat;
+  76   1      }
+  77           
+  78          /* CPOL=0，CPHA=1, MSB first */
+  79          uint8_t SOFT_SPI_RW_MODE1(uint8_t write_dat) 
+  80          {
+  81   1          uint8_t i, read_dat = 0;
+  82   1      
+  83   1        SPI_SCK_L();
+  84   1        SPI_Delay();
+  85   1        for(i = 0; i < 8; i++)  //循环8次
+  86   1        {
+  87   2          SPI_SCK_H();    //拉高时钟
+  88   2          if(write_dat & 0x80)
+  89   2            MOSI_H();   //若最到位为高，则输出高
+  90   2          else      
+  91   2            MOSI_L();   //若最到位为低，则输出低
+  92   2          write_dat <<= 1;  //低一位移位到最高位
+  93   2          SPI_Delay();
+  94   2          SPI_SCK_L();    //拉低时钟
+  95   2          read_dat <<= 1;   //数据左移
+  96   2          read_dat |= MISO_Read();
+  97   2        }
+  98   1        return read_dat;    //返回数据
+  99   1      }
+ 100           
+ 101          /* CPOL=1，CPHA=0, MSB first */
+ 102          uint8_t SOFT_SPI_RW_MODE2(uint8_t write_dat) 
+ 103          {
+ 104   1          uint8_t i, read_dat = 0;
+ 105   1      
+ 106   1        SPI_SCK_H();
+ 107   1        SPI_Delay();
+ 108   1        for(i = 0; i < 8; i++)  // 循环8次
+ 109   1        {
+ 110   2          if(write_dat & 0x80)
+ 111   2            MOSI_H();   //若最到位为高，则输出高
+ 112   2          else      
+ 113   2            MOSI_L();   //若最到位为低，则输出低
+ 114   2          write_dat <<= 1;  //低一位移位到最高位
+ 115   2          SPI_Delay();
+ 116   2          SPI_SCK_L();    //拉低时钟
+C51 COMPILER V9.60.0.0   SOFTWARE_SPI                                                      12/21/2021 21:57:20 PAGE 3   
+
+ 117   2          read_dat <<= 1;     //数据左移
+ 118   2          read_dat |= MISO_Read();    
+ 119   2          SPI_SCK_H();    //拉高时钟
+ 120   2        }
+ 121   1        return read_dat;    //返回数据
+ 122   1      }
+ 123           
+ 124          /* CPOL = 1, CPHA = 1, MSB first */
+ 125          uint8_t SOFT_SPI_RW_MODE3(uint8_t write_dat)
+ 126          {
+ 127   1          uint8_t i, read_dat = 0;
+ 128   1      
+ 129   1        SPI_SCK_H();
+ 130   1        SPI_Delay();
+ 131   1          for( i = 0; i < 8; i++ )
+ 132   1          {
+ 133   2          SPI_SCK_L(); 
+ 134   2              if(write_dat & 0x80)
+ 135   2                  MOSI_H();  
+ 136   2              else                    
+ 137   2                  MOSI_L();  
+ 138   2              write_dat <<= 1;
+ 139   2              SPI_Delay();  
+ 140   2              SPI_SCK_H(); 
+ 141   2              read_dat <<= 1;  
+ 142   2              read_dat |= MISO_Read(); 
+ 143   2          }
+ 144   1          return read_dat;
+ 145   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    242    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

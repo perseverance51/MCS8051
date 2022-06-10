@@ -1,0 +1,473 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              04/27/2022 09:08:18 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          //测试工作频率为 11.0592MHz
+   2          //本例程实现如下功能： 侦测反电动势，驱动无霍尔无刷直流马达运转
+   3          //目前使用 MCU 内置单比较器可实现无霍尔 100000 转高速运转，还有提升空间
+   4          /******************** include **************************/
+   5          #include <STC8.H>
+   6          
+   7          //#include "STC8H8K.h"
+   8          /******************** typedef **************************/
+   9          typedef unsigned char u8;
+  10          typedef unsigned int u16;
+  11          /******************** define **************************/
+  12          #define TIM1_Period ((u16)200)
+  13          #define START 0x1A
+  14          #define RUN 0x1B
+  15          #define STOP 0x1C
+  16          #define IDLE 0x1D
+  17          /******************** Variable **************************/
+  18          u8 Hall_sta = 0;
+  19          u16 Aim_Pulse,Start_Pulse;
+  20          u8 Motor_sta = IDLE;
+  21          u8 Hall_a=0,Hall_b=0,Hall_c=0;
+  22          u8 CMP_ch=0;
+  23          u8 BMF_en=0;
+  24          u8 BMF=0;
+  25          /******************** function **************************/
+  26          void DelayXus(u8 delayTime);
+  27          void DelayXms(u8 delayTime);
+  28          void MOTOR_START(void);
+  29          void MOTOR_STOP(void);
+  30          u8 RD_BMF(void);
+  31          u8 KEY_detect(void);
+  32          /******************** main **************************/
+  33          void main(void)
+  34          {
+  35   1          P_SW2 = 0x80; //SFR enable
+  36   1          P0M1 = 0x0F;
+  37   1          P0M0 = 0x00;
+  38   1          P1M1 = 0xc1;
+  39   1          P1M0 = 0x30;
+  40   1          P2M1 = 0x00;
+  41   1          P2M0 = 0xff;
+  42   1          P3M1 = 0xE0;
+  43   1          P3M0 = 0x13;
+  44   1          P5M1 = 0x03;
+  45   1          P5M0 = 0x00;
+  46   1          RSTCFG = 0x40; //P54 用作 IO
+  47   1          ADCCFG = 0x0f;
+  48   1          ADC_CONTR = 0x80;
+  49   1          CMPCR2 = 0x1f;
+  50   1          CMPEXCFG = 0x00;
+  51   1          CMPCR1 = 0xB0;
+  52   1          PWM_ENO = 0x15; //IO 输出 PWM
+*** ERROR C202 IN LINE 52 OF main.c: 'PWM_ENO': undefined identifier
+  53   1          PWM_PS = 0x55;
+C51 COMPILER V9.60.0.0   MAIN                                                              04/27/2022 09:08:18 PAGE 2   
+
+*** ERROR C202 IN LINE 53 OF main.c: 'PWM_PS': undefined identifier
+  54   1          TIM1-> PSCRH = 0x00; //预分频寄存器
+*** ERROR C202 IN LINE 54 OF main.c: 'TIM1': undefined identifier
+  55   1          TIM1-> PSCRL = 0x02;
+*** ERROR C202 IN LINE 55 OF main.c: 'TIM1': undefined identifier
+  56   1          TIM1-> DTR = 0x02; // 死区时间配置
+*** ERROR C202 IN LINE 56 OF main.c: 'TIM1': undefined identifier
+  57   1          TIM1-> ARRH = (u8)(TIM1_Period >> 8);
+*** ERROR C202 IN LINE 57 OF main.c: 'TIM1': undefined identifier
+  58   1          TIM1-> ARRL = (u8)(TIM1_Period);
+*** ERROR C202 IN LINE 58 OF main.c: 'TIM1': undefined identifier
+  59   1          TIM1-> CCMR1 = 0x60; // 通道模式配置
+*** ERROR C202 IN LINE 59 OF main.c: 'TIM1': undefined identifier
+  60   1          TIM1-> CCMR2 = 0x60;
+*** ERROR C202 IN LINE 60 OF main.c: 'TIM1': undefined identifier
+  61   1          TIM1-> CCMR3 = 0x60;
+*** ERROR C202 IN LINE 61 OF main.c: 'TIM1': undefined identifier
+  62   1          TIM1-> CCER1 = 0x11; // 配置通道输出使能和极性
+*** ERROR C202 IN LINE 62 OF main.c: 'TIM1': undefined identifier
+  63   1          TIM1-> CCER2 = 0x01; // 配置通道输出使能和极性
+*** ERROR C202 IN LINE 63 OF main.c: 'TIM1': undefined identifier
+  64   1          TIM1-> OISR = 0x00; // 配置 MOE=0 时各通道输出电平
+*** ERROR C202 IN LINE 64 OF main.c: 'TIM1': undefined identifier
+  65   1          TIM1-> CR1 = 0xA0;
+*** ERROR C202 IN LINE 65 OF main.c: 'TIM1': undefined identifier
+  66   1          TIM1-> CR2 = 0x24;
+*** ERROR C202 IN LINE 66 OF main.c: 'TIM1': undefined identifier
+  67   1          TIM1-> SMCR = 0x20;
+*** ERROR C202 IN LINE 67 OF main.c: 'TIM1': undefined identifier
+  68   1          TIM1-> BKR = 0x0c;
+*** ERROR C202 IN LINE 68 OF main.c: 'TIM1': undefined identifier
+  69   1          TIM1-> CR1 |= 0x01; // 使能计数器
+*** ERROR C202 IN LINE 69 OF main.c: 'TIM1': undefined identifier
+  70   1          EA = 1;
+  71   1          Aim_Pulse = 100;
+  72   1          while (1)
+  73   1          {
+  74   2              switch(Motor_sta)
+  75   2              {
+  76   3              case START:
+  77   3                  MOTOR_START();
+  78   3                  Motor_sta = RUN;
+  79   3                  break;
+  80   3              case RUN:
+  81   3                  if(KEY_detect()==1)
+  82   3                      Motor_sta = STOP;
+  83   3                  break;
+  84   3              case STOP:
+  85   3                  MOTOR_STOP();
+  86   3                  Motor_sta = IDLE;
+  87   3                  break;
+  88   3              case IDLE:
+  89   3                  if(KEY_detect()==1)
+  90   3                      Motor_sta = START;
+  91   3                  break;
+  92   3              default:
+  93   3                  break;
+  94   3              }
+  95   2          }
+  96   1      }
+  97          void CMP_Isr() interrupt 21
+  98          {
+C51 COMPILER V9.60.0.0   MAIN                                                              04/27/2022 09:08:18 PAGE 3   
+
+  99   1          CMPCR1 &= ~0x30; //关比较器中断
+ 100   1          if(CMPCR1 & 0x01)
+ 101   1          {
+ 102   2              if((CMPEXCFG&0X03) == 0) {
+ 103   3                  Hall_a=1;
+ 104   3              }
+ 105   2              if((CMPEXCFG&0X03) == 1) {
+ 106   3                  Hall_b=1;
+ 107   3              }
+ 108   2              if((CMPEXCFG&0X03) == 2) {
+ 109   3                  Hall_c=1;
+ 110   3              }
+ 111   2          } else
+ 112   1          {
+ 113   2              if((CMPEXCFG&0X03) == 0) {
+ 114   3                  Hall_a=0;
+ 115   3              }
+ 116   2              if((CMPEXCFG&0X03) == 1) {
+ 117   3                  Hall_b=0;
+ 118   3              }
+ 119   2              if((CMPEXCFG&0X03) == 2) {
+ 120   3                  Hall_c=0;
+ 121   3              }
+ 122   2          }
+ 123   1          BMF= RD_BMF();
+ 124   1          if(BMF_en)
+ 125   1          {
+ 126   2              switch(BMF)
+ 127   2              {
+ 128   3              case 3:
+ 129   3                  TIM1-> CCR3H = 0;
+*** ERROR C202 IN LINE 129 OF main.c: 'TIM1': undefined identifier
+ 130   3                  TIM1-> CCR3L = 0;
+*** ERROR C202 IN LINE 130 OF main.c: 'TIM1': undefined identifier
+ 131   3                  TIM1-> CCR1H = (u8)(Aim_Pulse >> 8);
+*** ERROR C202 IN LINE 131 OF main.c: 'TIM1': undefined identifier
+ 132   3                  TIM1-> CCR1L = (u8)(Aim_Pulse);
+*** ERROR C202 IN LINE 132 OF main.c: 'TIM1': undefined identifier
+ 133   3                  TIM1-> CCR2H = 0;
+*** ERROR C202 IN LINE 133 OF main.c: 'TIM1': undefined identifier
+ 134   3                  TIM1-> CCR2L = 0;
+*** ERROR C202 IN LINE 134 OF main.c: 'TIM1': undefined identifier
+ 135   3                  P21=0;
+ 136   3                  P23=1;
+ 137   3                  P25=0;
+ 138   3                  break;
+ 139   3              case 2:
+ 140   3                  TIM1-> CCR3H = 0;
+*** ERROR C202 IN LINE 140 OF main.c: 'TIM1': undefined identifier
+ 141   3                  TIM1-> CCR3L = 0;
+*** ERROR C202 IN LINE 141 OF main.c: 'TIM1': undefined identifier
+ 142   3                  TIM1-> CCR1H = (u8)(Aim_Pulse >> 8);
+*** ERROR C202 IN LINE 142 OF main.c: 'TIM1': undefined identifier
+ 143   3                  TIM1-> CCR1L = (u8)(Aim_Pulse);
+*** ERROR C202 IN LINE 143 OF main.c: 'TIM1': undefined identifier
+ 144   3                  TIM1-> CCR2H = 0;
+*** ERROR C202 IN LINE 144 OF main.c: 'TIM1': undefined identifier
+ 145   3                  TIM1-> CCR2L = 0;
+*** ERROR C202 IN LINE 145 OF main.c: 'TIM1': undefined identifier
+ 146   3                  P21=0;
+ 147   3                  P23=0;
+ 148   3                  P25=1;
+C51 COMPILER V9.60.0.0   MAIN                                                              04/27/2022 09:08:18 PAGE 4   
+
+ 149   3                  break;
+ 150   3              case 6:
+ 151   3                  TIM1-> CCR1H = 0;
+*** ERROR C202 IN LINE 151 OF main.c: 'TIM1': undefined identifier
+ 152   3                  TIM1-> CCR1L = 0;
+*** ERROR C202 IN LINE 152 OF main.c: 'TIM1': undefined identifier
+ 153   3                  TIM1-> CCR2H = (u8)(Aim_Pulse >> 8);
+*** ERROR C202 IN LINE 153 OF main.c: 'TIM1': undefined identifier
+ 154   3                  TIM1-> CCR2L = (u8)(Aim_Pulse);
+*** ERROR C202 IN LINE 154 OF main.c: 'TIM1': undefined identifier
+ 155   3                  TIM1-> CCR3H = 0;
+*** ERROR C202 IN LINE 155 OF main.c: 'TIM1': undefined identifier
+ 156   3                  TIM1-> CCR3L = 0;
+*** ERROR C202 IN LINE 156 OF main.c: 'TIM1': undefined identifier
+ 157   3                  P21=0;
+ 158   3                  P23=0;
+ 159   3                  P25=1;
+ 160   3                  break;
+ 161   3              case 4:
+ 162   3                  TIM1-> CCR1H = 0;
+*** ERROR C202 IN LINE 162 OF main.c: 'TIM1': undefined identifier
+ 163   3                  TIM1-> CCR1L = 0;
+*** ERROR C202 IN LINE 163 OF main.c: 'TIM1': undefined identifier
+ 164   3                  TIM1-> CCR2H = (u8)(Aim_Pulse >> 8);
+*** ERROR C202 IN LINE 164 OF main.c: 'TIM1': undefined identifier
+ 165   3                  TIM1-> CCR2L = (u8)(Aim_Pulse);
+*** ERROR C202 IN LINE 165 OF main.c: 'TIM1': undefined identifier
+ 166   3                  TIM1-> CCR3H = 0;
+*** ERROR C202 IN LINE 166 OF main.c: 'TIM1': undefined identifier
+ 167   3                  TIM1-> CCR3L = 0;
+*** ERROR C202 IN LINE 167 OF main.c: 'TIM1': undefined identifier
+ 168   3                  P21=1;
+ 169   3                  P23=0;
+ 170   3                  P25=0;
+ 171   3                  break;
+ 172   3              case 5:
+ 173   3                  TIM1-> CCR1H = 0;
+*** ERROR C202 IN LINE 173 OF main.c: 'TIM1': undefined identifier
+ 174   3                  TIM1-> CCR1L = 0;
+*** ERROR C202 IN LINE 174 OF main.c: 'TIM1': undefined identifier
+ 175   3                  TIM1-> CCR2H = 0;
+*** ERROR C202 IN LINE 175 OF main.c: 'TIM1': undefined identifier
+ 176   3                  TIM1-> CCR2L = 0;
+*** ERROR C202 IN LINE 176 OF main.c: 'TIM1': undefined identifier
+ 177   3                  TIM1-> CCR3H = (u8)(Aim_Pulse >> 8);
+*** ERROR C202 IN LINE 177 OF main.c: 'TIM1': undefined identifier
+ 178   3                  TIM1-> CCR3L = (u8)(Aim_Pulse);
+*** ERROR C202 IN LINE 178 OF main.c: 'TIM1': undefined identifier
+ 179   3                  P21=1;
+ 180   3                  P23=0;
+ 181   3                  P25=0;
+ 182   3                  break;
+ 183   3              case 1:
+ 184   3                  TIM1-> CCR1H = 0;
+*** ERROR C202 IN LINE 184 OF main.c: 'TIM1': undefined identifier
+ 185   3                  TIM1-> CCR1L = 0;
+*** ERROR C202 IN LINE 185 OF main.c: 'TIM1': undefined identifier
+ 186   3                  TIM1-> CCR2H = 0;
+*** ERROR C202 IN LINE 186 OF main.c: 'TIM1': undefined identifier
+ 187   3                  TIM1-> CCR2L = 0;
+*** ERROR C202 IN LINE 187 OF main.c: 'TIM1': undefined identifier
+ 188   3                  TIM1-> CCR3H = (u8)(Aim_Pulse >> 8);
+C51 COMPILER V9.60.0.0   MAIN                                                              04/27/2022 09:08:18 PAGE 5   
+
+*** ERROR C202 IN LINE 188 OF main.c: 'TIM1': undefined identifier
+ 189   3                  TIM1-> CCR3L = (u8)(Aim_Pulse);
+*** ERROR C202 IN LINE 189 OF main.c: 'TIM1': undefined identifier
+ 190   3                  P21=0;
+ 191   3                  P23=1;
+ 192   3                  P25=0;
+ 193   3                  break;
+ 194   3              default :
+ 195   3                  break;
+ 196   3              }
+ 197   2          }
+ 198   1          CMP_ch++;
+ 199   1          if(CMP_ch==3) CMP_ch=0;
+ 200   1          CMPEXCFG &= ~0x03;
+ 201   1          CMPEXCFG |= CMP_ch;
+ 202   1          CMPCR1 &= ~0x40; //清比较器中断标志
+ 203   1          CMPCR1 |= 0x30; //开比较器中断
+ 204   1      }
+ 205          u8 RD_BMF()
+ 206          {
+ 207   1          Hall_sta = 0;
+ 208   1          (Hall_b)? (Hall_sta|=0x01):(Hall_sta&=~0x01);
+ 209   1          (Hall_a)? (Hall_sta|=0x02):(Hall_sta&=~0x02);
+ 210   1          (Hall_c)? (Hall_sta|=0x04):(Hall_sta&=~0x04);
+ 211   1          return Hall_sta;
+ 212   1      }
+ 213          void MOTOR_START()
+ 214          {
+ 215   1          u16 i,timer=120;
+ 216   1          u8 HA = 3;
+ 217   1          u8 Start_cnt = 0;
+ 218   1          Start_Pulse = 0;
+ 219   1          TIM1-> BKR |= 0x80; // 主输出使能
+*** ERROR C202 IN LINE 219 OF main.c: 'TIM1': undefined identifier
+ 220   1          while(1)
+ 221   1          {
+ 222   2              for(i=0; i<timer; i++)
+ 223   2              {
+ 224   3                  DelayXus(78); //等待
+ 225   3              }
+ 226   2              timer-= timer/25;
+ 227   2              switch(HA)
+ 228   2              {
+ 229   3              case 3:
+ 230   3                  TIM1-> CCR1H = (u8)(Start_Pulse >> 8);
+*** ERROR C202 IN LINE 230 OF main.c: 'TIM1': undefined identifier
+ 231   3                  TIM1-> CCR1L = (u8)(Start_Pulse);
+*** ERROR C202 IN LINE 231 OF main.c: 'TIM1': undefined identifier
+ 232   3                  TIM1-> CCR2H = 0;
+*** ERROR C202 IN LINE 232 OF main.c: 'TIM1': undefined identifier
+ 233   3                  TIM1-> CCR2L = 0;
+*** ERROR C202 IN LINE 233 OF main.c: 'TIM1': undefined identifier
+ 234   3                  TIM1-> CCR3H = 0;
+*** ERROR C202 IN LINE 234 OF main.c: 'TIM1': undefined identifier
+ 235   3                  TIM1-> CCR3L = 0;
+*** ERROR C202 IN LINE 235 OF main.c: 'TIM1': undefined identifier
+ 236   3                  P21=0;
+ 237   3                  P23=1;
+ 238   3                  P25=0;
+ 239   3                  HA = 2;
+ 240   3                  break;
+ 241   3              case 2:
+C51 COMPILER V9.60.0.0   MAIN                                                              04/27/2022 09:08:18 PAGE 6   
+
+ 242   3                  TIM1-> CCR1H = (u8)(Start_Pulse >> 8);
+*** ERROR C202 IN LINE 242 OF main.c: 'TIM1': undefined identifier
+ 243   3                  TIM1-> CCR1L = (u8)(Start_Pulse);
+*** ERROR C202 IN LINE 243 OF main.c: 'TIM1': undefined identifier
+ 244   3                  TIM1-> CCR2H = 0;
+*** ERROR C202 IN LINE 244 OF main.c: 'TIM1': undefined identifier
+ 245   3                  TIM1-> CCR2L = 0;
+*** ERROR C202 IN LINE 245 OF main.c: 'TIM1': undefined identifier
+ 246   3                  TIM1-> CCR3H = 0;
+*** ERROR C202 IN LINE 246 OF main.c: 'TIM1': undefined identifier
+ 247   3                  TIM1-> CCR3L = 0;
+*** ERROR C202 IN LINE 247 OF main.c: 'TIM1': undefined identifier
+ 248   3                  P21=0;
+ 249   3                  P23=0;
+ 250   3                  P25=1;
+ 251   3                  HA = 6;
+ 252   3                  break;
+ 253   3              case 6:
+ 254   3                  TIM1-> CCR1H = 0;
+*** ERROR C202 IN LINE 254 OF main.c: 'TIM1': undefined identifier
+ 255   3                  TIM1-> CCR1L = 0;
+*** ERROR C202 IN LINE 255 OF main.c: 'TIM1': undefined identifier
+ 256   3                  TIM1-> CCR2H = (u8)(Start_Pulse >> 8);
+*** ERROR C202 IN LINE 256 OF main.c: 'TIM1': undefined identifier
+ 257   3                  TIM1-> CCR2L = (u8)(Start_Pulse);
+*** ERROR C202 IN LINE 257 OF main.c: 'TIM1': undefined identifier
+ 258   3                  TIM1-> CCR3H = 0;
+*** ERROR C202 IN LINE 258 OF main.c: 'TIM1': undefined identifier
+ 259   3                  TIM1-> CCR3L = 0;
+*** ERROR C202 IN LINE 259 OF main.c: 'TIM1': undefined identifier
+ 260   3                  P21=0;
+ 261   3                  P23=0;
+ 262   3                  P25=1;
+ 263   3                  HA = 4;
+ 264   3                  break;
+ 265   3              case 4:
+ 266   3                  TIM1-> CCR1H = 0;
+*** ERROR C202 IN LINE 266 OF main.c: 'TIM1': undefined identifier
+ 267   3                  TIM1-> CCR1L = 0;
+*** ERROR C202 IN LINE 267 OF main.c: 'TIM1': undefined identifier
+ 268   3                  TIM1-> CCR2H = (u8)(Start_Pulse >> 8);
+*** ERROR C202 IN LINE 268 OF main.c: 'TIM1': undefined identifier
+ 269   3                  TIM1-> CCR2L = (u8)(Start_Pulse);
+*** ERROR C202 IN LINE 269 OF main.c: 'TIM1': undefined identifier
+ 270   3                  TIM1-> CCR3H = 0;
+*** ERROR C202 IN LINE 270 OF main.c: 'TIM1': undefined identifier
+ 271   3                  TIM1-> CCR3L = 0;
+*** ERROR C202 IN LINE 271 OF main.c: 'TIM1': undefined identifier
+ 272   3                  P21=1;
+ 273   3                  P23=0;
+ 274   3                  P25=0;
+ 275   3                  HA = 5;
+ 276   3                  break;
+ 277   3              case 5:
+ 278   3                  TIM1-> CCR1H = 0;
+*** ERROR C202 IN LINE 278 OF main.c: 'TIM1': undefined identifier
+ 279   3                  TIM1-> CCR1L = 0;
+*** ERROR C202 IN LINE 279 OF main.c: 'TIM1': undefined identifier
+ 280   3                  TIM1-> CCR2H = 0;
+*** ERROR C202 IN LINE 280 OF main.c: 'TIM1': undefined identifier
+ 281   3                  TIM1-> CCR2L = 0;
+*** ERROR C202 IN LINE 281 OF main.c: 'TIM1': undefined identifier
+C51 COMPILER V9.60.0.0   MAIN                                                              04/27/2022 09:08:18 PAGE 7   
+
+ 282   3                  TIM1-> CCR3H = (u8)(Start_Pulse >> 8);
+*** ERROR C202 IN LINE 282 OF main.c: 'TIM1': undefined identifier
+ 283   3                  TIM1-> CCR3L = (u8)(Start_Pulse);
+*** ERROR C202 IN LINE 283 OF main.c: 'TIM1': undefined identifier
+ 284   3                  P21=1;
+ 285   3                  P23=0;
+ 286   3                  P25=0;
+ 287   3                  HA = 1;
+ 288   3                  break;
+ 289   3              case 1:
+ 290   3                  TIM1-> CCR1H = 0;
+*** ERROR C202 IN LINE 290 OF main.c: 'TIM1': undefined identifier
+ 291   3                  TIM1-> CCR1L = 0;
+*** ERROR C202 IN LINE 291 OF main.c: 'TIM1': undefined identifier
+ 292   3                  TIM1-> CCR2H = 0;
+*** ERROR C202 IN LINE 292 OF main.c: 'TIM1': undefined identifier
+ 293   3                  TIM1-> CCR2L = 0;
+*** ERROR C202 IN LINE 293 OF main.c: 'TIM1': undefined identifier
+ 294   3                  TIM1-> CCR3H = (u8)(Start_Pulse >> 8);
+*** ERROR C202 IN LINE 294 OF main.c: 'TIM1': undefined identifier
+ 295   3                  TIM1-> CCR3L = (u8)(Start_Pulse);
+*** ERROR C202 IN LINE 295 OF main.c: 'TIM1': undefined identifier
+ 296   3                  P21=0;
+ 297   3                  P23=1;
+ 298   3                  P25=0;
+ 299   3                  HA = 3;
+ 300   3                  break;
+ 301   3              default :
+ 302   3                  break;
+ 303   3              }
+ 304   2              if(++Start_cnt>80)
+ 305   2              {
+ 306   3                  BMF_en=1;
+ 307   3                  break;
+ 308   3              }
+ 309   2              else
+ 310   2              {
+ 311   3                  if(Start_Pulse<Aim_Pulse) Start_Pulse += 4;
+ 312   3                  else Start_Pulse = Aim_Pulse;
+ 313   3              }
+ 314   2          }
+ 315   1      }
+ 316          void MOTOR_STOP()
+ 317          {
+ 318   1          BMF_en = 0;
+ 319   1          TIM1-> BKR &= ~0x80; //关比较器中断
+*** ERROR C202 IN LINE 319 OF main.c: 'TIM1': undefined identifier
+ 320   1          P21=0;
+ 321   1          P23=0;
+ 322   1          P25=0;
+ 323   1      }
+ 324          u8 KEY_detect()
+ 325          {
+ 326   1          if(!P05)
+ 327   1          {
+ 328   2              DelayXms(30);
+ 329   2              if(!P05)
+ 330   2              {
+ 331   3                  while(!P05);
+ 332   3                  return 1;
+ 333   3              }
+ 334   2          }
+C51 COMPILER V9.60.0.0   MAIN                                                              04/27/2022 09:08:18 PAGE 8   
+
+ 335   1          return 0;
+ 336   1      }
+ 337          void DelayXus(u8 delayTime)
+ 338          {
+ 339   1          int i = 0;
+ 340   1          while( delayTime-- )
+ 341   1          {
+ 342   2              for( i = 0 ; i < 1 ; i++);
+ 343   2          }
+ 344   1      }
+ 345          void DelayXms( u8 delayTime )
+ 346          {
+ 347   1          int i = 0;
+ 348   1          while( delayTime-- )
+ 349   1          {
+ 350   2              for( i = 0 ; i < 2 ; i++ )
+ 351   2              {
+ 352   3                  DelayXus(100);
+ 353   3              }
+ 354   2          }
+ 355   1      }
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  92 ERROR(S)

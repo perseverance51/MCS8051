@@ -1,0 +1,77 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              05/20/2022 14:30:27 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          //74hc164驱动共阴数码管源程序
+   2          //共阴数码管74hc164串行驱动
+   3          #include <STC89C5xRC.H>
+   4          #define uint unsigned int
+   5          #define uchar unsigned char
+   6          #define bitRead(value, bit) (((value) >> (bit)) & 0x01)
+   7          sbit DAT = P3^7; //模拟串口数据发送端
+   8          sbit CLK = P3^4;//模拟时钟控制端
+   9          //共阴数码管
+  10          uchar code tab[]= {0xfc,0x60,0xda,0xf2,0x66,0xb6,0xbe,0xe0,0xff,0xf6}; //0-9,-,全灭
+  11          
+  12          
+  13          void sendbyte(uchar a)
+  14           {
+  15   1          uchar num ,c;
+  16   1          num = tab[a];
+  17   1          for(c=0; c<8; c++)
+  18   1              {
+  19   2              CLK =0;
+  20   2          //      DAT = num&0x01;
+  21   2              DAT = bitRead(num,c);//高位先输出
+  22   2              CLK = 1;
+  23   2          //   num >>= 1;       
+  24   2          }   
+  25   1      }
+  26          
+  27          void delay_50ms(uint x) //延时50ms    12晶振
+  28          {
+  29   1       TMOD=0x01; //开定时器0，工作方式为1
+  30   1       TR0=1;     //启动定时器0；
+  31   1       while(x--)
+  32   1       {  
+  33   2          TH0=(65536-50000)/256; //定时50ms初值的高八位装入TH0
+  34   2          TL0=(65536-50000)%256; //定时50ms初值的低八位装入TL0 
+  35   2          while(!TF0); //等待，直到TF0为1
+  36   2          TF0=0;    //重置溢出标志位
+  37   2        }
+  38   1        TR0=0;  //停止定时器0；
+  39   1      }
+  40          
+  41          void main( )
+  42           {
+  43   1          unsigned char h;
+  44   1          while(1) {
+  45   2              for(h=0; h<10; h++) {
+  46   3                  sendbyte(h);
+  47   3                  delay_50ms(20);           
+  48   3              }
+  49   2              h=0;        
+  50   2          }     
+  51   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+C51 COMPILER V9.60.0.0   MAIN                                                              05/20/2022 14:30:27 PAGE 2   
+
+   CODE SIZE        =    101    ----
+   CONSTANT SIZE    =     10    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

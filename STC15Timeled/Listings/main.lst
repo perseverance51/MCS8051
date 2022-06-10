@@ -1,0 +1,76 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              01/28/2022 12:44:39 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include "reg51.h"
+   2          typedef unsigned char BYTE;
+   3          typedef unsigned int WORD;
+   4          //-----------------------------------------------
+   5          #define FOSC 11059200L
+   6          #define T5MS (65536-5*FOSC/1000) //1T模式，110592MHz
+   7          //#define T5MS (65536-5*FOSC/12/1000) //12T模式，110592MHz
+   8          sfr AUXR = 0x8e; //Auxiliary register
+   9          sbit P10 = P1^0;
+  10          bit B_5ms;      //5ms标志
+  11           unsigned int   msecond;    //计时
+  12          //-----------------------------------------------
+  13          /* Timer0 interrupt routine */
+  14          void tm0_isr() interrupt 1 using 1
+  15          {
+  16   1          B_5ms = 1;
+  17   1      }
+  18          void Timer0Init(void)   //5毫秒@11.0592MHz
+  19          {
+  20   1        AUXR |= 0x80;   //定时器时钟1T模式
+  21   1        // AUXR &= 0x7f; //定时器0为12T模式
+  22   1        TMOD &= 0xF0;   //设置定时器模式
+  23   1      //  TL0 = 0x00;   //设置定时初始值
+  24   1      //  TH0 = 0x28;   //设置定时初始值
+  25   1           TL0 = T5MS; //初始化计时值
+  26   1           TH0 = T5MS >> 8;
+  27   1        TF0 = 0;    //清除TF0标志
+  28   1        TR0 = 1;    //定时器0开始计时
+  29   1        ET0 = 1; //使能定时器0中断
+  30   1        EA = 1;
+  31   1      }
+  32          
+  33          //-----------------------------------------------
+  34          /* main program */
+  35          void main()
+  36          {
+  37   1        Timer0Init();
+  38   1        while(1)
+  39   1        {
+  40   2        if(B_5ms) //5ms到达标志位
+  41   2          {
+  42   3            B_5ms = 0;
+  43   3            if(++msecond >= 200)  //计数到达1S
+  44   3            {
+  45   4              msecond = 0;
+  46   4               P10 = ! P10; //将测试口取反
+  47   4            }
+  48   3          }
+  49   2        }
+  50   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     58    ----
+C51 COMPILER V9.60.0.0   MAIN                                                              01/28/2022 12:44:39 PAGE 2   
+
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      2    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,3 @@
+".\Objects\main.obj" 
+TO ".\Objects\T0INT0Set" 
+PRINT(".\Listings\T0INT0Set.m51") RAMSIZE(256) 

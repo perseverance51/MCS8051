@@ -1,0 +1,50 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              02/02/2022 17:17:20 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include "reg51.h"
+   2          typedef unsigned char BYTE;
+   3          typedef unsigned int WORD;
+   4          #define FOSC 16000000L
+   5          //-----------------------------------------
+   6          sfr CLK_DIV = 0x97; //时钟分频寄存器
+   7          sfr AUXR = 0x8E; //时钟分频寄存器
+   8          //-----------------------------------------
+   9          void main()
+  10          {
+  11   1        //AUXR |= 0x00;
+  12   1      //  CLK_DIV = 0x40;//0100,0000 P5.4输出频率为SYSclk = 16MHz
+  13   1        //  CLK_DIV = 0x42;//0100,0010 P5.4输出频率为SYSclk/4 = 4MHz
+  14   1      //  CLK_DIV = 0x43;//0100,0011 P5.4输出频率为SYSclk = 2MHz
+  15   1       // CLK_DIV = 0xc2; //1000,0000 P5.4输出频率为SYSclk/4/4 =1MHz
+  16   1       //CLK_DIV = 0x80; //1000,0000 P5.4输出频率为SYSclk/2 =8MHz
+  17   1      //  CLK_DIV = 0x83; //1000,0011 P5.4输出频率为SYSclk/2/8 =1M
+  18   1      
+  19   1      // CLK_DIV = 0xC0; //1100,0000 P5.4输出频率为SYSclk/4 = 4MHz
+  20   1            CLK_DIV = 0xC4;//1100,0111 P5.4输出频率为SYSclk/4/64 = 62.5KHz
+  21   1      //    CLK_DIV = 0xC5;//1100,0111 P5.4输出频率为SYSclk/4/64 = 125KHz
+  22   1        //CLK_DIV = 0xC6;//1100,0111 P5.4输出频率为SYSclk/4/64 = 62.5KHz
+  23   1      //  CLK_DIV = 0xC7;//1100,0111 P5.4输出频率为SYSclk/4/128 = 31.25KHz
+  24   1      //CLK_DIV = 0x00; //主时钟不对外输出时钟
+  25   1       while (1); //程序终止
+  26   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =      5    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

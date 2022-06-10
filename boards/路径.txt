@@ -1,0 +1,1 @@
+C:\Users\Administrator\.platformio\platforms\intel_mcs51

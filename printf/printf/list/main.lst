@@ -1,0 +1,122 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              02/03/2022 15:50:41 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\list\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\list\main.lst
+                    -) TABS(2) OBJECT(.\list\main.obj)
+
+line level    source
+
+   1          
+   2          /*------------------------------------------------------------------*/
+   3          /* --- STC MCU International Limited -------------------------------*/
+   4          /* --- STC 1T Series MCU RC Demo -----------------------------------*/
+   5          /* --- Mobile: (86)13922805190 -------------------------------------*/
+   6          /* --- Fax: 86-0513-55012956,55012947,55012969 ---------------------*/
+   7          /* --- Tel: 86-0513-55012928,55012929,55012966 ---------------------*/
+   8          /* --- Web: www.GXWMCU.com -----------------------------------------*/
+   9          /* --- QQ:  800003751 ----------------------------------------------*/
+  10          /* If you want to use the program or the program referenced in the  */
+  11          /* article, please specify in which data and procedures from STC    */
+  12          /*------------------------------------------------------------------*/
+  13          #include "stdio.h"
+  14          //#include "string.h"
+  15          //#include "stdarg.h"  
+  16          
+  17          #include  "config.h"
+  18          #include  "USART1.h"
+  19          #include  "delay.h"
+  20          #include  "mpu.h"
+  21          
+  22          /*************  功能说明  **************
+  23          
+  24          双串口全双工中断方式收发通讯程序。
+  25          
+  26          通过PC向MCU发送数据, MCU收到后通过串口把收到的数据原样返回.
+  27          
+  28          ******************************************/
+  29          
+  30          /*************  本地常量声明  **************/
+  31          
+  32          sbit ledpin = P1^0;
+  33          /*************  本地变量声明  **************/
+  34          
+  35          
+  36          /*************  本地函数声明  **************/
+  37          
+  38          
+  39          
+  40          /*************  外部函数和变量声明 *****************/
+  41          
+  42          
+  43          /*************  串口1初始化函数 *****************/
+  44          void  UART_config(void)
+  45          {
+  46   1        COMx_InitDefine   COMx_InitStructure;         //结构定义
+  47   1        COMx_InitStructure.UART_Mode      = UART_8bit_BRTx;   //模式,       UART_ShiftRight,UART_8bit_BRTx,UART_9b
+             -it,UART_9bit_BRTx
+  48   1        COMx_InitStructure.UART_BRT_Use   = BRT_Timer2;     //使用波特率,   BRT_Timer1, BRT_Timer2 (注意: 串口2固定
+             -使用BRT_Timer2)
+  49   1        COMx_InitStructure.UART_BaudRate  = 9600ul;     //波特率, 一般 110 ~ 115200
+  50   1        COMx_InitStructure.UART_RxEnable  = ENABLE;       //接收允许,   ENABLE或DISABLE
+  51   1        COMx_InitStructure.BaudRateDouble = DISABLE;      //波特率加倍, ENABLE或DISABLE
+  52   1        COMx_InitStructure.UART_Interrupt = ENABLE;       //中断允许,   ENABLE或DISABLE
+C51 COMPILER V9.60.0.0   MAIN                                                              02/03/2022 15:50:41 PAGE 2   
+
+  53   1        COMx_InitStructure.UART_Polity    = PolityLow;      //中断优先级, PolityLow,PolityHigh
+  54   1        COMx_InitStructure.UART_P_SW      = UART1_SW_P30_P31; //切换端口,   UART1_SW_P30_P31,UART1_SW_P36_P37,UAR
+             -T1_SW_P16_P17(必须使用内部时钟)
+  55   1        COMx_InitStructure.UART_RXD_TXD_Short = DISABLE;    //内部短路RXD与TXD, 做中继, ENABLE,DISABLE
+  56   1        USART_Configuration(USART1, &COMx_InitStructure);   //初始化串口1 USART1,USART2
+  57   1      
+  58   1        //PrintString1("STC15F2K60S2 UART1 Test Prgramme!\r\n");  //SUART1发送一个字符串
+  59   1      }
+  60          
+  61          
+  62          /**********************************************/
+  63          void main(void)
+  64          {
+  65   1        P1M1 = 0; 
+  66   1        P1M0 = 0; //设置为准双向口
+  67   1        P2M1 = 0; 
+  68   1        P2M0 = 0; //设置为准双向口
+  69   1        UART_config();
+  70   1        EA = 1;
+  71   1      InitMPU6050();
+  72   1        while (1)
+  73   1        {
+  74   2      printf("X轴加速度=%d，\n",GetData(ACCEL_XOUT_H)); //X轴加速度
+  75   2          Delay1000ms();  
+  76   2      printf("Y轴加速度=%d，\n",GetData(ACCEL_YOUT_H));   //Y轴加速度
+  77   2            Delay1000ms();
+  78   2      printf("Z轴加速度=%d，\n",GetData(ACCEL_ZOUT_H));   //Z轴加速度
+  79   2          Delay1000ms();  
+  80   2      printf("X轴加速度=%d，\n",GetData(GYRO_XOUT_H));  //X轴角速度
+  81   2          Delay1000ms();  
+  82   2      printf("Y轴加速度=%d，\n",GetData(GYRO_YOUT_H));  //Y轴角速度
+  83   2            Delay1000ms();
+  84   2      printf("Z轴加速度=%d，\n",GetData(GYRO_ZOUT_H));  //Z轴角速度
+  85   2          Delay1000ms();
+  86   2        printf("温度=%3.1f℃，\n",Get_temp());  //Z轴角速度     
+  87   2            ledpin = !ledpin;
+  88   2            Delay1000ms();
+  89   2        }
+  90   1      }
+  91          
+  92          
+  93          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    212    ----
+   CONSTANT SIZE    =     64    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      13
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

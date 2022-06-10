@@ -1,0 +1,458 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              01/07/2022 12:40:02 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          
+   2          #include "main.h"
+   3          #include "LCD1602.h"
+   4          #include "DS1302.h"
+   5          #include "DS18B20.h"
+   6          
+   7          //定义变量
+   8          unsigned int Temp_Buffer = 0;
+   9          unsigned char KEY_NUM = 0;
+  10          bit Flag_KEY_Set = 0;
+  11          unsigned char KEY2_Count = 0;
+  12          
+  13          
+  14          //****************************************************
+  15          //主函数
+  16          //****************************************************
+  17          void main()
+  18          {
+  19   1        LCD1602_Init();                 //初始化LCD1602
+  20   1        DS1302_Init();                  //初始化DS1302
+  21   1      
+  22   1        LCD1602_write_com(0x80);
+  23   1        LCD1602_write_word("Hello World!");
+  24   1      
+  25   1        Temp_Buffer = Get_temp();           //读取DS18B20的值
+  26   1        Delay_ms(1000); 
+  27   1      
+  28   1        LCD1602_write_com(0x01);          //清屏
+  29   1      
+  30   1        while(1)
+  31   1        {       
+  32   2          DS1302_GetTime(&DS1302Buffer);              //获取当前RTCC值
+  33   2      
+  34   2          if(Flag_Time_Refresh == 1 && Flag_KEY_Set == 0)     //数据更新时才刷新LCD
+  35   2          {
+  36   3            Flag_Time_Refresh = 0;
+  37   3            Display_RTCC();                   //显示实时时钟
+  38   3            Display_Temp();                   //获取并显示温度值
+  39   3          }
+  40   2      
+  41   2          Scan_Key();                     //按键扫描
+  42   2      
+  43   2          switch( KEY_NUM )
+  44   2          {
+  45   3            case 1:           //按键1执行程序
+  46   3                KEY_NUM = 0;    //清空按键标志
+  47   3                Flag_KEY_Set = ~Flag_KEY_Set; //设置按键标志位翻转
+  48   3                if(Flag_KEY_Set)
+  49   3                {           
+  50   4                  LCD1602_write_com(0x0d);  //LCD1602指针闪烁开
+  51   4                  LCD1602_write_com(0x80+ 3); //指针设置到第一行第4列
+  52   4                  KEY2_Count = 0;       //按键S2计数清零
+  53   4                }
+  54   3                else
+  55   3                {
+C51 COMPILER V9.60.0.0   MAIN                                                              01/07/2022 12:40:02 PAGE 2   
+
+  56   4                  LCD1602_write_com(0x0c);  //LCD1602指针闪烁关
+  57   4                }
+  58   3                break;
+  59   3            case 2:           //按键2执行程序
+  60   3                KEY_NUM = 0;    //清空按键标志
+  61   3                if(Flag_KEY_Set)      //在设置状态时运行
+  62   3                {
+  63   4                  KEY2_Count++;
+  64   4                  if(KEY2_Count == 7)
+  65   4                    KEY2_Count = 0;
+  66   4                  switch(KEY2_Count)
+  67   4                  {
+  68   5                    case 0:
+  69   5                        LCD1602_write_com(0x80+ 3); //指针指向年，闪烁
+  70   5                        break;
+  71   5                    case 1:
+  72   5                        LCD1602_write_com(0x80+ 6); //指针指向月，闪烁
+  73   5                        break;
+  74   5                    case 2:
+  75   5                        LCD1602_write_com(0x80+ 9); //指针指向日，闪烁
+  76   5                        break;
+  77   5                    case 3:
+  78   5                        LCD1602_write_com(0x80+ 15);  //指针指向星期，闪烁
+  79   5                        break;
+  80   5                    case 4:
+  81   5                        LCD1602_write_com(0x80+ 0x40 + 1);  //指针指向小时，闪烁
+  82   5                        break;
+  83   5                    case 5:
+  84   5                        LCD1602_write_com(0x80+ 0x40 + 4);  //指针指向分钟，闪烁
+  85   5                        break;
+  86   5                    case 6:
+  87   5                        LCD1602_write_com(0x80+ 0x40 + 7);  //指针指向秒钟，闪烁
+  88   5                        break;
+  89   5                    default : break;
+  90   5                  } 
+  91   4                }         
+  92   3                break;
+  93   3            case 3:           //按键3执行程序
+  94   3                KEY_NUM = 0;    //清空按键标志
+  95   3                if(Flag_KEY_Set)      //在设置状态时运行
+  96   3                {
+  97   4                  switch(KEY2_Count)
+  98   4                  {
+  99   5                    case 0:
+ 100   5                        DS1302Buffer.Year++;
+ 101   5                        if(DS1302Buffer.Year >= 100)
+ 102   5                        {
+ 103   6                          DS1302Buffer.Year = 0;
+ 104   6                        }
+ 105   5                        DS1302_SetTime( DS1302_YEAR , DS1302Buffer.Year );
+ 106   5      
+ 107   5                        Display_RTCC();
+ 108   5                        
+ 109   5                        LCD1602_write_com(0x80+ 3); //指针指向年，闪烁
+ 110   5                        break;
+ 111   5                    case 1:
+ 112   5                        DS1302Buffer.Month++;
+ 113   5                        if(DS1302Buffer.Month >= 13)
+ 114   5                        {
+ 115   6                          DS1302Buffer.Month = 1;
+ 116   6                        }
+ 117   5                        DS1302_SetTime( DS1302_MONTH , DS1302Buffer.Month );
+C51 COMPILER V9.60.0.0   MAIN                                                              01/07/2022 12:40:02 PAGE 3   
+
+ 118   5                        Display_RTCC();
+ 119   5        
+ 120   5                        LCD1602_write_com(0x80+ 6); //指针指向月，闪烁
+ 121   5                        break;
+ 122   5                    case 2:
+ 123   5                        DS1302Buffer.Day++;
+ 124   5                        if(DS1302Buffer.Day >= 32)
+ 125   5                        {
+ 126   6                          DS1302Buffer.Day = 1;
+ 127   6                        }
+ 128   5                        DS1302_SetTime( DS1302_DAY , DS1302Buffer.Day );
+ 129   5                        Display_RTCC();
+ 130   5        
+ 131   5                        LCD1602_write_com(0x80+ 9); //指针指向日，闪烁
+ 132   5                        break;
+ 133   5                    case 3:
+ 134   5                        DS1302Buffer.Week++;
+ 135   5                        if(DS1302Buffer.Week >= 8)
+ 136   5                        {
+ 137   6                          DS1302Buffer.Week = 1;
+ 138   6                        }
+ 139   5                        DS1302_SetTime( DS1302_WEEK , DS1302Buffer.Week );
+ 140   5                        Display_RTCC();
+ 141   5        
+ 142   5                        LCD1602_write_com(0x80+ 15);  //指针指向星期，闪烁
+ 143   5                        break;
+ 144   5                    case 4:
+ 145   5                        DS1302Buffer.Hour++;
+ 146   5                        if(DS1302Buffer.Hour >= 24)
+ 147   5                        {
+ 148   6                          DS1302Buffer.Hour = 0;
+ 149   6                        }
+ 150   5                        DS1302_SetTime( DS1302_HOUR , DS1302Buffer.Hour );
+ 151   5                        Display_RTCC();
+ 152   5        
+ 153   5                        LCD1602_write_com(0x80+ 0x40 + 1);  //指针指向小时，闪烁
+ 154   5                        break;
+ 155   5                    case 5:
+ 156   5                        DS1302Buffer.Minute++;
+ 157   5                        if(DS1302Buffer.Minute >= 60)
+ 158   5                        {
+ 159   6                          DS1302Buffer.Minute = 0;
+ 160   6                        }
+ 161   5                        DS1302_SetTime( DS1302_MINUTE , DS1302Buffer.Minute );
+ 162   5                        Display_RTCC();
+ 163   5        
+ 164   5                        LCD1602_write_com(0x80+ 0x40 + 4);  //指针指向分钟，闪烁
+ 165   5                        break;
+ 166   5                    case 6:
+ 167   5                        DS1302Buffer.Second++;
+ 168   5                        if(DS1302Buffer.Second >= 60)
+ 169   5                        {
+ 170   6                          DS1302Buffer.Second = 0;
+ 171   6                        }
+ 172   5                        DS1302_SetTime( DS1302_SECOND , DS1302Buffer.Second);
+ 173   5                        Display_RTCC();
+ 174   5        
+ 175   5                        LCD1602_write_com(0x80+ 0x40 + 7);  //指针指向秒钟，闪烁
+ 176   5                        break;
+ 177   5                    default : break;
+ 178   5                  }
+ 179   4                }
+C51 COMPILER V9.60.0.0   MAIN                                                              01/07/2022 12:40:02 PAGE 4   
+
+ 180   3                break;
+ 181   3            case 4:           //按键4执行程序
+ 182   3                KEY_NUM = 0;    //清空按键标志
+ 183   3                if(Flag_KEY_Set)      //在设置状态时运行
+ 184   3                {
+ 185   4                  switch(KEY2_Count)
+ 186   4                  {
+ 187   5                    case 0:
+ 188   5                        DS1302Buffer.Year--;
+ 189   5                        if(DS1302Buffer.Year == 255)
+ 190   5                        {
+ 191   6                          DS1302Buffer.Year = 99;
+ 192   6                        }
+ 193   5                        DS1302_SetTime( DS1302_YEAR , DS1302Buffer.Year );
+ 194   5                        Display_RTCC();
+ 195   5                        
+ 196   5                        LCD1602_write_com(0x80+ 3); //指针指向年，闪烁
+ 197   5                        break;
+ 198   5                    case 1:
+ 199   5                        DS1302Buffer.Month--;
+ 200   5                        if(DS1302Buffer.Month == 0)
+ 201   5                        {
+ 202   6                          DS1302Buffer.Month = 12;
+ 203   6                        }
+ 204   5                        DS1302_SetTime( DS1302_MONTH , DS1302Buffer.Month );
+ 205   5                        Display_RTCC();
+ 206   5        
+ 207   5                        LCD1602_write_com(0x80+ 6); //指针指向月，闪烁
+ 208   5                        break;
+ 209   5                    case 2:
+ 210   5                        DS1302Buffer.Day--;
+ 211   5                        if(DS1302Buffer.Day == 0)
+ 212   5                        {
+ 213   6                          DS1302Buffer.Day = 31;
+ 214   6                        }
+ 215   5                        DS1302_SetTime( DS1302_DAY , DS1302Buffer.Day );
+ 216   5                        Display_RTCC();
+ 217   5        
+ 218   5                        LCD1602_write_com(0x80+ 9); //指针指向日，闪烁
+ 219   5                        break;
+ 220   5                    case 3:
+ 221   5                        DS1302Buffer.Week--;
+ 222   5                        if(DS1302Buffer.Week == 0)
+ 223   5                        {
+ 224   6                          DS1302Buffer.Week = 7;
+ 225   6                        }
+ 226   5                        DS1302_SetTime( DS1302_WEEK , DS1302Buffer.Week );
+ 227   5                        Display_RTCC();
+ 228   5        
+ 229   5                        LCD1602_write_com(0x80+ 15);  //指针指向星期，闪烁
+ 230   5                        break;
+ 231   5                    case 4:
+ 232   5                        DS1302Buffer.Hour--;
+ 233   5                        if(DS1302Buffer.Hour == 255)
+ 234   5                        {
+ 235   6                          DS1302Buffer.Hour = 23;
+ 236   6                        }
+ 237   5                        DS1302_SetTime( DS1302_HOUR , DS1302Buffer.Hour );
+ 238   5                        Display_RTCC();
+ 239   5        
+ 240   5                        LCD1602_write_com(0x80+ 0x40 + 1);  //指针指向小时，闪烁
+ 241   5                        break;
+C51 COMPILER V9.60.0.0   MAIN                                                              01/07/2022 12:40:02 PAGE 5   
+
+ 242   5                    case 5:
+ 243   5                        DS1302Buffer.Minute--;
+ 244   5                        if(DS1302Buffer.Minute == 255)
+ 245   5                        {
+ 246   6                          DS1302Buffer.Minute = 59;
+ 247   6                        }
+ 248   5                        DS1302_SetTime( DS1302_MINUTE , DS1302Buffer.Minute );
+ 249   5                        Display_RTCC();
+ 250   5        
+ 251   5                        LCD1602_write_com(0x80+ 0x40 + 4);  //指针指向分钟，闪烁
+ 252   5                        break;
+ 253   5                    case 6:
+ 254   5                        DS1302Buffer.Second--;
+ 255   5                        if(DS1302Buffer.Second == 255)
+ 256   5                        {
+ 257   6                          DS1302Buffer.Second = 59;
+ 258   6                        }
+ 259   5                        DS1302_SetTime( DS1302_SECOND , DS1302Buffer.Second);
+ 260   5                        Display_RTCC();
+ 261   5        
+ 262   5                        LCD1602_write_com(0x80+ 0x40 + 7);  //指针指向秒钟，闪烁
+ 263   5                        break;
+ 264   5                    default : break;
+ 265   5                  }
+ 266   4                }
+ 267   3                break;
+ 268   3            default : break;
+ 269   3          }       
+ 270   2        }
+ 271   1      }
+ 272          
+ 273          //****************************************************
+ 274          //显示温度
+ 275          //****************************************************
+ 276          void Display_Temp()
+ 277          {
+ 278   1        Temp_Buffer = Get_temp();           //读取DS18B20的值
+ 279   1        LCD1602_write_com(0x80+0x40+10);        //设置LCD1602指针到第二行第11列
+ 280   1        if(flag_temper == 1)            //根据温度标志位显示温度正负
+ 281   1        {
+ 282   2          LCD1602_write_data('-');  
+ 283   2        }
+ 284   1        if( Temp_Buffer/1000 != 0 )         //如果第一位为0，忽略显示
+ 285   1        {
+ 286   2          LCD1602_write_data(Temp_Buffer/1000+0X30);     //显示温度百位值
+ 287   2        }
+ 288   1        LCD1602_write_data(Temp_Buffer%1000/100+0X30);     //显示温度十位值
+ 289   1        LCD1602_write_data(Temp_Buffer%100/10+0X30);     //显示温度个位值
+ 290   1        LCD1602_write_data('.');               //显示小数点
+ 291   1        LCD1602_write_data(Temp_Buffer%10+0X30);       //显示温度十分位值
+ 292   1        //LCD1602_write_data('C');               //显示字符C
+ 293   1          LCD1602_write_word("*C");
+ 294   1      }
+ 295          
+ 296          //****************************************************
+ 297          //显示实时时钟
+ 298          //****************************************************
+ 299          void Display_RTCC()
+ 300          {
+ 301   1        LCD1602_write_com(0x80);              //指针设置到第一行第1列
+ 302   1        
+ 303   1        LCD1602_write_word("20");
+C51 COMPILER V9.60.0.0   MAIN                                                              01/07/2022 12:40:02 PAGE 6   
+
+ 304   1        LCD1602_write_data(DS1302Buffer.Year/10 + 0x30);   //显示Year高位
+ 305   1        LCD1602_write_data(DS1302Buffer.Year%10 + 0x30);   //显示Year低位
+ 306   1        LCD1602_write_data('-');
+ 307   1        LCD1602_write_data(DS1302Buffer.Month/10 + 0x30);  //显示Month高位
+ 308   1        LCD1602_write_data(DS1302Buffer.Month%10 + 0x30);  //显示Month低位
+ 309   1        LCD1602_write_data('-');
+ 310   1        LCD1602_write_data(DS1302Buffer.Day/10 + 0x30);    //显示Day高位
+ 311   1        LCD1602_write_data(DS1302Buffer.Day%10 + 0x30);    //显示Day低位
+ 312   1      
+ 313   1        LCD1602_write_com(0x80+13);              //指针设置到第一行第14列
+ 314   1        switch(DS1302Buffer.Week)
+ 315   1        {
+ 316   2          case 1:
+ 317   2              LCD1602_write_word("Mon");         //显示星期一
+ 318   2              break;
+ 319   2          case 2:
+ 320   2              LCD1602_write_word("Tue");         //显示星期二
+ 321   2              break;
+ 322   2          case 3:
+ 323   2              LCD1602_write_word("Wed");         //显示星期三
+ 324   2              break;
+ 325   2          case 4:
+ 326   2              LCD1602_write_word("Thu");         //显示星期四
+ 327   2              break;
+ 328   2          case 5:
+ 329   2              LCD1602_write_word("Fri");         //显示星期五
+ 330   2              break;
+ 331   2          case 6:
+ 332   2              LCD1602_write_word("Sat");         //显示星期六
+ 333   2              break;
+ 334   2          case 7:
+ 335   2              LCD1602_write_word("Sun");         //显示星期日
+ 336   2              break;
+ 337   2          default : break;            
+ 338   2        }   
+ 339   1      
+ 340   1      
+ 341   1        LCD1602_write_com(0x80 + 0x40);        //指针设置到第二行第1列
+ 342   1      
+ 343   1        LCD1602_write_data(DS1302Buffer.Hour/10 + 0x30);   //显示Hour高位
+ 344   1        LCD1602_write_data(DS1302Buffer.Hour%10 + 0x30);   //显示Hour低位
+ 345   1        LCD1602_write_data(':');
+ 346   1        LCD1602_write_data(DS1302Buffer.Minute/10 + 0x30);   //显示Minute高位
+ 347   1        LCD1602_write_data(DS1302Buffer.Minute%10 + 0x30);   //显示Minute低位
+ 348   1        LCD1602_write_data(':');
+ 349   1        LCD1602_write_data(DS1302Buffer.Second/10 + 0x30);   //显示Second高位
+ 350   1        LCD1602_write_data(DS1302Buffer.Second%10 + 0x30);   //显示Second低位 
+ 351   1      }
+ 352          
+ 353          //****************************************************
+ 354          //蜂鸣器程序
+ 355          //****************************************************
+ 356          void Buzzer_Di()
+ 357          {
+ 358   1        Buzzer = 0;
+ 359   1        Delay_ms(3);
+ 360   1        Buzzer = 1;
+ 361   1        Delay_ms(3);
+ 362   1      }
+ 363          //****************************************************
+ 364          //按键扫描程序
+ 365          //****************************************************
+C51 COMPILER V9.60.0.0   MAIN                                                              01/07/2022 12:40:02 PAGE 7   
+
+ 366          void Scan_Key()
+ 367          {
+ 368   1        if( KEY1 == 0 )           //按键1扫描
+ 369   1        {
+ 370   2          Delay_ms(10);         //延时去抖
+ 371   2          if( KEY1 == 0 )
+ 372   2          {
+ 373   3            Buzzer_Di();  //蜂鸣器响声
+ 374   3            while(KEY1 == 0);     //等待松手
+ 375   3            KEY_NUM = 1;
+ 376   3          }
+ 377   2        }
+ 378   1      
+ 379   1        if( KEY2 == 0 )           //按键2扫描
+ 380   1        {
+ 381   2          Delay_ms(10);         //延时去抖
+ 382   2          if( KEY2 == 0 )
+ 383   2          {
+ 384   3            Buzzer_Di();
+ 385   3            while(KEY2 == 0);     //等待松手
+ 386   3            KEY_NUM = 2;
+ 387   3          }
+ 388   2        }
+ 389   1      
+ 390   1        if( KEY3 == 0 )           //按键2扫描
+ 391   1        {
+ 392   2          Delay_ms(10);         //延时去抖
+ 393   2          if( KEY3 == 0 )
+ 394   2          {
+ 395   3            Buzzer_Di();
+ 396   3            while(KEY3 == 0);     //等待松手
+ 397   3            KEY_NUM = 3;
+ 398   3          }
+ 399   2        }
+ 400   1      
+ 401   1        if( KEY4 == 0 )           //按键2扫描
+ 402   1        {
+ 403   2          Delay_ms(10);         //延时去抖
+ 404   2          if( KEY4 == 0 )
+ 405   2          {
+ 406   3            Buzzer_Di();
+ 407   3            while(KEY4 == 0);     //等待松手
+ 408   3            KEY_NUM = 4;
+ 409   3          }
+ 410   2        }
+ 411   1      }
+ 412          
+ 413          //****************************************************
+ 414          //MS延时函数(12M晶振下测试)
+ 415          //****************************************************
+ 416          void Delay_ms(unsigned int n)
+ 417          {
+ 418   1        unsigned int  i,j;
+ 419   1        for(i=0;i<n;i++)
+ 420   1          for(j=0;j<123;j++);
+ 421   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1248    ----
+   CONSTANT SIZE    =     47    ----
+   XDATA SIZE       =   ----    ----
+C51 COMPILER V9.60.0.0   MAIN                                                              01/07/2022 12:40:02 PAGE 8   
+
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      4    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

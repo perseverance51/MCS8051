@@ -1,0 +1,89 @@
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                    02/06/2022  15:29:42  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0, INVOKED BY:
+C:\KEIL_V5\C51\BIN\BL51.EXE .\Objects\MAIN.obj TO .\Objects\CMP PRINT (.\Listings\CMP.m51) RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  .\Objects\MAIN.obj (MAIN)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_STARTUP)
+
+
+LINK MAP OF MODULE:  .\Objects\CMP (MAIN)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            IDATA   0008H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     0021H     UNIT         ?PR?MAIN?MAIN
+            CODE    0024H     0011H     UNIT         ?PR?CMP_ISR?MAIN
+            CODE    0035H     000CH     UNIT         ?C_C51STARTUP
+                    0041H     006AH                  *** GAP ***
+            CODE    00ABH     0003H     ABSOLUTE     
+
+
+
+OVERLAY MAP OF MODULE:   .\Objects\CMP (MAIN)
+
+
+SEGMENT
+  +--> CALLED SEGMENT
+---------------------
+?C_C51STARTUP
+  +--> ?PR?MAIN?MAIN
+
+
+
+SYMBOL TABLE OF MODULE:  .\Objects\CMP (MAIN)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        MAIN
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0090H         PUBLIC        P1
+  B:00A8H.7       PUBLIC        EA
+  C:0003H         PUBLIC        main
+  D:00E6H         PUBLIC        CMPCR1
+  D:00E7H         PUBLIC        CMPCR2
+  B:0090H.0       PUBLIC        LED
+  C:0024H         PUBLIC        cmp_isr
+  -------         PROC          CMP_ISR
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  02/06/2022  15:29:42  PAGE 2
+
+
+  C:0024H         LINE#         18
+  C:0028H         LINE#         20
+  C:002BH         LINE#         21
+  C:0030H         LINE#         22
+  -------         ENDPROC       CMP_ISR
+  -------         PROC          MAIN
+  C:0003H         LINE#         23
+  C:0003H         LINE#         24
+  C:0003H         LINE#         25
+  C:0006H         LINE#         26
+  C:0008H         LINE#         27
+  C:000BH         LINE#         29
+  C:000EH         LINE#         31
+  C:0011H         LINE#         33
+  C:0014H         LINE#         35
+  C:0017H         LINE#         37
+  C:001AH         LINE#         39
+  C:001DH         LINE#         43
+  C:0020H         LINE#         45
+  C:0022H         LINE#         47
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        MAIN
+
+Program Size: data=9.0 xdata=0 code=68
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

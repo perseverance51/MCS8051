@@ -1,0 +1,3 @@
+".\Objects\main2.obj" 
+TO ".\Objects\delaycalc" 
+PRINT(".\Listings\delaycalc.m51") RAMSIZE(256) 

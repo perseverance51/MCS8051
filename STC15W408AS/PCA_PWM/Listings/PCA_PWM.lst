@@ -1,0 +1,133 @@
+C51 COMPILER V9.60.0.0   PCA_PWM                                                           05/11/2022 21:19:37 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE PCA_PWM
+OBJECT MODULE PLACED IN .\Objects\PCA_PWM.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE PCA_PWM.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\P
+                    -CA_PWM.lst) TABS(2) OBJECT(.\Objects\PCA_PWM.obj)
+
+line level    source
+
+   1          //CCP/PCA输出PWM(6位+7位+8位)的测试程序
+   2          #include "reg51.h"
+   3          #include "intrins.h"
+   4          
+   5          #define FOSC    11059200L
+   6          
+   7          typedef unsigned char BYTE;
+   8          typedef unsigned int WORD;
+   9          
+  10          sfr P0M1 = 0x93;
+  11          sfr P0M0 = 0x94;
+  12          sfr P1M1 = 0x91;
+  13          sfr P1M0 = 0x92;
+  14          sfr P2M1 = 0x95;
+  15          sfr P2M0 = 0x96;
+  16          sfr P3M1 = 0xb1;
+  17          sfr P3M0 = 0xb2;
+  18          sfr P4M1 = 0xb3;
+  19          sfr P4M0 = 0xb4;
+  20          sfr P5M1 = 0xC9;
+  21          sfr P5M0 = 0xCA;
+  22          sfr P6M1 = 0xCB;
+  23          sfr P6M0 = 0xCC;
+  24          sfr P7M1 = 0xE1;
+  25          sfr P7M0 = 0xE2;
+  26          
+  27          sfr P_SW1       = 0xA2;             //外设功能切换寄存器1
+  28          
+  29          #define CCP_S0 0x10                 //P_SW1.4
+  30          #define CCP_S1 0x20                 //P_SW1.5
+  31          
+  32          sfr CCON        =   0xD8;           //PCA控制寄存器
+  33          sbit CCF0       =   CCON^0;         //PCA模块0中断标志
+  34          sbit CCF1       =   CCON^1;         //PCA模块1中断标志
+  35          sbit CR         =   CCON^6;         //PCA定时器运行控制位
+  36          sbit CF         =   CCON^7;         //PCA定时器溢出标志
+  37          sfr CMOD        =   0xD9;           //PCA模式寄存器
+  38          sfr CL          =   0xE9;           //PCA定时器低字节
+  39          sfr CH          =   0xF9;           //PCA定时器高字节
+  40          sfr CCAPM0      =   0xDA;           //PCA模块0模式寄存器
+  41          sfr CCAP0L      =   0xEA;           //PCA模块0捕获寄存器 LOW
+  42          sfr CCAP0H      =   0xFA;           //PCA模块0捕获寄存器 HIGH
+  43          sfr CCAPM1      =   0xDB;           //PCA模块1模式寄存器
+  44          sfr CCAP1L      =   0xEB;           //PCA模块1捕获寄存器 LOW
+  45          sfr CCAP1H      =   0xFB;           //PCA模块1捕获寄存器 HIGH
+  46          sfr CCAPM2      =   0xDC;           //PCA模块2模式寄存器
+  47          sfr CCAP2L      =   0xEC;           //PCA模块2捕获寄存器 LOW
+  48          sfr CCAP2H      =   0xFC;           //PCA模块2捕获寄存器 HIGH
+  49          sfr PCA_PWM0    =   0xf2;           //PCA模块0的PWM寄存器
+  50          sfr PCA_PWM1    =   0xf3;           //PCA模块1的PWM寄存器
+  51          sfr PCA_PWM2    =   0xf4;           //PCA模块2的PWM寄存器
+  52          
+  53          void main()
+  54          {
+C51 COMPILER V9.60.0.0   PCA_PWM                                                           05/11/2022 21:19:37 PAGE 2   
+
+  55   1          P0M0 = 0x00;
+  56   1          P0M1 = 0x00;
+  57   1          P1M0 = 0x00;
+  58   1          P1M1 = 0x00;
+  59   1          P2M0 = 0x00;
+  60   1          P2M1 = 0x00;
+  61   1          P3M0 = 0x00;
+  62   1          P3M1 = 0x00;
+  63   1          P4M0 = 0x00;
+  64   1          P4M1 = 0x00;
+  65   1          P5M0 = 0x00;
+  66   1          P5M1 = 0x00;
+  67   1      
+  68   1          ACC = P_SW1;
+  69   1          ACC &= ~(CCP_S0 | CCP_S1);      //CCP_S0=0 CCP_S1=0
+  70   1          P_SW1 = ACC;                    //(P1.2/ECI, P1.1/CCP0, P1.0/CCP1, P3.7/CCP2)
+  71   1          
+  72   1      //  ACC = P_SW1;
+  73   1      //  ACC &= ~(CCP_S0 | CCP_S1);      //CCP_S0=1 CCP_S1=0
+  74   1      //  ACC |= CCP_S0;                  //(P3.4/ECI_2, P3.5/CCP0_2, P3.6/CCP1_2, P3.7/CCP2_2)
+  75   1      //  P_SW1 = ACC;        //P35 P36 P37
+  76   1       
+  77   1      //  ACC = P_SW1;
+  78   1      //  ACC &= ~(CCP_S0 | CCP_S1);      //CCP_S0=0 CCP_S1=1
+  79   1      //  ACC |= CCP_S1;                  //(P2.4/ECI_3, P2.5/CCP0_3, P2.6/CCP1_3, P2.7/CCP2_3)
+  80   1      //  P_SW1 = ACC;          //P25  P26  P27
+  81   1      
+  82   1          CCON = 0;                       //初始化PCA控制寄存器
+  83   1                                          //PCA定时器停止
+  84   1                                          //清除CF标志
+  85   1                                          //清除模块中断标志
+  86   1          CL = 0;                         //复位PCA寄存器
+  87   1          CH = 0;
+  88   1          CMOD = 0x00;                    //设置PCA时钟源,f=SYSclk/12/256
+  89   1                                          //禁止PCA定时器溢出中断
+  90   1          PCA_PWM0 = 0x00;                //PCA模块0工作于8位PWM
+  91   1          CCAP0H = CCAP0L = 0x20;         //PWM0的占空比为87.5% ((100H-20H)/100H)
+  92   1          CCAPM0 = 0x42;                  //PCA模块0为8位PWM模式
+  93   1      //P10
+  94   1          PCA_PWM1 = 0x40;                //PCA模块1工作于7位PWM:SYSclk/12/128
+  95   1          CCAP1H = CCAP1L = 0x20;         //PWM1的占空比为75% ((80H-20H)/80H)
+  96   1          CCAPM1 = 0x42;                  //PCA模块1为7位PWM模式
+  97   1      //P37
+  98   1          PCA_PWM2 = 0x80;                //PCA模块2工作于6位PWMf=SYSclk/12/64
+  99   1          CCAP2H = CCAP2L = 0x20;         //PWM2的占空比为50% ((40H-20H)/40H)
+ 100   1          CCAPM2 = 0x42;                  //PCA模块2为6位PWM模式
+ 101   1      
+ 102   1          CR = 1;                         //PCA定时器开始工作
+ 103   1      
+ 104   1          while (1);
+ 105   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     79    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+C51 COMPILER V9.60.0.0   PCA_PWM                                                           05/11/2022 21:19:37 PAGE 3   
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

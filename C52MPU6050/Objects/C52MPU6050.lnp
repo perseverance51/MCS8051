@@ -1,0 +1,3 @@
+".\Objects\51-´®¿Ú-mpu6050.obj" 
+TO ".\Objects\C52MPU6050" 
+PRINT(".\Listings\C52MPU6050.m51") RAMSIZE(256) 

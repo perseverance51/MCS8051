@@ -1,0 +1,217 @@
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                    12/25/2021  17:32:06  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0, INVOKED BY:
+C:\KEIL_V5\C51\BIN\BL51.EXE main.obj TO MOTOR RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  main.obj (MAIN)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_STARTUP)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_INIT)
+
+
+LINK MAP OF MODULE:  MOTOR (MAIN)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     000EH     UNIT         ?DT?MAIN
+            IDATA   0016H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     0003H     ABSOLUTE     
+            CODE    0006H     008CH     UNIT         ?C_C51STARTUP
+            CODE    0092H     0045H     UNIT         ?PR?KEY_SCAN?MAIN
+            CODE    00D7H     0023H     UNIT         ?PR?_DELAY_XMS?MAIN
+            CODE    00FAH     0023H     UNIT         ?PR?MAIN?MAIN
+            CODE    011DH     0015H     UNIT         ?PR?MOTORCW?MAIN
+            CODE    0132H     0015H     UNIT         ?PR?MOTORCCW?MAIN
+            CODE    0147H     000DH     UNIT         ?C_INITSEG
+            CODE    0154H     000AH     UNIT         ?PR?INTERINT0?MAIN
+            CODE    015EH     0009H     UNIT         ?PR?INIT_P?MAIN
+
+
+
+OVERLAY MAP OF MODULE:   MOTOR (MAIN)
+
+
+SEGMENT
+  +--> CALLED SEGMENT
+---------------------
+?C_C51STARTUP
+  +--> ?PR?MAIN?MAIN
+  +--> ?C_INITSEG
+
+?PR?MAIN?MAIN
+  +--> ?PR?INIT_P?MAIN
+  +--> ?PR?KEY_SCAN?MAIN
+  +--> ?PR?MOTORCW?MAIN
+  +--> ?PR?MOTORCCW?MAIN
+
+?PR?KEY_SCAN?MAIN
+  +--> ?PR?_DELAY_XMS?MAIN
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/25/2021  17:32:06  PAGE 2
+
+
+?PR?MOTORCW?MAIN
+  +--> ?PR?_DELAY_XMS?MAIN
+
+?PR?MOTORCCW?MAIN
+  +--> ?PR?_DELAY_XMS?MAIN
+
+
+
+SYMBOL TABLE OF MODULE:  MOTOR (MAIN)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        MAIN
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0090H         PUBLIC        P1
+  D:00B0H         PUBLIC        P3
+  B:00A8H.7       PUBLIC        EA
+  D:00A8H         PUBLIC        IE
+  D:0008H         PUBLIC        key1_down
+  D:0009H         PUBLIC        key2_down
+  D:000AH         PUBLIC        key3_down
+  D:00B8H         PUBLIC        IP
+  C:0154H         PUBLIC        interint0
+  C:00FAH         PUBLIC        main
+  C:00E0H         PUBLIC        _Delay_xms
+  C:011DH         PUBLIC        MotorCW
+  D:0098H         PUBLIC        SCON
+  D:0088H         PUBLIC        TCON
+  C:015EH         PUBLIC        Init_P
+  B:00A8H.0       PUBLIC        EX0
+  B:0088H.0       PUBLIC        IT0
+  B:0088H.2       PUBLIC        IT1
+  C:0092H         PUBLIC        key_scan
+  D:000BH         PUBLIC        phaseccw
+  D:00C8H         PUBLIC        T2CON
+  D:000FH         PUBLIC        phasecw
+  C:0132H         PUBLIC        MotorCCW
+  D:0013H         PUBLIC        key1_flag
+  D:0014H         PUBLIC        key2_flag
+  D:0015H         PUBLIC        key3_flag
+  D:00D0H         PUBLIC        PSW
+  B:00B0H.0       PUBLIC        key1
+  B:00B0H.1       PUBLIC        key2
+  -------         PROC          L?0031
+  -------         ENDPROC       L?0031
+  -------         PROC          _DELAY_XMS
+  D:0006H         SYMBOL        t
+  -------         DO            
+  D:0005H         SYMBOL        k
+  -------         ENDDO         
+  C:00E0H         LINE#         29
+  C:00E0H         LINE#         30
+  C:00E0H         LINE#         32
+  C:00EAH         LINE#         33
+  C:00EAH         LINE#         34
+  C:00F6H         LINE#         35
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/25/2021  17:32:06  PAGE 3
+
+
+  C:00F9H         LINE#         36
+  C:00F9H         LINE#         37
+  -------         ENDPROC       _DELAY_XMS
+  -------         PROC          MOTORCW
+  -------         DO            
+  D:0004H         SYMBOL        i
+  -------         ENDDO         
+  C:011DH         LINE#         39
+  C:011DH         LINE#         40
+  C:011DH         LINE#         42
+  C:0129H         LINE#         43
+  C:0129H         LINE#         44
+  C:012BH         LINE#         45
+  C:012EH         LINE#         46
+  C:0131H         LINE#         47
+  -------         ENDPROC       MOTORCW
+  -------         PROC          MOTORCCW
+  -------         DO            
+  D:0004H         SYMBOL        i
+  -------         ENDDO         
+  C:0132H         LINE#         49
+  C:0132H         LINE#         50
+  C:0132H         LINE#         52
+  C:013EH         LINE#         53
+  C:013EH         LINE#         54
+  C:0140H         LINE#         55
+  C:0143H         LINE#         56
+  C:0146H         LINE#         57
+  -------         ENDPROC       MOTORCCW
+  -------         PROC          INIT_P
+  C:015EH         LINE#         61
+  C:015EH         LINE#         62
+  C:015EH         LINE#         63
+  C:0160H         LINE#         64
+  C:0162H         LINE#         65
+  C:0164H         LINE#         66
+  C:0166H         LINE#         67
+  -------         ENDPROC       INIT_P
+  -------         PROC          INTERINT0
+  C:0154H         LINE#         69
+  C:0154H         LINE#         71
+  C:0157H         LINE#         72
+  C:015AH         LINE#         73
+  C:015DH         LINE#         76
+  -------         ENDPROC       INTERINT0
+  -------         PROC          KEY_SCAN
+  C:0092H         LINE#         77
+  C:0092H         LINE#         78
+  C:0092H         LINE#         80
+  C:0095H         LINE#         81
+  C:0095H         LINE#         82
+  C:009CH         LINE#         83
+  C:00A2H         LINE#         84
+  C:00A2H         LINE#         85
+  C:00ABH         LINE#         86
+  C:00ABH         LINE#         87
+  C:00AEH         LINE#         88
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  12/25/2021  17:32:06  PAGE 4
+
+
+  C:00B0H         LINE#         89
+  C:00B2H         LINE#         90
+  C:00B4H         LINE#         91
+  C:00B4H         LINE#         93
+  C:00B7H         LINE#         94
+  C:00B7H         LINE#         95
+  C:00BEH         LINE#         96
+  C:00C4H         LINE#         97
+  C:00C4H         LINE#         98
+  C:00CDH         LINE#         99
+  C:00CDH         LINE#         100
+  C:00CFH         LINE#         101
+  C:00D2H         LINE#         102
+  C:00D4H         LINE#         103
+  C:00D6H         LINE#         104
+  C:00D6H         LINE#         105
+  -------         ENDPROC       KEY_SCAN
+  -------         PROC          MAIN
+  C:00FAH         LINE#         108
+  C:00FAH         LINE#         109
+  C:00FAH         LINE#         110
+  C:00FDH         LINE#         111
+  C:00FDH         LINE#         112
+  C:00FDH         LINE#         113
+  C:0100H         LINE#         114
+  C:0109H         LINE#         115
+  C:0112H         LINE#         116
+  C:011BH         LINE#         117
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        MAIN
+
+Program Size: data=23.0 xdata=0 code=359
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,102 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              02/04/2022 14:25:05 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE INCDIR(..\STC15USART _PWM) DEBUG OBJECTE
+                    -XTEND PRINT(.\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          
+   2          
+   3          
+   4          /*************  功能说明  **************
+   5          
+   6          双串口全双工中断方式收发通讯程序。
+   7          注意：
+   8          通过PC向MCU发送数据, MCU收到后通过串口把收到的数据原样返回.
+   9          
+  10          ******************************************/
+  11          
+  12          
+  13          #include  "config.h"
+  14          #include "stdio.h"
+  15          #include "USART.h"
+  16          #include "PWM.h"
+  17          
+  18          void  delay_ms(unsigned int ms)
+  19          {
+  20   1           unsigned int i;
+  21   1         do{
+  22   2              i = MAIN_Fosc / 13000;
+  23   2            while(--i)  ;   //14T per loop
+  24   2           }while(--ms);
+  25   1      }
+  26          
+  27          
+  28          
+  29          //========================================================================
+  30          // 函数: void main(void)
+  31          // 描述: 主函数。
+  32          // 参数: none.
+  33          // 返回: none.
+  34          // 版本: VER1.0
+  35          // 日期: 2014-11-28
+  36          // 备注: 
+  37          //========================================================================
+  38          void main(void)
+  39          {
+  40   1        
+  41   1            PCA_Init(); //PCA初始化
+  42   1      //  P0M1 = 0; P0M0 = 0; //设置为准双向口
+  43   1      //  P1M1 = 0; P1M0 = 0; //设置为准双向口
+  44   1      //  P2M1 = 0; P2M0 = 0; //设置为准双向口
+  45   1        P2M1 &= ~(0xe0);  //P2.7 P2.6 P2.5 设置为推挽输出
+  46   1        P2M0 |=  (0xe0);
+  47   1        P3M1 = 0; P3M0 = 0; //设置为准双向口
+  48   1      //  P4M1 = 0; P4M0 = 0; //设置为准双向口
+  49   1      //  P5M1 = 0; P5M0 = 0; //设置为准双向口
+  50   1      //  P6M1 = 0; P6M0 = 0; //设置为准双向口
+  51   1      //  P7M1 = 0; P7M0 = 0; //设置为准双向口
+  52   1          //  S1_USE_P30P31();
+  53   1       InitSerialPort();    //初始化串口,波特率9600，8bit数据位，1停止位，无校验
+  54   1        EA = 1; //允许总中断
+C51 COMPILER V9.60.0.0   MAIN                                                              02/04/2022 14:25:05 PAGE 2   
+
+  55   1      
+  56   1      //  PrintString1("STC15F2K60S2 UART1 Test Prgramme!\r\n");  //SUART1发送一个字符串
+  57   1      
+  58   1        while (1)
+  59   1        {
+  60   2          delay_ms(500);  
+  61   2          P10 = !P10;
+  62   2          if(++pwm0 >= PWM_HIGH_MAX)  pwm0 = PWM_HIGH_MIN;
+  63   2          PWMn_Update(PCA0,pwm0);
+  64   2      
+  65   2          if(++pwm1 >= PWM_HIGH_MAX)  pwm1 = PWM_HIGH_MIN;
+  66   2          PWMn_Update(PCA1,pwm1);
+  67   2      
+  68   2          if(++pwm2 >= PWM_HIGH_MAX)  pwm2 = PWM_HIGH_MIN;
+  69   2          PWMn_Update(PCA2,pwm2);
+  70   2          
+  71   2          printf("pwm0:%u \t pwm1:%u \t pwm2:%u\r\n",pwm0,pwm1,pwm2); //SUART1发送一个字符串
+  72   2        }
+  73   1      }
+  74          
+  75          
+  76          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    177    ----
+   CONSTANT SIZE    =     30    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

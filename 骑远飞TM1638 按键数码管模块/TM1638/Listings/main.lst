@@ -1,0 +1,39 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              12/15/2021 16:44:06 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include  <intrins.h>
+   2          #include <REGX52.H>
+   3          #include "TM1638.h"
+*** WARNING C280 IN LINE 117 OF TM1638.h: 'flag': unreferenced local variable
+   4          
+   5          int main(void){
+   6   1        unsigned char i;
+   7   1        init_TM1638();
+   8   1        while(1){
+   9   2          for(i=0;i<8;i++){
+  10   3          Write_oneLED(i,1);
+  11   3          //  Delay1000ms();
+  12   3          }
+  13   2        }
+  14   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    639    ----
+   CONSTANT SIZE    =     64    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      32
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

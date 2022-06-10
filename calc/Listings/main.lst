@@ -1,0 +1,294 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              06/09/2022 20:28:53 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <intrins.h>
+   2          #include <reg51.h>
+   3          #include "main.h"
+   4          
+   5          //Variables
+   6          static  data long lvalue;
+   7          static  data long rvalue;
+   8          static  data char currtoken;
+   9          static  data char lasttoken;
+  10          static  data char lastpress;
+  11          static  xdata char outputbuffer[MAX_DISPLAY_char];
+  12          
+  13          void main (void)
+  14           { 
+  15   1         lvalue    = 0;
+  16   1         rvalue    = 0;
+  17   1         currtoken = '=';
+  18   1         lasttoken = '0';
+  19   1         initialise();  // ª„±‡,≥ı ºªØ“∫æßœ‘ æ∆˜°£
+  20   1         calc_output(OK);
+  21   1         calc_evaluate();
+  22   1       }   
+  23          
+  24          void calc_evaluate()
+  25           { 
+  26   1         char data key;
+  27   1         int  data i;
+  28   1         char xdata number[MAX_DISPLAY_char];
+  29   1         char xdata *bufferptr;
+  30   1         
+  31   1         // Clear the buffer before we start.
+  32   1         for (i = 0; i <= MAX_DISPLAY_char; i++)
+  33   1            { number[i] = ' ';
+  34   2          }
+  35   1         bufferptr = number;  
+  36   1         
+  37   1         for (;;)
+  38   1           { key = calc_getkey();
+  39   2           if (calc_testkey(key))
+  40   2             // Key test positive for digit so we read it into the
+  41   2             // buffer and then write the buffer to the screen/LCD.
+  42   2           // Size limit the number of digits - allow for termination
+  43   2           // and possible negative results.
+  44   2                { if (bufferptr != &number[MAX_DISPLAY_char - 2])
+  45   3                     { *bufferptr = key;
+  46   4                       calc_display(number);
+  47   4                       bufferptr++;
+  48   4                     }
+  49   3                }
+  50   2      
+  51   2             else
+  52   2             // Key is an operator so pass it to the function handlers.
+  53   2             // If we are just after startup or cancel then assign to lvalue
+  54   2             // otherwise assign to rvalue.
+C51 COMPILER V9.60.0.0   MAIN                                                              06/09/2022 20:28:53 PAGE 2   
+
+  55   2                { 
+  56   3              //Assign the value.
+  57   3                  if (lasttoken == '0')
+  58   3                     { lvalue = calc_asciidec (number);}
+  59   3                  else
+  60   3                     { rvalue = calc_asciidec (number);}
+  61   3      
+  62   3                  //Clear the number buffer.
+  63   3                  bufferptr = number;
+  64   3                  for (i = 0;i <= MAX_DISPLAY_char; i++)
+  65   3                     { number[i] = ' '; }
+  66   3           
+  67   3                  //Process the Operator.
+  68   3                  currtoken = key;
+  69   3            if (currtoken == 'C') 
+  70   3               { calc_opfunctions(currtoken); }
+  71   3            else
+  72   3               { calc_opfunctions(lasttoken); }
+  73   3          
+  74   3              // Clear the outputbuffer for reuse on next operation.
+  75   3                  for (i = 0;i <= MAX_DISPLAY_char;i++)
+  76   3                     { outputbuffer[i] = ' ';}
+  77   3                
+  78   3                   bufferptr = number;
+  79   3            // Handle the equals operation here for brevity.
+  80   3            // All we need do is preserve the previous operator in
+  81   3            // lasttoken.
+  82   3            if (currtoken != 0x3D) lasttoken = currtoken;
+  83   3                  
+  84   3              }
+  85   2             lastpress = key;
+  86   2           }
+  87   1       }
+  88          
+  89          void calc_opfunctions (char token)
+  90          // Handle the operations. Lvalue holds the result and we test for
+  91          // consecutive operator presses.
+  92           { char data result;
+  93   1         switch(token)
+  94   1              // Add.
+  95   1           {  case '+' : if ((currtoken == '=' ) || ((lastpress >= 0x30) && (lastpress <=0x39)))
+  96   2                        { lvalue += rvalue;
+  97   3                        result = calc_chkerror(lvalue);
+  98   3                  }
+  99   2                   else
+ 100   2                      { result =  SLEEP; }    break;
+ 101   2              // Subtract.
+ 102   2          case '-' : if ((currtoken == '=' ) || ((lastpress >= 0x30) && (lastpress <=0x39)))
+ 103   2                            { lvalue -= rvalue;
+ 104   3                              result = calc_chkerror(lvalue);   
+ 105   3                  }
+ 106   2                         else
+ 107   2                            { result = SLEEP;}    break;
+ 108   2              // Multiply.
+ 109   2          case '*' : if ((currtoken == '=' ) || ((lastpress >= 0x30) && (lastpress <=0x39)))
+ 110   2                            { lvalue *= rvalue;
+ 111   3                              result =  calc_chkerror(lvalue);
+ 112   3                            }
+ 113   2                         else
+ 114   2                            { result =  SLEEP;}   break;
+ 115   2          // Divide.        
+ 116   2          case '/' : if ((currtoken == '=' ) || ((lastpress >= 0x30) && (lastpress <=0x39)))
+C51 COMPILER V9.60.0.0   MAIN                                                              06/09/2022 20:28:53 PAGE 3   
+
+ 117   2                            { if (rvalue)
+ 118   3                                 { lvalue /= rvalue;
+ 119   4                                   result = calc_chkerror(lvalue);
+ 120   4                                 }
+ 121   3                              else
+ 122   3                                 { result = ERROR;}        
+ 123   3                            }
+ 124   2                         else
+ 125   2                            { result = SLEEP;}    break;
+ 126   2          // Cancel.
+ 127   2          case 'C' : lvalue = 0;
+ 128   2                         rvalue = 0;
+ 129   2                         currtoken = '0';
+ 130   2                         lasttoken = '0';
+ 131   2                         result = OK;           break;
+ 132   2        
+ 133   2          default :  result = SLEEP;  
+ 134   2      
+ 135   2            }
+ 136   1         calc_output(result); 
+ 137   1       }
+ 138          
+ 139           
+ 140          /************************************************************************
+ 141          ***** Utility Routines *****
+ 142          ***************************/
+ 143          
+ 144          int calc_chkerror (long num)
+ 145          // Check upper and lower bounds for the display.
+ 146          // i.e. 99999999 and -99999999.
+ 147           { if ((num >= -9999999) && (num <= 9999999))
+ 148   1            return OK;
+ 149   1         else
+ 150   1            return ERROR;
+ 151   1       }
+ 152          
+ 153          
+ 154          void calc_output (int status)
+ 155          // Output according to the status of the operation.
+ 156          // *Sleep* is used for the first op press after a full cancel
+ 157          // or on startup.  
+ 158           { switch (status)
+ 159   1            { case OK      : calc_display(calc_decascii(lvalue));    break;
+ 160   2              case SLEEP   :                                         break;
+ 161   2          case ERROR   : calc_display("Exception ");         break; 
+ 162   2              default      : calc_display("Exception ");           break;
+ 163   2            }
+ 164   1       }
+ 165          
+ 166          
+ 167          long calc_asciidec (char *buffer)
+ 168          // Convert the ASCII string into the floating point number.
+ 169           { long data value;
+ 170   1         long data digit;
+ 171   1         value = 0;
+ 172   1         while (*buffer != ' ')
+ 173   1            { digit = *buffer - 48;
+ 174   2            value = value*10 + digit;
+ 175   2              buffer++;
+ 176   2          }
+ 177   1         return value;
+ 178   1       }
+C51 COMPILER V9.60.0.0   MAIN                                                              06/09/2022 20:28:53 PAGE 4   
+
+ 179          
+ 180          char *calc_decascii (long num)
+ 181          // A rather messy function to convert a floating
+ 182          // point number into an ASCII string.
+ 183           { long data temp = num;
+ 184   1         char xdata *arrayptr = &outputbuffer[MAX_DISPLAY_char];
+ 185   1         long data divisor = 10;
+ 186   1         long data result;
+ 187   1         char data remainder,asciival;
+ 188   1         int  data i;
+ 189   1         
+ 190   1         // If the result of the calculation is zero 
+ 191   1         // insert a zero in the buffer and finish.
+ 192   1         if (!temp)
+ 193   1            { *arrayptr = 48;
+ 194   2            goto done;
+ 195   2          }
+ 196   1         // Handle Negative Numbers.
+ 197   1         if (temp < 0)
+ 198   1            { outputbuffer[0] = '-';
+ 199   2            temp -= 2*temp;
+ 200   2          }
+ 201   1      
+ 202   1         for (i=0 ; i < sizeof(outputbuffer) ; i++)
+ 203   1            { remainder = temp % divisor;   
+ 204   2              result = temp / divisor;
+ 205   2            
+ 206   2          // If we run off the end of the number insert a space into
+ 207   2            // the buffer.
+ 208   2            if ((!remainder) && (!result))
+ 209   2               { *arrayptr = ' ';}
+ 210   2          
+ 211   2            // We're in business - store the digit offsetting
+ 212   2            // by 48 decimal to account for the ascii value.
+ 213   2            else
+ 214   2               { asciival = remainder + 48;
+ 215   3               *arrayptr = asciival;
+ 216   3             } 
+ 217   2          
+ 218   2          temp /= 10;
+ 219   2            // Save a place for a negative sign.
+ 220   2            if (arrayptr != &outputbuffer[1]) arrayptr--;
+ 221   2           }
+ 222   1         done: return outputbuffer;
+ 223   1       }
+ 224          
+ 225          
+ 226          char calc_testkey (char key)
+ 227          // Test whether the key is a digit or an operator. Return 1 for digit, 0 for op.
+ 228           { if ((key >= 0x30) && (key <= 0x39))
+ 229   1            { return 1;}
+ 230   1         else
+ 231   1            { return 0;}
+ 232   1       }
+ 233          
+ 234          /************************************************************************
+ 235          ***** I/O Routines *****
+ 236          ***********************/
+ 237          
+ 238          char calc_getkey (void)
+ 239          // Use the input routine from the *Keypad_Read* assembly file to 
+ 240          // Scan for a key and return ASCII value of the Key pressed.
+C51 COMPILER V9.60.0.0   MAIN                                                              06/09/2022 20:28:53 PAGE 5   
+
+ 241          { char data mykey;
+ 242   1        do mykey = input();
+ 243   1           while (mykey == 0);
+ 244   1        return mykey;
+ 245   1       }
+ 246          
+ 247          void calc_display (char buf[MAX_DISPLAY_char])
+ 248          // Use the Output and Clearscreen routines from the 
+ 249          // *LCD_Write* assembly file to output ASCII values to the LCD.
+ 250           { int data  i = 0;
+ 251   1         clearscreen();
+ 252   1         for (i ; i <= MAX_DISPLAY_char ; i++)
+ 253   1            { if (buf[i] != ' ')
+ 254   2             { output(buf[i]); }
+ 255   2          } 
+ 256   1       }
+ 257          
+ 258          
+ 259          
+ 260          
+ 261          
+ 262          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1201    ----
+   CONSTANT SIZE    =     11    ----
+   XDATA SIZE       =      9       9
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     11      39
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

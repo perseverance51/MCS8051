@@ -1,0 +1,3 @@
+".\Objects\main.obj" 
+TO ".\Objects\AutoClear" 
+PRINT(".\Listings\AutoClear.m51") RAMSIZE(256) 

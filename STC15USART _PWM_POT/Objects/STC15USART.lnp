@@ -1,0 +1,6 @@
+".\Objects\main.obj",
+".\Objects\USART.obj",
+".\Objects\PWM.obj",
+".\Objects\ADC.obj" 
+TO ".\Objects\STC15USART" 
+PRINT(".\Listings\STC15USART.m51") RAMSIZE(256) 

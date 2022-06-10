@@ -1,0 +1,44 @@
+C51 COMPILER V9.60.0.0   LEDCONTROL                                                        12/24/2021 10:57:30 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE LEDCONTROL
+OBJECT MODULE PLACED IN .\Objects\ledcontrol.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE ledcontrol.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listing
+                    -s\ledcontrol.lst) TABS(2) OBJECT(.\Objects\ledcontrol.obj)
+
+line level    source
+
+   1          #include <reg52.h>
+   2          
+   3          void main()
+   4          {
+   5   1        unsigned char i = 0;
+   6   1        unsigned int temp;
+   7   1        P1=0xff;  //P1端口制一关闭LED
+   8   1        P2=0xff;  //设置P2端口初始值
+   9   1        while(1)  //循环
+  10   1        {
+  11   2          if(P1 != 0xff) //如果无按键反应，则跳出
+  12   2          {
+  13   3            temp=(P2^P1)^0xff;  //将上一状况与本次状况合并
+  14   3            P2 = temp;        //送至P2口
+  15   3            while(P1 != 0xff);
+  16   3          }
+  17   2          
+  18   2        }
+  19   1      }
+  20          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     30    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       1
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

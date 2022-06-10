@@ -1,0 +1,3 @@
+".\Objects\main.obj" 
+TO ".\Objects\CMP2" 
+PRINT(".\Listings\CMP2.m51") RAMSIZE(256) 

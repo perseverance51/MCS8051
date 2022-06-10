@@ -1,0 +1,175 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              01/06/2022 16:04:13 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE INCDIR(..\pcf85) DEBUG OBJECTEXTEND PRIN
+                    -T(.\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          
+   2          #include <reg52.h>
+   3          #include "LCD1602.h"
+   4          #include "IIC.h"
+   5          
+   6          #define uchar unsigned char
+   7          #define uint unsigned int
+   8            
+   9          uchar flags = 1; //1秒定时标志
+  10          static uchar cnt = 0;  //用来记录中断次数，设置的中断定时为1ms，中断200次即一秒钟
+  11          unsigned char *weeklist[7]={"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
+  12          
+  13          unsigned char write_buff[8],read_buff[8];
+  14          //-----------延时用于稳定-------------
+  15          void delay_kk(uint k)
+  16          {
+  17   1          while(k--);
+  18   1      }
+  19          //-----------时间预设定值---------
+  20          void time_init()
+  21          {
+  22   1          iic_send_add_byte(0x02,0x30);         //0秒
+  23   1          iic_send_add_byte(0x03,0x26);         //0分钟
+  24   1          iic_send_add_byte(0x04,0x11);          //0小时
+  25   1          iic_send_add_byte(0x05,0x04);  //3号
+  26   1         iic_send_add_byte(0x06,0x02);  //week
+  27   1          iic_send_add_byte(0x07,0x01);           //1月  20世纪的
+  28   1          iic_send_add_byte(0x08,0x22);         //2022年
+  29   1      }
+  30          
+  31          //----------------PCF8563初始化-----------------
+  32          void pcf_init()
+  33          {
+  34   1          iic_send_add_byte(0x00,0x00);  //启动时钟
+  35   1      }
+  36          
+  37          //----------------BCD转10进制-----------
+  38          uchar bcd_dec(uchar bat)
+  39          {
+  40   1      //    uchar temp1,temp2,tol;
+  41   1      //    temp1=bat&0x0f;
+  42   1      //    temp2=(bat&0xf0)>>4;
+  43   1      //    tol=temp2*10+temp1;
+  44   1         return ( (bat/16*10) + (bat%16) );
+  45   1          //return tol;
+  46   1      }
+  47          //------------LCD1602显示：年,月,日,小时,分钟,秒,
+  48          void display_time(uchar sec,min,hour,day,mon,year,unsigned char *week)
+  49          {
+  50   1          LCD_Write_String(1,0,"20");
+  51   1          LCD1602_WriteData(year/10 +'0');
+  52   1          LCD1602_WriteData(year%10 +'0');
+  53   1          LCD1602_WriteData('-');
+  54   1          LCD1602_WriteData(mon/10 + 0x30);
+C51 COMPILER V9.60.0.0   MAIN                                                              01/06/2022 16:04:13 PAGE 2   
+
+  55   1          LCD1602_WriteData(mon%10 + 0x30);
+  56   1          LCD1602_WriteData('-');
+  57   1          LCD1602_WriteData(day/10 + 0x30);
+  58   1          LCD1602_WriteData(day%10 + 0x30);
+  59   1          LCD_Write_String(13,0,week);
+  60   1      
+  61   1          LCD1602_WriteCom(0xc0 + 4);//第二行第四列
+  62   1          LCD1602_WriteData(hour/10 + '0');
+  63   1          LCD1602_WriteData(hour%10 + '0');
+  64   1          LCD1602_WriteData(':');
+  65   1          LCD1602_WriteData(min/10 + 0x30);
+  66   1          LCD1602_WriteData(min%10 + 0x30);
+  67   1          LCD1602_WriteData(':');
+  68   1          LCD1602_WriteData(sec/10 + 0x30);
+  69   1          LCD1602_WriteData(sec%10 + 0x30);
+  70   1      }
+  71          
+  72          void TimeInit()
+  73          {
+  74   1          EA = 1;                       //打开中断总开关
+  75   1          ET0 = 1;                      //打开T0中断开关
+  76   1          TMOD = 0x01;    //设置定时器工作在模式1
+  77   1          TH0=(65536-5000)/256;  //高四位寄存器的值；//5000us=5ms
+  78   1          TL0=(65536-5000)%256;  //低四位寄存器的值；
+  79   1          TR0 = 1;                      //允许定时器T0工作
+  80   1      }
+  81          void main()
+  82          {
+  83   1          uchar sec,min,hour,day,mon,year,week,sec1,min1,hour1,day1,mon1,year1,*week1;
+  84   1          //PCF8563读出的变量和代转换成的十进制变量
+  85   1          TimeInit();
+  86   1            LCD1602_Init();
+  87   1       //  iic_send_add_byte(0x00,0x20);  // 关闭时钟
+  88   1      //   delay_kk(1000);
+  89   1      //   time_init();    //时钟芯片初始时间设置
+  90   1      //    pcf_init();
+  91   1          delay_kk(1000);
+  92   1          while(1)
+  93   1          {
+  94   2          if(flags){
+  95   3        //    ReadData1(0x02,0x07,read_buff) ;/*多字节*/
+  96   3        //     ReadRTC(read_buff);
+  97   3      //      sec = 0x7f&read_buff[0];//秒
+  98   3      //      min = 0x7f&read_buff[1] ;
+  99   3      //      hour   = 0x3f&read_buff[2];
+ 100   3      //      day   = 0x3f&read_buff[3];
+ 101   3      //      week = 0x07&read_buff[4];
+ 102   3      //      mon   = 0x1f&read_buff[5];
+ 103   3      //      year   = 0xff&read_buff[6]; 
+ 104   3      
+ 105   3      //            switch(week-1){
+ 106   3      //            case 0: week1="Sun";break;
+ 107   3      //            case 6: week1="Sat";break;
+ 108   3      //            case 5: week1="Fri";break;
+ 109   3      //            case 4: week1="Thu";break;
+ 110   3      //            case 3: week1="Wed";break;
+ 111   3      //            case 2: week1="Tue";break;
+ 112   3      //            case 1: week1="Mon";break;
+ 113   3      //          } 
+ 114   3                      flags=0;
+ 115   3            
+ 116   3              sec=0x7f&iic_rec_add_byte(0x02);    //读取秒,屏蔽无效位
+C51 COMPILER V9.60.0.0   MAIN                                                              01/06/2022 16:04:13 PAGE 3   
+
+ 117   3              min=0x7f&iic_rec_add_byte(0x03);   //读取分钟
+ 118   3              hour = 0x3f&iic_rec_add_byte(0x04);  //读取小时         
+ 119   3              day=0x3f&iic_rec_add_byte(0x05);   //读取天数
+ 120   3              week=0x07&iic_rec_add_byte(0x06);    //读取星期
+ 121   3              mon=0x1f&iic_rec_add_byte(0x07);  //读取月0x07
+ 122   3              year =0xff&iic_rec_add_byte(0x08);    //读取年0xff&
+ 123   3              
+ 124   3              sec1=bcd_dec(sec);                   //将读取的BCD码秒转换成十进制秒以便运算
+ 125   3              min1=bcd_dec(min);
+ 126   3              hour1=bcd_dec(hour);
+ 127   3              day1=bcd_dec(day);
+ 128   3               mon1=bcd_dec(mon);       
+ 129   3             year1=bcd_dec(year);   
+ 130   3            week1 = weeklist[week-1]; 
+ 131   3      
+ 132   3          }
+ 133   2        display_time(sec1,min1,hour1,day1,mon1,year1,week1);   //LCD1602显示时间
+ 134   2        }
+ 135   1      }
+ 136          void InterruptTimer0() interrupt 1
+ 137          {
+ 138   1      
+ 139   1          TH0=(65536-5000)/256;  //高四位寄存器的值；//5000us=5ms
+ 140   1          TL0=(65536-5000)%256;  //低四位寄存器的值；
+ 141   1          cnt++;                                     //中断次数计数值加1
+ 142   1          if(cnt>=200)                                 //中断次数达到200次即为1秒
+ 143   1          {
+ 144   2              cnt = 0;                               //清零，重新记录中断次数
+ 145   2              flags = 1;                             //设置1秒定时标志位1
+ 146   2          }
+ 147   1        }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    597    ----
+   CONSTANT SIZE    =     31    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     39      29
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

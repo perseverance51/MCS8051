@@ -1,0 +1,3 @@
+".\Objects\mian.obj" 
+TO ".\Objects\adc25" 
+PRINT(".\Listings\adc25.m51") RAMSIZE(256) 

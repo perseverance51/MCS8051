@@ -1,0 +1,5 @@
+"uart.obj",
+"PCF8563.obj",
+"main.obj" 
+TO "PCF8563" 
+RAMSIZE(256) 

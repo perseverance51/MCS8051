@@ -1,0 +1,182 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              02/01/2022 10:50:05 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          #include <reg51.h>
+   2          #include<string.h>
+   3          
+   4          typedef unsigned char u8;     // 重命名类型u8简化代码编写
+   5          typedef unsigned int u16; 
+   6          
+   7          #define LCD1602_DATA_PORT  P2   // LCD1602的8位数据端口
+   8          
+   9          sbit gLcd1602_E  = P3^2;    // LCD1602控制总线的使能信号
+  10          sbit gLcd1602_RW = P3^1;    // LCD1602控制总线的读写选择信号
+  11          sbit gLcd1602_RS = P3^0;    // LCD1602控制总线的数据/命令选择信号
+  12          
+  13          sbit Key1 = P3^5;
+  14          sbit Key2 = P3^7;
+  15          
+  16          float Output_DA = 200;
+  17          
+  18          void delay10ms(void)   
+  19          {
+  20   1          unsigned char a,b,c;
+  21   1          for(c=1;c>0;c--)
+  22   1              for(b=38;b>0;b--)
+  23   1                  for(a=130;a>0;a--);
+  24   1      }
+  25          
+  26          void Lcd1602WaitNoBusy(void)  //忙检测函数，判断bit7是0，允许执行；1禁止
+  27          {
+  28   1          unsigned char sta = 0;      //
+  29   1      
+  30   1          LCD1602_DATA_PORT = 0xff;
+  31   1          gLcd1602_RS = 0;
+  32   1          gLcd1602_RW = 1;
+  33   1          do
+  34   1          {
+  35   2              gLcd1602_E = 1;
+  36   2              sta = LCD1602_DATA_PORT;
+  37   2              gLcd1602_E = 0;    //使能，用完就拉低，释放总线
+  38   2          }while(sta & 0x80);
+  39   1      }
+  40          
+  41          void Lcd1602WriteCmd(unsigned char cmd)   
+  42          {
+  43   1        Lcd1602WaitNoBusy();    // 先等待LCD1602处于不忙状态
+  44   1      
+  45   1        gLcd1602_E = 0;         // 禁止LCD
+  46   1        gLcd1602_RS = 0;        // 选择发送命令模式
+  47   1        gLcd1602_RW = 0;        // 选择写入模式 
+  48   1        LCD1602_DATA_PORT = cmd;    // 将1字节命令字放入8位并行数据端口
+  49   1        gLcd1602_E = 1;             // 使能LED
+  50   1        gLcd1602_E = 0;       // 禁止LCD
+  51   1      }
+  52          
+  53          void Lcd1602WriteData(unsigned char dat)      
+  54          {
+  55   1        Lcd1602WaitNoBusy();    // 先等待LCD1602处于不忙状态
+C51 COMPILER V9.60.0.0   MAIN                                                              02/01/2022 10:50:05 PAGE 2   
+
+  56   1      
+  57   1        gLcd1602_E = 0;         // 禁止LCD
+  58   1        gLcd1602_RS = 1;        // 选择发送数据模式
+  59   1        gLcd1602_RW = 0;        // 选择写入模式 
+  60   1        LCD1602_DATA_PORT = dat;    // 将1字节命令字放入8位并行数据端口
+  61   1        gLcd1602_E = 1;             // 使能LED
+  62   1        gLcd1602_E = 0;       // 禁止LCD
+  63   1      }
+  64          
+  65          void Lcd1602SetCursor(unsigned char x,unsigned char y)    // 坐标显示
+  66          {
+  67   1          unsigned char addr = 0;
+  68   1      
+  69   1          switch (y)
+  70   1        {
+  71   2          case 0:           // 上面一行
+  72   2            addr = 0x00 + x;    break;  
+  73   2          case 1:           // 下面一行
+  74   2            addr = 0x40 + x;    break;
+  75   2          default:
+  76   2                        break;
+  77   2        }
+  78   1          Lcd1602WriteCmd(addr | 0x80);
+  79   1      }
+  80          
+  81          void Lcd1602ShowStr(unsigned char x, unsigned char y, unsigned char *pStr)     //显示字符串
+  82          {
+  83   1          Lcd1602SetCursor(x, y);      //当前字符的坐标
+  84   1          while (*pStr != '\0')
+  85   1          {
+  86   2              Lcd1602WriteData(*pStr++);
+  87   2          }
+  88   1      }
+  89          
+  90          void Lcd1602Init(void)            
+  91          {
+  92   1        Lcd1602WriteCmd(0x38);    // 按照数据手册的初始化时序，先发送38H
+  93   1        delay10ms();          // 延时10ms
+  94   1        Lcd1602WriteCmd(0x38);    // 按照数据手册的初始化时序，先发送38H
+  95   1        delay10ms();          // 延时10ms
+  96   1        Lcd1602WriteCmd(0x38);    // 按照数据手册的初始化时序，先发送38H
+  97   1        delay10ms();          // 延时10ms
+  98   1        Lcd1602WriteCmd(0x38);    // 显示模式设置
+  99   1        Lcd1602WriteCmd(0x08);    // 关闭显示
+ 100   1        Lcd1602WriteCmd(0x01);    // 清屏（同时清数据指针）
+ 101   1        Lcd1602WriteCmd(0x06);    // 读写后指针自动加1，写1个字符后整屏显示不移动
+ 102   1        Lcd1602WriteCmd(0x0c);    // 开显示，不显示光标
+ 103   1        
+ 104   1        Lcd1602ShowStr(2,0,"NC ADJ POWER ");  
+ 105   1        Lcd1602ShowStr(0,1,"Voltage:    V");  
+ 106   1      }
+ 107          
+ 108          /*************** 显示函数 *************************************************/
+ 109          void Write_Volt(unsigned char hang,unsigned char add,unsigned int date)    //用于显示
+ 110          {
+ 111   1        if(hang==1)   
+ 112   1          Lcd1602WriteCmd(0x80+add);
+ 113   1        else
+ 114   1        Lcd1602WriteCmd(0x80+0x40+add);
+ 115   1        Lcd1602WriteData(0x30+date%1000/100);  //显示百位
+ 116   1        Lcd1602WriteData(0x30+date%100/10);    //显示十位
+ 117   1        Lcd1602WriteData('.');           //显示.
+C51 COMPILER V9.60.0.0   MAIN                                                              02/01/2022 10:50:05 PAGE 3   
+
+ 118   1        Lcd1602WriteData(0x30+date%10);      //显示个位
+ 119   1        Lcd1602WriteData('V');           //显示字母V
+ 120   1      }
+ 121          
+ 122          void Out_Volt(unsigned char Volt)
+ 123          {   
+ 124   1        P0=Volt;
+ 125   1      }
+ 126          
+ 127          void main()
+ 128          {
+ 129   1        Lcd1602Init();
+ 130   1        while (1)
+ 131   1        {
+ 132   2          Out_Volt(Output_DA);
+ 133   2          
+ 134   2          if (Key1 == 0)  
+ 135   2          {
+ 136   3            delay10ms();    
+ 137   3            if (Key1 == 0)      
+ 138   3            {
+ 139   4              if(Output_DA < 200) Output_DA += 2;
+ 140   4            }   
+ 141   3            while(!Key1);
+ 142   3          }
+ 143   2          if (Key2 == 0)  
+ 144   2          {
+ 145   3            delay10ms();    
+ 146   3            if (Key2 == 0)      
+ 147   3            {
+ 148   4              if(Output_DA >= 2) Output_DA -= 2;
+ 149   4            }     
+ 150   3            while(!Key2);
+ 151   3          }
+ 152   2          
+ 153   2          Write_Volt(0,8,Output_DA/2.0);
+ 154   2        }   
+ 155   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    487    ----
+   CONSTANT SIZE    =     28    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      4       3
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

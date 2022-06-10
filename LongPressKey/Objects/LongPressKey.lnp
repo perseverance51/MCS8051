@@ -1,0 +1,3 @@
+".\Objects\main.obj" 
+TO ".\Objects\LongPressKey" 
+PRINT(".\Listings\LongPressKey.m51") RAMSIZE(256) 

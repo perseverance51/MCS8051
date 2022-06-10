@@ -1,0 +1,842 @@
+C51 COMPILER V9.60.0.0   PCF8563                                                           01/07/2022 13:00:55 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE PCF8563
+OBJECT MODULE PLACED IN .\Objects\PCF8563.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE PCF8563.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\P
+                    -CF8563.lst) TABS(2) OBJECT(.\Objects\PCF8563.obj)
+
+line level    source
+
+   1          //---库函数声明及相关定义---//
+   2          #include <reg52.h>
+   3          #include <intrins.h>
+   4          
+   5          #define uchar unsigned char
+   6          #define uint unsigned int
+   7          
+   8          sbit SDA=P3^1; //数据
+   9          sbit SCL=P3^0; //时钟
+  10          
+  11          #define     LCDIO      P0  //1602数据口
+  12          sbit rs=P2^0;  //1602数据命令选择引脚
+  13          sbit rd=P2^1;        //读写选择
+  14          sbit lcden=P2^2;        //1602选通引脚
+  15          
+  16          //uchar code table[]={" 2021-1-2 SUN"};
+  17          //uchar code table1[]={" 15:45:00       "};
+  18          uchar code table2[]= "SUNMONTUEWEDTHUFRISAT";
+  19          
+  20          static uchar g8563_Store[8]="0"; /*时间交换区,全局变量声明*/
+  21          uchar code c8563_Store[8]={0x50,0x59,0x23,0x31,0x05,0x07,0x88,0x20}; /*写入时间初值：世纪，08年 7月 星期一
+             - 13日 07:59:00*/
+  22          
+  23          sbit menu=P0^0;//菜单
+  24          sbit add=P0^1;//加一
+  25          sbit dec=P0^2;//减一
+  26          
+  27          uchar second,minute,hour,day,month,year,week,count=0;  
+  28          
+  29          uchar flags = 1; //1秒定时标志
+  30          static uchar cnt = 0;  //用来记录中断次数，设置的中断定时为1ms，中断200次即一秒钟
+  31          void delay1602(uint n)
+  32          {
+  33   1        unsigned int  i,j;
+  34   1        for(i=0;i<n;i++)
+  35   1          for(j=0;j<123;j++);
+  36   1      }
+  37          void write_com(uchar com)//1602写命令子程序
+  38          {
+  39   1              rs=0;//RS是数据命令选择短，高电平写数据，低电平写命令
+  40   1          delay1602(1);
+  41   1              lcden=1;//1602选通端，高电平选通，低电平禁止
+  42   1              LCDIO=com;
+  43   1              delay1602(1);
+  44   1              lcden=0;        
+  45   1      }
+  46          
+  47          void write_date(uchar date)//1602写数据子程序
+  48          {
+  49   1              rs=1;        //RS是数据命令选择短，高电平写数据，低电平写命令
+  50   1            delay1602(1);
+  51   1              rd=0;        //RD是读写选择短，高电平读，低电平写
+  52   1             lcden=0;        //1602选通端，高电平选通，低电平禁止 
+  53   1             LCDIO=date;
+C51 COMPILER V9.60.0.0   PCF8563                                                           01/07/2022 13:00:55 PAGE 2   
+
+  54   1         
+  55   1              lcden=1;
+  56   1              delay1602(1);
+  57   1              lcden=0;        
+  58   1      }
+  59          
+  60          void init()
+  61          {
+  62   1      //        uchar num;
+  63   1              lcden=0;
+  64   1              rd = 0;
+  65   1              write_com(0x38);        //0011 1000B，功能模式设置，设置为8为数据口，两行显示，5*7点阵
+  66   1              write_com(0x0c);        //0000 1011B，显示开及光标设置，关显示，显示光标，光标闪烁
+  67   1              write_com(0x06);        //0000 0110B，显示光标移动设置，读或写一个字符，地址指针减一且光标减一，写
+             -一个字符屏幕显示不移动
+  68   1              write_com(0x01);        //0000 0001B，显示清屏，数据指针和所有显示清屏
+  69   1              write_com(0x80);        //1000 000B，关闭显示
+  70   1              delay1602(5);
+  71   1              write_com(0x80);        //1000 000B，设置为2行显示，写入第一行字符的地址，第一行地址是00-2F
+  72   1      //        for(num=0;num<15;num++)
+  73   1      //        {
+  74   1      //                write_date(table[num]);        //写入第一行数据
+  75   1      //                delay1602(5);
+  76   1      //        }
+  77   1      //        write_com(0x80+0x40);        //1100 0000B,设置为2行显示，写入第二行字符的地址，第二行地址是40-67
+  78   1      //        for(num=0;num<15;num++)        //写入第二行数据
+  79   1      //        {
+  80   1      //                write_date(table1[num]);//写入第二行数据
+  81   1      //                delay1602(5);
+  82   1      //        }
+  83   1      }
+  84          
+  85          /********************************************
+  86                内部函数，延时1
+  87          ********************************************/
+  88          /*根据晶振频率制定延时时间*/
+  89          void Delay()
+  90          {
+  91   1          _nop_();
+  92   1         _nop_();     
+  93   1        _nop_();
+  94   1         _nop_(); 
+  95   1            _nop_();
+  96   1         _nop_(); 
+  97   1      }
+  98          /********************************************
+  99          内部函数，I2C开始
+ 100          ********************************************/
+ 101          void Start()
+ 102          {  //EA=0;
+ 103   1      
+ 104   1          SDA=1;
+ 105   1          _nop_();
+ 106   1          SCL=1;
+ 107   1          _nop_();
+ 108   1          _nop_();
+ 109   1          _nop_();
+ 110   1          _nop_();
+ 111   1          _nop_();
+ 112   1          SDA=0;
+ 113   1          _nop_();
+ 114   1          _nop_();
+C51 COMPILER V9.60.0.0   PCF8563                                                           01/07/2022 13:00:55 PAGE 3   
+
+ 115   1          _nop_();
+ 116   1          _nop_();
+ 117   1          _nop_();
+ 118   1          SCL=0;
+ 119   1      }
+ 120          
+ 121          
+ 122          /********************************************
+ 123          内部函数，I2C结束
+ 124          ********************************************/
+ 125          void Stop()
+ 126          {
+ 127   1         SDA=0;
+ 128   1         SCL=0;
+ 129   1         Delay();
+ 130   1         SCL=1;
+ 131   1         Delay();
+ 132   1         SDA=1;
+ 133   1         Delay();
+ 134   1        // EA=1;
+ 135   1      }
+ 136          /********************************************
+ 137          内部函数，输出ACK ,每个字节传输完成，输出ack=0,结束读书据，ack=1;
+ 138          ********************************************/
+ 139          void WriteACK(uchar ack)
+ 140          {
+ 141   1         SDA=ack;
+ 142   1         Delay();
+ 143   1         SCL=1;
+ 144   1         Delay();
+ 145   1         SCL=0;
+ 146   1      }
+ 147          /********************************************
+ 148          内部函数，等待ACK
+ 149          ********************************************/
+ 150          void WaitACK()
+ 151          {  uchar errtime=20;
+ 152   1         SDA=1;
+ 153   1         Delay(); /*读ACK*/
+ 154   1         SCL=1;
+ 155   1         Delay();
+ 156   1         while(SDA)
+ 157   1         {  errtime--;
+ 158   2            if(!errtime) Stop();
+ 159   2         }
+ 160   1         SCL=0;
+ 161   1         Delay();
+ 162   1      }
+ 163          /********************************************
+ 164          内部函数.输出数据字节
+ 165          入口:B=数据
+ 166          ********************************************/
+ 167          void writebyte(uchar wdata)
+ 168          {
+ 169   1         uchar i;
+ 170   1         for(i=0;i<8;i++)
+ 171   1         {
+ 172   2             if(wdata&0x80) SDA=1;
+ 173   2             else SDA=0;
+ 174   2             wdata<<=1;
+ 175   2             SCL=1;
+ 176   2        Delay();
+C51 COMPILER V9.60.0.0   PCF8563                                                           01/07/2022 13:00:55 PAGE 4   
+
+ 177   2             SCL=0;
+ 178   2         }
+ 179   1       //  WaitACK();     //I2C器件或通讯出错，将会退出I2C通讯
+ 180   1      }
+ 181          /********************************************
+ 182          内部函数.输入数据
+ 183          出口:B
+ 184          ********************************************/
+ 185          uchar Readbyte()
+ 186          {
+ 187   1         uchar i,bytedata;
+ 188   1         SDA=1;
+ 189   1         for(i=0;i<8;i++)
+ 190   1         {
+ 191   2            SCL=1;
+ 192   2            bytedata<<=1;
+ 193   2            bytedata|=SDA;
+ 194   2            SCL=0;
+ 195   2            Delay();
+ 196   2         }
+ 197   1         return(bytedata);
+ 198   1      }
+ 199          /********************************************
+ 200          输出数据->pcf8563
+ 201          ********************************************/
+ 202          void writeData(uchar address,uchar mdata)
+ 203          {
+ 204   1         Start();
+ 205   1         writebyte(0xa2); /*写命令*/
+ 206   1         writebyte(address); /*写地址*/
+ 207   1         writebyte(mdata); /*写数据*/
+ 208   1         Stop();
+ 209   1      }
+ 210          /********************************************
+ 211          输入数据<-pcf8563
+ 212          ********************************************/
+ 213          uchar ReadData(uchar address) /*单字节*/
+ 214          {  uchar rdata;
+ 215   1         Start();
+ 216   1         writebyte(0xa2); /*写命令*/
+ 217   1         writebyte(address); /*写地址*/
+ 218   1         Start();
+ 219   1         writebyte(0xa3); /*读命令*/
+ 220   1         rdata=Readbyte();
+ 221   1         WriteACK(1);
+ 222   1         Stop();
+ 223   1         return(rdata);
+ 224   1      }
+ 225          void ReadData1(uchar address,uchar count,uchar * buff) /*多字节*/
+ 226          {  uchar i;
+ 227   1         Start();
+ 228   1         writebyte(0xa2); /*写命令*/
+ 229   1        WriteACK(0);
+ 230   1         writebyte(address); /*写地址*/
+ 231   1        WriteACK(0);
+ 232   1         Start();
+ 233   1         writebyte(0xa3); /*读命令*/
+ 234   1        WriteACK(0);
+ 235   1         for(i=0;i<count;i++)
+ 236   1         {
+ 237   2              buff[i]=Readbyte();
+ 238   2              if(i<count-1) WriteACK(0);
+C51 COMPILER V9.60.0.0   PCF8563                                                           01/07/2022 13:00:55 PAGE 5   
+
+ 239   2         }
+ 240   1        WriteACK(1);
+ 241   1         Stop();
+ 242   1      }
+ 243          /********************************************
+ 244          内部函数,读入时间到内部缓冲区
+ 245          ********************************************/
+ 246          void P8563_Read()
+ 247          {   uchar time[7],century;
+ 248   1              ReadData1(0x02,0x07,time);
+ 249   1              century=time[5];
+ 250   1              g8563_Store[0]=time[0]&0x7f; /*秒*/
+ 251   1              g8563_Store[1]=time[1]&0x7f; /*分*/
+ 252   1              g8563_Store[2]=time[2]&0x3f; /*小时*/
+ 253   1        
+ 254   1              g8563_Store[3]=time[3]&0x3f; /*日*/
+ 255   1              g8563_Store[4]=time[4]&0x07; /*星期*/
+ 256   1              g8563_Store[5]=time[5]&0x1f; /*月*/
+ 257   1              g8563_Store[6]=time[6]&0xff; /*年*/
+ 258   1             g8563_Store[7]=century&0x80; /*去世纪,00为2000，80为1900*/
+ 259   1              if(g8563_Store[7]==0x00)g8563_Store[7]=20;
+ 260   1              if(g8563_Store[7]==0x80)g8563_Store[7]=19;
+ 261   1      }
+ 262          /********************************************
+ 263          读入时间到内部缓冲区----外部调用
+ 264          ********************************************/
+ 265          void P8563_gettime()
+ 266          {
+ 267   1          P8563_Read();
+ 268   1          if(g8563_Store[0]==0)
+ 269   1            P8563_Read(); /*如果为秒=0，为防止时间变化，再读一次*/
+ 270   1      }
+ 271          /********************************************
+ 272          写时间修改值
+ 273          ********************************************/
+ 274          void P8563_settime()
+ 275          {      
+ 276   1              writeData(2,g8563_Store[0]);//秒
+ 277   1              writeData(3,g8563_Store[1]);//分
+ 278   1              writeData(4,g8563_Store[2]);//时
+ 279   1              writeData(5,g8563_Store[3]);//日
+ 280   1              writeData(6,g8563_Store[4]);//星期
+ 281   1              if(g8563_Store[7]==20)g8563_Store[5]=(g8563_Store[5]&0x3F);//判断世纪
+ 282   1              if(g8563_Store[7]==0x19)g8563_Store[5]=(g8563_Store[5]|0x80);//判断世纪
+ 283   1              writeData(7,g8563_Store[1]);//月
+ 284   1              writeData(8,g8563_Store[0]);//年
+ 285   1      }
+ 286          
+ 287          /********************************************
+ 288                    P8563的初始化
+ 289          ********************************************/
+ 290          void P8563_init()
+ 291          {
+ 292   1          uchar i;
+ 293   1          if((ReadData(0xa)&0x3f)!=0x8) /*检查是否第一次启动，是则初始化时间*/
+ 294   1          {
+ 295   2              for(i=0;i<8;i++) g8563_Store[i]=c8563_Store[i]; /*初始化时间*/
+ 296   2                        P8563_settime();
+ 297   2              writeData(0x0,0x00);
+ 298   2              writeData(0xa,0x8); /*8:00报警*/
+ 299   2              writeData(0x1,0x12); /*报警有效*/
+ 300   2              writeData(0xd,0xf0);
+C51 COMPILER V9.60.0.0   PCF8563                                                           01/07/2022 13:00:55 PAGE 6   
+
+ 301   2          }
+ 302   1      }
+ 303          
+ 304          
+ 305          void DisplaySecond(uchar x)        //写入1602秒
+ 306          {
+ 307   1              uchar i,j;   
+ 308   1              i=x/10;
+ 309   1              j=x%10;
+ 310   1              write_com(0xca);   //写1602的命令字，设置秒的数据地址为47H
+ 311   1              write_date(0x30+i); //写入秒的低位  
+ 312   1              write_date(0x30+j); //写入秒的高位      
+ 313   1      }
+ 314          
+ 315          void DisplayMinute(uchar x)         //写入1602分
+ 316          {
+ 317   1              uchar i,j;   
+ 318   1              i=x/10;
+ 319   1              j=x%10;
+ 320   1              write_com(0xc7);   
+ 321   1              write_date(0x30+i);  
+ 322   1              write_date(0x30+j);
+ 323   1              write_date(':'); //后面，添加间隔符号":"    
+ 324   1      }
+ 325          
+ 326          void DisplayHour(uchar x)         //写入1602小时
+ 327          {
+ 328   1              uchar i,j;   
+ 329   1              i=x/10;
+ 330   1              j=x%10;
+ 331   1              write_com(0xc4);   
+ 332   1              write_date(0x30+i);  
+ 333   1              write_date(0x30+j); 
+ 334   1              write_date(':'); //后面，添加间隔符号":"  
+ 335   1      }
+ 336          
+ 337          void DisplayDay(uchar x)         //写入1602,天
+ 338          {
+ 339   1              uchar i,j;   
+ 340   1              i=x/10;
+ 341   1              j=x%10;   
+ 342   1              write_com(0x89);   
+ 343   1              write_date(0x30+i);  
+ 344   1              write_date(0x30+j); 
+ 345   1          
+ 346   1      }
+ 347          
+ 348          void DisplayMonth(uchar x)         //写入1602,月
+ 349          {
+ 350   1              uchar i,j;     
+ 351   1              i=x/10;
+ 352   1              j=x%10;  
+ 353   1              write_com(0x86);   
+ 354   1              write_date(0x30+i);  
+ 355   1              write_date(0x30+j); 
+ 356   1              write_date('-'); //后面，添加间隔符号"-"  
+ 357   1      }
+ 358          
+ 359          void DisplayYear(uchar x)         //写入1602年
+ 360          {
+ 361   1              uchar i,j;  
+ 362   1              i=x/10;
+C51 COMPILER V9.60.0.0   PCF8563                                                           01/07/2022 13:00:55 PAGE 7   
+
+ 363   1              j=x%10;
+ 364   1              write_com(0x83);   
+ 365   1              write_date(0x30+i);
+ 366   1              write_date(0x30+j); 
+ 367   1                write_date('-'); //后面，免添加间隔符号"-"    
+ 368   1      }   
+ 369          
+ 370          void DisplayWeek(uchar x)        //写入星期
+ 371          {
+ 372   1              uchar i;
+ 373   1              x=(x-1)*3;//需要减一处理
+ 374   1              write_com(0x8d);   
+ 375   1              for(i=0;i<3;i++)
+ 376   1              {
+ 377   2                      write_date(table2[x]);
+ 378   2                      x++;  
+ 379   2              }
+ 380   1      }  
+ 381          
+ 382          
+ 383          void DisplayCentury(uchar x)         //写入世纪
+ 384          {
+ 385   1              uchar i,j;  
+ 386   1              i=x/10;
+ 387   1              j=x%10;
+ 388   1              write_com(0x81);   
+ 389   1              write_date(0x30+i);
+ 390   1              write_date(0x30+j);  
+ 391   1      }   
+ 392          
+ 393          //---BCD转换16函数---//
+ 394          void BCD_16( )
+ 395          {
+ 396   1      uchar i;//ucData1,ucData2;
+ 397   1              for(i=0;i<7;i++)
+ 398   1              {
+ 399   2      //                ucData1=g8563_Store[i]/16; //BCD码转十六进制
+ 400   2      //                ucData2=g8563_Store[i]%16;
+ 401   2      //                g8563_Store[i]=ucData1*10+ucData2;
+ 402   2      
+ 403   2      //          ucData1=g8563_Store[i]&0x0f;
+ 404   2      //          ucData2=(g8563_Store[i]&0xf0)>>4;
+ 405   2      //          g8563_Store[i] =  ucData2*10+ucData1;
+ 406   2                g8563_Store[i] = (g8563_Store[i] /16*10) + (g8563_Store[i]%16);
+ 407   2                      }
+ 408   1      }
+ 409          
+ 410          void display(void)
+ 411          {   DisplayCentury(g8563_Store[7]);//0x81
+ 412   1         DisplayYear(g8563_Store[6]); 
+ 413   1         DisplayMonth(g8563_Store[5]); 
+ 414   1        DisplayDay(g8563_Store[3]);  
+ 415   1        DisplayWeek(g8563_Store[4]);
+ 416   1             
+ 417   1              DisplayHour(g8563_Store[2]);                                       
+ 418   1              DisplayMinute(g8563_Store[1]);           
+ 419   1                 DisplaySecond(g8563_Store[0]);         
+ 420   1                    
+ 421   1              
+ 422   1              
+ 423   1      }
+ 424          
+C51 COMPILER V9.60.0.0   PCF8563                                                           01/07/2022 13:00:55 PAGE 8   
+
+ 425          void turn_val(uchar newval,uchar flag,uchar  newaddr,uchar s1num)        
+ 426          //newval是时间日期值，flag是时间日期增减标识，newaddr是读取数据的地址，s1num是年月日时分秒星期的数字标识
+ 427          {
+ 428   1      uchar ucData1,ucData2;
+ 429   1              newval=ReadData(newaddr);
+ 430   1      //        century=newval；
+ 431   1              switch(newaddr)
+ 432   1                      {
+ 433   2                      case 0x02:newval=(newval&0x7f); /*秒*/
+ 434   2                      break;
+ 435   2                      case 0x03:newval=(newval&0x7f); /*秒*/
+ 436   2                      break;
+ 437   2                      case 0x04:newval=(newval&0x3f);/*小时*/
+ 438   2                      break;
+ 439   2                      case 0x05:newval=(newval&0x3f); /*日*/
+ 440   2                      break;
+ 441   2                      case 0x06:newval=(newval&0x07); /*星期*/
+ 442   2                      break;
+ 443   2                      case 0x07:newval=(newval&0x1f);/*月*/
+ 444   2                      break;
+ 445   2                      case 0x08:newval=(newval&0xff);/*年*/
+ 446   2                      }
+ 447   1      
+ 448   1                      ucData1=newval/16; //BCD码转十六进制
+ 449   1                      ucData2=newval%16;
+ 450   1                      newval=ucData1*10+ucData2;
+ 451   1      
+ 452   1              if(flag)    //判断是加一还是减一
+ 453   1              {
+ 454   2                      newval++;
+ 455   2                      switch(s1num)
+ 456   2                      {
+ 457   3                              case 1: if(newval>99) newval=0;
+ 458   3                              DisplayYear(newval);      
+ 459   3                              break;
+ 460   3                              case 2: if(newval>12) newval=1;
+ 461   3                              DisplayMonth(newval);
+ 462   3                              break;
+ 463   3                              case 3: if(newval>31) newval=1;
+ 464   3                              DisplayDay(newval);  
+ 465   3                              break;
+ 466   3                              case 4: if(newval>6) newval=0;
+ 467   3                              DisplayWeek(newval);
+ 468   3                              break;
+ 469   3                              case 5: if(newval>23) newval=0;
+ 470   3                              DisplayHour(newval);
+ 471   3                              break;
+ 472   3                              case 6: if(newval>59) newval=0;
+ 473   3                              DisplayMinute(newval);
+ 474   3                              break;
+ 475   3                              case 7: if(newval>59) newval=0;
+ 476   3                              DisplaySecond(newval);
+ 477   3                              break;
+ 478   3                              default:break;
+ 479   3                      }
+ 480   2              }   
+ 481   1              else
+ 482   1              {
+ 483   2                      newval--;
+ 484   2                      switch(s1num)
+ 485   2                      {
+ 486   3                              case 1: if(newval==0XFF) newval=99;
+C51 COMPILER V9.60.0.0   PCF8563                                                           01/07/2022 13:00:55 PAGE 9   
+
+ 487   3                              DisplayYear(newval);
+ 488   3                              break;
+ 489   3                              case 2: if(newval==0) newval=12;
+ 490   3                              DisplayMonth(newval);
+ 491   3                              break;
+ 492   3                              case 3: if(newval==0) newval=31;
+ 493   3                              DisplayDay(newval);
+ 494   3                              break;
+ 495   3                              case 4: if(newval==0xff) newval=6;
+ 496   3                              DisplayWeek(newval);
+ 497   3                              break;
+ 498   3                              case 5: if(newval==0xff) newval=23;
+ 499   3                              DisplayHour(newval);
+ 500   3                              break;
+ 501   3                              case 6: if(newval==0xff) newval=59;
+ 502   3                              DisplayMinute(newval);
+ 503   3                              break;
+ 504   3                              case 7: if(newval==0xff) newval=59;
+ 505   3                              DisplaySecond(newval);
+ 506   3                              break;
+ 507   3                              default:break;
+ 508   3                      }
+ 509   2              }
+ 510   1      
+ 511   1                      ucData1=newval/10; //BCD码转十六进制
+ 512   1                      ucData2=newval%10;
+ 513   1                      newval=ucData1*16+ucData2;
+ 514   1                      writeData(newaddr,newval);
+ 515   1      }   
+ 516          void delay(uint z)
+ 517          {
+ 518   1              uint x,y;
+ 519   1              for(x=z;x>0;x--)
+ 520   1              for(y=110;y>0;y--);
+ 521   1      }
+ 522          //键盘扫描程序
+ 523          void key_scan(void)
+ 524          {
+ 525   1              uchar s1num=0;                        //s1num记录光标的位置的编号
+ 526   1              if(menu==0)
+ 527   1              {
+ 528   2                EA=0;
+ 529   2                      delay(5);
+ 530   2                      if(menu==0)
+ 531   2                      {
+ 532   3                              while(!menu);          //menum测试到由0到1的变化，也就是按下松开的变化，s1num加1
+ 533   3                              s1num++;
+ 534   3                              while(1)
+ 535   3                              {
+ 536   4                                      if(menu==0)
+ 537   4                                      {
+ 538   5                                      delay(5);
+ 539   5                                      if(menu==0)
+ 540   5                                      {
+ 541   6                                      while(!menu);
+ 542   6                                      s1num++;        //menum测试到由0到1的变化，也就是按下松开的变化，s1num再加
+             -1
+ 543   6                                      }
+ 544   5                                      }
+ 545   4              writeData(0x0,0x20);//停止计时，开始相关设置。
+ 546   4               write_com(0x0f);//光标闪射，0X0F是1602的命令字，显示开，光标开，光标闪烁                       
+ 547   4                                      if(s1num==1)
+C51 COMPILER V9.60.0.0   PCF8563                                                           01/07/2022 13:00:55 PAGE 10  
+
+ 548   4                                      {
+ 549   5                                              year=ReadData(0x08);        //读取年的数据。
+ 550   5                                        //year=g8563_Store[6]++;                              
+ 551   5                                              write_com(0x80+4);        //年光标，0X80+地址码，设置数据地址指针
+ 552   5                                              if(add==0)
+ 553   5                                              {
+ 554   6                                                      delay(3);
+ 555   6                                                      if(add==0)
+ 556   6                                                      {
+ 557   7                                                      while(!add);
+ 558   7                                                      turn_val(year,1,0x08,1);               
+ 559   7                                                      }
+ 560   6                                              }
+ 561   5                                              if(dec==0)
+ 562   5                                              {
+ 563   6                                                      delay(3);
+ 564   6                                                      if(dec==0)
+ 565   6                                                      {
+ 566   7                                                      while(!dec);
+ 567   7                                                      turn_val(year,0,0x08,1);//读取当前年值，根据减小年值，并写
+             -入1302                              
+ 568   7                                                      }
+ 569   6                                              }
+ 570   5                                      }
+ 571   4                              
+ 572   4                                      if(s1num==2)
+ 573   4                                      {
+ 574   5                                              month=ReadData(0x07);
+ 575   5                                              write_com(0x80+7);        //月光标
+ 576   5                                              if(add==0)
+ 577   5                                              {
+ 578   6                                                      delay(3);
+ 579   6                                                      if(add==0)
+ 580   6                                                      {
+ 581   7                                                              while(!add);
+ 582   7                                                              turn_val(month,1,0x07,2);
+ 583   7                                                      }
+ 584   6                                              }
+ 585   5                                              if(dec==0)
+ 586   5                                              {
+ 587   6                                                      delay(3);
+ 588   6                                                      if(dec==0)
+ 589   6                                                      {
+ 590   7                                                              while(!dec);
+ 591   7                                                              turn_val(month,0,0x07,2);
+ 592   7                                                      }
+ 593   6                                              }
+ 594   5                                      }
+ 595   4                              
+ 596   4                                      if(s1num==3)
+ 597   4                                      {
+ 598   5                                              day=ReadData(0x05);
+ 599   5                                              write_com(0x80+10);//日光标
+ 600   5                                              if(add==0)
+ 601   5                                              {
+ 602   6                                                      delay(3);
+ 603   6                                                      if(add==0)
+ 604   6                                                      {
+ 605   7                                                              while(!add);
+ 606   7                                                              turn_val(day,1,0x05,3);
+ 607   7                                                      }
+ 608   6                                              }
+C51 COMPILER V9.60.0.0   PCF8563                                                           01/07/2022 13:00:55 PAGE 11  
+
+ 609   5                                              if(dec==0)
+ 610   5                                              {
+ 611   6                                                      delay(3);
+ 612   6                                                      if(dec==0)
+ 613   6                                                      {
+ 614   7                                                              while(!dec);
+ 615   7                                                              turn_val(day,0,0x05,3);        //写入日寄存器
+ 616   7                                                      }
+ 617   6                                              }
+ 618   5                                      }
+ 619   4                                      
+ 620   4                                      if(s1num==4)
+ 621   4                                      {
+ 622   5                                              week=ReadData(0x06);
+ 623   5                                              write_com(0x80+14);        //星期光标
+ 624   5                                              if(add==0)
+ 625   5                                              {
+ 626   6                                                      delay(3);
+ 627   6                                                      if(add==0)
+ 628   6                                                      {
+ 629   7                                                              while(!add);
+ 630   7                                                              turn_val(week,1,0x06,4);
+ 631   7                                                      }
+ 632   6                                              }
+ 633   5                                              if(dec==0)
+ 634   5                                              {
+ 635   6                                                      delay(3);
+ 636   6                                                      if(dec==0)
+ 637   6                                                      {
+ 638   7                                                              while(!dec);
+ 639   7                                                              turn_val(week,0,0x06,4);
+ 640   7                                                      }
+ 641   6                                              }
+ 642   5                                      }
+ 643   4                                      
+ 644   4                                      if(s1num==5)
+ 645   4                                      {
+ 646   5                                              hour=ReadData(0x04);
+ 647   5                                              write_com(0xc0+5);        //时光标，因为是第二行的地址从0X40开始，
+             -所以加0X40。
+ 648   5                                              if(add==0)
+ 649   5                                              {
+ 650   6                                                      delay(3);
+ 651   6                                                      if(add==0)
+ 652   6                                                      {
+ 653   7                                                              while(!add);
+ 654   7                                                              turn_val(hour,1,0x04,5);
+ 655   7                                                      }
+ 656   6                                              }
+ 657   5                                              if(dec==0)
+ 658   5                                              {
+ 659   6                                                      delay(3);
+ 660   6                                                      if(dec==0)
+ 661   6                                                      {
+ 662   7                                                              while(!dec);
+ 663   7                                                              turn_val(hour,0,0x04,5);
+ 664   7                                                      }
+ 665   6                                              }
+ 666   5                                      }
+ 667   4                                      
+ 668   4                                      if(s1num==6)//调时间分
+ 669   4                                      {
+C51 COMPILER V9.60.0.0   PCF8563                                                           01/07/2022 13:00:55 PAGE 12  
+
+ 670   5                                              minute=ReadData(0x03);
+ 671   5                                              write_com(0xc0+8);
+ 672   5                                              if(add==0)
+ 673   5                                              {
+ 674   6                                                      delay(5);
+ 675   6                                                      if(add==0)
+ 676   6                                                      {
+ 677   7                                                              while(!add);
+ 678   7                                                              turn_val(minute,1,0x03,6);                        
+             -        //写入分寄存器   
+ 679   7                                                      }
+ 680   6                                              }
+ 681   5                                              if(dec==0)
+ 682   5                                              {
+ 683   6                                                      delay(3);
+ 684   6                                                      if(dec==0)
+ 685   6                                                      {
+ 686   7                                                              while(!dec);
+ 687   7                                                              turn_val(minute,0,0x03,6);                        
+             -        //写入分寄存器
+ 688   7                                                      }
+ 689   6                                              }
+ 690   5                                      }
+ 691   4                                     
+ 692   4                                      if(s1num==7)//调时间秒
+ 693   4                                      {
+ 694   5                                              second=ReadData(0x02);
+ 695   5                                              write_com(0xc0+11);//秒光标
+ 696   5                                              if(add==0)
+ 697   5                                              {
+ 698   6                                                      delay(3);
+ 699   6                                                      if(add==0)
+ 700   6                                                      {
+ 701   7                                                      while(!add);
+ 702   7                                                      if(second==0x60)
+ 703   7                                                      second=0x00;
+ 704   7                                                      turn_val(second,1,0x02,7);        
+ 705   7                                                      }
+ 706   6                                              }
+ 707   5                                              if(dec==0)
+ 708   5                                              {
+ 709   6                                                      delay(3);
+ 710   6                                                      if(dec==0)
+ 711   6                                                      {
+ 712   7                                                              while(!dec);
+ 713   7                                                              turn_val(second,0,0x02,7);                        
+             -        
+ 714   7                                                      }
+ 715   6                                              }
+ 716   5                                      }
+ 717   4                                      
+ 718   4                                      if(s1num==8)
+ 719   4                                      {
+ 720   5                writeData(0x0,0x00);//设置结束，开始计时
+ 721   5                                      s1num=0;//s1num清零//
+ 722   5                                              write_com(0x0c);//光标不闪烁//
+ 723   5                                              break;
+ 724   5                                      }
+ 725   4                              }
+ 726   3                      }
+ 727   2              }
+ 728   1              EA=1;
+C51 COMPILER V9.60.0.0   PCF8563                                                           01/07/2022 13:00:55 PAGE 13  
+
+ 729   1      }
+ 730          
+ 731          void LCD1602_write_word(unsigned char *s)
+ 732          {
+ 733   1        while(*s>0)
+ 734   1        {
+ 735   2          write_date(*s);
+ 736   2          s++;
+ 737   2        }
+ 738   1      }
+ 739          void TimeInit()
+ 740          {
+ 741   1          EA = 1;                       //打开中断总开关
+ 742   1          ET0 = 1;                      //打开T0中断开关
+ 743   1          TMOD = 0x01;    //设置定时器工作在模式1
+ 744   1          TH0=(65536-5000)/256;  //高四位寄存器的值；//5000us=5ms
+ 745   1          TL0=(65536-5000)%256;  //低四位寄存器的值；
+ 746   1          TR0 = 1;                      //允许定时器T0工作
+ 747   1      }
+ 748          
+ 749          //---主函数---//
+ 750          void main()
+ 751          {
+ 752   1        TimeInit();
+ 753   1          P8563_init();        
+ 754   1          init(); 
+ 755   1        delay1602(1000);
+ 756   1              while(1)
+ 757   1              {
+ 758   2                if(flags){
+ 759   3            P8563_gettime();
+ 760   3             BCD_16();    
+ 761   3            flags=0;  
+ 762   3                }
+ 763   2          display();
+ 764   2      //          write_com(0x80);
+ 765   2      //          LCD1602_write_word(table);
+ 766   2      //                    write_com(0x80+40);
+ 767   2      //          LCD1602_write_word(table1);
+ 768   2                
+ 769   2             key_scan();
+ 770   2              }
+ 771   1              }
+ 772          
+ 773          void InterruptTimer0() interrupt 1
+ 774          {
+ 775   1      
+ 776   1          TH0=(65536-5000)/256;  //高四位寄存器的值；//5000us=5ms
+ 777   1          TL0=(65536-5000)%256;  //低四位寄存器的值；
+ 778   1          cnt++;                                     //中断次数计数值加1
+ 779   1          if(cnt>=200)                                 //中断次数达到200次即为1秒
+ 780   1          {
+ 781   2              cnt = 0;                               //清零，重新记录中断次数
+ 782   2              flags = 1;                             //设置1秒定时标志位1
+ 783   2          }
+ 784   1        }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   2208    ----
+   CONSTANT SIZE    =     30    ----
+   XDATA SIZE       =   ----    ----
+C51 COMPILER V9.60.0.0   PCF8563                                                           01/07/2022 13:00:55 PAGE 14  
+
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     18      36
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

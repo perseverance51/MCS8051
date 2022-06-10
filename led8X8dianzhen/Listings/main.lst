@@ -1,0 +1,78 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              01/21/2022 21:25:39 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          
+   2          #include <STC89C5xRC.H>
+   3          
+   4          sbit ds=P1^0;//数据线595的14引脚
+   5          sbit shcp=P1^1;//数据输入时钟战595的11脚
+   6          sbit stcp=P1^2;//输出存储器锁存时钟线5958的12脚
+   7          sbit mr=P1^3;//数据清零
+   8          unsigned char code shuju[8]={
+   9          //0x00,0x38,0x38,0x38,0xfe,0x7c,0x38,0x10
+  10            0x0C,0x1E,0x3E,0x7C,0x7C,0x3E,0x1E,0x0C
+  11          };//LED点阵高电平端口数据
+  12          unsigned char code dzwei[8]={0x7f,0xbf,0xdf,0xef,0xf7,0xfb,0xfd,0xfe};//LED点阵低电平端口位
+  13          void QuDong595(unsigned char sj){
+  14   1        unsigned char aa=8;
+  15   1              mr=0;
+  16   1              mr=1;
+  17   1              while(aa--)
+  18   1              {
+  19   2            ds=sj>>7;
+  20   2            sj<<=1;//十六进制数据发送
+  21   2            shcp=1;//上升沿发全移位，上升沿时数据寄存器锁存。
+  22   2            shcp=0;
+  23   2            }
+  24   1              stcp=0;
+  25   1              stcp=1;//上升沿将数据锁存
+  26   1              stcp=0;
+  27   1            }
+  28          void main()
+  29          {
+  30   1      unsigned char Xd=0,ss=1,cs=0,d=0,y=0;
+  31   1      unsigned int ys=0;
+  32   1        P14 = 0x00;
+  33   1      //ZhongDcionSheZhi();
+  34   1        while(1)
+  35   1        {
+  36   2          P0=dzwei[7-cs];//控制图形方向数据出现((cs+8-d) < 8 ? shuju[cs+8-d]:0x00)
+  37   2          QuDong595((((7-cs)-d)<8?shuju[(7-cs)-d]:0x00));//数据消失cs+d倒退 (7-cs)-d前进
+  38   2          //QuDong595(((cs+8-d) < 8?shuju[cs+8-d]:0x00));//数据消失cs+d倒退(7-cs)-d前进
+  39   2          //P0=~((cs+d) <8 ?shuju[(7-cs)-d]:0x00);
+  40   2          //QuDong595(~dzwei[7-cs])//90°转向
+  41   2          while(++Xd);
+  42   2            mr=0;
+  43   2            mr=1;
+  44   2          QuDong595(0x00);
+  45   2          if(++cs >7) cs=0;
+  46   2          if(++y==0){
+  47   3          if(++d > 8*1) 
+  48   3          d = 0;
+  49   3          }
+  50   2          cs++;d++;
+  51   2          }
+  52   1        }
+
+
+C51 COMPILER V9.60.0.0   MAIN                                                              01/21/2022 21:25:39 PAGE 2   
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    185    ----
+   CONSTANT SIZE    =     16    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       4
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

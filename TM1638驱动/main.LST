@@ -1,0 +1,108 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              12/13/2021 22:25:53 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          /*********************************************************************
+   2           
+   3           ********************************************************************/
+   4          #include <stc15series.h>
+   5          #include <TM1638_drive.h>
+   6          #include <delay.h>
+   7          
+   8          void sys_init()
+   9          {
+  10   1        unsigned char i;
+  11   1        
+  12   1        init_TM1638();                             //初始化TM1638
+  13   1      
+  14   1        for(i=0;i<8;i++)
+  15   1          Write_DATA(WeiL_tab[i],Num_tab[16]);                 //初始化寄存器
+  16   1      
+  17   1        Write_LED(0xff,0xff); 
+  18   1      
+  19   1        delayms(500);
+  20   1        
+  21   1        Write_LED(0,0);
+  22   1      
+  23   1        for(i=0;i<8;i++)
+  24   1          Write_DATA(WeiL_tab[i],0x00);                //初始化寄存器
+  25   1      
+  26   1        Write_DATA(WeiL_tab[6],Num_tab[0]);
+  27   1        Write_DATA(WeiL_tab[7],Num_tab[0]); 
+  28   1      
+  29   1      }
+  30          
+  31          void main()
+  32          {
+  33   1        
+  34   1        unsigned char key=0;
+  35   1        
+  36   1        sys_init();
+  37   1      
+  38   1        while(1)
+  39   1        {
+  40   2          key=Read_Onekey();    
+  41   2          if(key>=1&&key<=64)
+  42   2          { 
+  43   3            Write_DATA(WeiL_tab[3],Num_tab[key/10]);
+  44   3            Write_DATA(WeiL_tab[4],Num_tab[key%10]);   
+  45   3      /******
+  46   3            if(key==1)
+  47   3            {
+  48   3              Write_LED(0x60,0x80);
+  49   3            }
+  50   3            else if(key==2)
+  51   3            {
+  52   3              Write_LED(0xda,0x40);    
+  53   3            }
+  54   3            else if(key==3)
+  55   3            {
+C51 COMPILER V9.60.0.0   MAIN                                                              12/13/2021 22:25:53 PAGE 2   
+
+  56   3              Write_LED(0xf2,0x20);      
+  57   3            }
+  58   3            else if(key==9)
+  59   3            {
+  60   3              Write_LED(0x66,0x10);     
+  61   3            }
+  62   3            else if(key==10)
+  63   3            {
+  64   3              Write_LED(0xb6,0x08);     
+  65   3            }
+  66   3            else if(key==11)
+  67   3            {
+  68   3              Write_LED(0xbe,0x04);     
+  69   3            }
+  70   3            else if(key==17)
+  71   3            {
+  72   3              Write_LED(0xe0,0x02);    
+  73   3            }
+  74   3            else if(key==18)
+  75   3            {
+  76   3              Write_LED(0xfe,0x01);     
+  77   3            }
+  78   3      *****/
+  79   3          while(Read_Onekey()==key);           //等待按键释放
+  80   3          }
+  81   2          
+  82   2        }
+  83   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    201    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

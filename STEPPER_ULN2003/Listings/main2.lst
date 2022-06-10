@@ -1,0 +1,163 @@
+C51 COMPILER V9.60.0.0   MAIN2                                                             05/02/2022 15:34:39 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN2
+OBJECT MODULE PLACED IN .\Objects\main2.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main2.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\mai
+                    -n2.lst) TABS(2) OBJECT(.\Objects\main2.obj)
+
+line level    source
+
+   1          #include<reg51.h>
+   2          #include<intrins.h>
+   3          #define uchar unsigned char
+   4          #define uint unsigned int 
+   5          //四相八拍转动数组
+   6          uchar code FFW[8]={0x02,0x06,0x04,0x0c,0x08,0x09,0x01,0x03//315,270,225......360(0)
+   7          };//八拍
+   8          uchar code REV[8]={0x01,0x09,0x08,0x0c,0x04,0x06,0x02,0x03//45,90,145......360(0)
+   9          };
+  10          uchar key1_down,key2_down,key3_down,key1_flag,key2_flag,key3_flag;//变量定义
+  11          sbit key1 = P3^0;//按键定义
+  12          sbit key2 = P3^1;
+  13          sbit key3 = P3^2;
+  14          /************************按键程序****************************/
+  15          /****************按键延迟函数100MS**********/
+  16          void delay()
+  17          {
+  18   1        unsigned char i, j, k;
+  19   1      
+  20   1        _nop_();
+  21   1        _nop_();
+  22   1        i = 2;
+  23   1        j = 13;
+  24   1        k = 237;
+  25   1        do
+  26   1        {
+  27   2          do
+  28   2          {
+  29   3            while (--k);
+  30   3          } while (--j);
+  31   2        } while (--i);
+  32   1      }
+  33          
+  34            //开启外部中断    
+  35          void Init_P( )
+  36          {      
+  37   1            EA=1; //开全局中断      
+  38   1            EX0=1; //开外部中断0      
+  39   1            IT0=1; //外部中断0边沿触发     
+  40   1            IT1=0; //外部中断1电平触发     
+  41   1      }  
+  42                //外部中断0处理 
+  43          void interint0() interrupt 0 //using **     
+  44          {     
+  45   1          key1_flag = 0;
+  46   1          key2_flag = 0;
+  47   1          key3_flag = 1;
+  48   1        
+  49   1            
+  50   1      }     
+  51          void key_scan()
+  52          {
+  53   1        /************按键1*************/
+  54   1        if(key1 == 0)
+C51 COMPILER V9.60.0.0   MAIN2                                                             05/02/2022 15:34:39 PAGE 2   
+
+  55   1        {
+  56   2          delay();
+  57   2          if(key1 == 0)key1_down = 1; 
+  58   2        }
+  59   1        if(key1_down == 1 && key1 == 1)
+  60   1        {
+  61   2          key1_flag = 1;
+  62   2          key2_flag = 0;
+  63   2          key3_flag = 0;
+  64   2          key1_down = 0;  
+  65   2        }
+  66   1        /************按键2*************/
+  67   1        if(key2 == 0)
+  68   1        {
+  69   2          delay();
+  70   2          if(key2 == 0)key2_down = 1; 
+  71   2        }
+  72   1        if(key2_down == 1 && key2 == 1)
+  73   1        {
+  74   2          key1_flag = 0;
+  75   2          key2_flag = 1;
+  76   2          key3_flag = 0;
+  77   2          key2_down = 0;  
+  78   2        }
+  79   1        /************按键3************
+  80   1        if(key3 == 0)
+  81   1        {
+  82   1          delay();
+  83   1          if(key3 == 0)key3_down = 1; 
+  84   1        }
+  85   1        if(key3_down == 1 && key3 == 1)
+  86   1        {
+  87   1          key1_flag = 0;
+  88   1          key2_flag = 0;
+  89   1          key3_flag = 1;
+  90   1          key3_down = 0;  
+  91   1        }
+  92   1        */
+  93   1      }
+  94          /****************转动延迟函数**********/
+  95          void delayB(uint t)
+  96          {                           
+  97   1         uchar k;
+  98   1         while(t--)
+  99   1         {
+ 100   2          for(k=0; k<125; k++)
+ 101   2          { }
+ 102   2         }
+ 103   1      }
+ 104          /************************电机正转****************************/
+ 105          void motor_ffw()
+ 106          { 
+ 107   1          uchar i;
+ 108   1        for (i=0; i<8; i++)       //一个周期转30度
+ 109   1          {
+ 110   2              P1 = FFW[i];          //取数据
+ 111   2              delayB(100);            //调节转速
+ 112   2          }
+ 113   1       }
+ 114          /************************电机反转****************************/
+ 115          void motor_rev()
+ 116          {
+C51 COMPILER V9.60.0.0   MAIN2                                                             05/02/2022 15:34:39 PAGE 3   
+
+ 117   1        uchar i;
+ 118   1        for (i=0; i<8; i++)     //一个周期转30度
+ 119   1          {
+ 120   2              P1 = REV[i];          //取数据
+ 121   2              delayB(100);            //调节转速
+ 122   2          }
+ 123   1      }
+ 124          /************************主程序****************************/
+ 125          main()
+ 126          { 
+ 127   1        Init_P( );
+ 128   1          while(1)
+ 129   1          {  
+ 130   2              key_scan();
+ 131   2        if(key1_flag == 1)motor_ffw();       //电机正转
+ 132   2        if(key2_flag == 1)motor_rev();    //电机反转
+ 133   2        if(key3_flag == 1) P1 = 0x0f;     //电机停止
+ 134   2        }
+ 135   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    208    ----
+   CONSTANT SIZE    =     16    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      6    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

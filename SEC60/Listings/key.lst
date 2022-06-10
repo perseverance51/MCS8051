@@ -1,0 +1,57 @@
+C51 COMPILER V9.60.0.0   KEY                                                               05/07/2022 10:36:13 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE KEY
+OBJECT MODULE PLACED IN .\Objects\key.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE key.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\key.l
+                    -st) TABS(2) OBJECT(.\Objects\key.obj)
+
+line level    source
+
+   1          #include "key.h"
+   2          
+   3          uchar Trg;
+   4          uchar Cont;
+   5          uchar cnt_plus;
+*** WARNING C231 IN LINE 5 OF key.c: 'cnt_plus': redefinition
+   6          //uchar count=1;
+   7          
+   8          void KeyRead()
+   9          {
+  10   1          uchar ReadData = KeyValue^0x01;   // 
+  11   1          Trg = ReadData & (ReadData ^ Cont);   // 按键触发为1
+  12   1          Cont = ReadData;                     // 长按触发为1
+  13   1        
+  14   1      }
+  15          
+  16          
+  17          void KeyProc()
+  18          {
+  19   1             if (Trg & KEY_MODE) // 如果按下的是KEY_MODE，而且你常按这按键也没有用，
+  20   1          {                    //它是不会执行第二次的哦 ， 必须先松开再按下
+  21   2               count++;         // 模式寄存器加1，当然，这里只是演示，你可以执行你想
+  22   2                               // 执行的任何代码
+  23   2          }
+  24   1          if (Cont & KEY_PLUS) // 如果“加”按键被按着不放
+  25   1          {
+  26   2               cnt_plus++;       // 计时
+  27   2               if (cnt_plus > 100) // 20ms*100 = 2S 如果时间到
+  28   2               {
+  29   3                    count +=10;      // 你需要的执行的程序
+  30   3               }          
+  31   2          }
+  32   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     57    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      3    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)
