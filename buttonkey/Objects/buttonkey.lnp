@@ -1,0 +1,3 @@
+".\Objects\main.obj" 
+TO ".\Objects\buttonkey" 
+PRINT(".\Listings\buttonkey.m51") RAMSIZE(256) 

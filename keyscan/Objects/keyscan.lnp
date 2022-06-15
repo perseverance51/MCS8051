@@ -1,0 +1,3 @@
+".\Objects\main.obj" 
+TO ".\Objects\keyscan" 
+PRINT(".\Listings\keyscan.m51") RAMSIZE(256) 
