@@ -1,0 +1,123 @@
+C51 COMPILER V9.60.0.0   LCD_12864                                                         06/18/2022 14:27:13 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE LCD_12864
+OBJECT MODULE PLACED IN .\Objects\LCD_12864.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE LCD_12864.C OPTIMIZE(8,SPEED) BROWSE INCDIR(..\Keil C) DEBUG OBJECTEXTEN
+                    -D PRINT(.\Listings\LCD_12864.lst) TABS(2) OBJECT(.\Objects\LCD_12864.obj)
+
+line level    source
+
+   1          //名称12864LCD 显示驱动程序(不带字库)
+   2          #include "LCD_12864.H"
+   3          
+   4          //液晶引脚定义
+   5          sbit DI=P2^0;
+   6          sbit RW=P2^1;
+   7          sbit E=P2^2;
+   8          sbit CS1=P2^3;
+   9          sbit CS2=P2^4;
+  10          sbit RST=P2^5;
+  11          //检查 LCD 是否忙
+  12          bit LCD_Check_Busy()
+  13          {
+  14   1      LCD_DB_PORT=0xFF;
+  15   1      RW=1;_nop_();DI=0;
+  16   1      E=1;_nop_();E=0;
+  17   1      return (bit)(P0 & 0X80);
+  18   1      }
+  19          //向 LCD 发送命令
+  20          void LCD_Write_Command(uchar c)
+  21          {
+  22   1      while (LCD_Check_Busy());
+  23   1      LCD_DB_PORT=0xFF;RW=0;_nop_();DI=0;
+  24   1      LCD_DB_PORT=c;E=1;_nop_();E=0;
+  25   1      }
+  26          //向 LCD 发送数据
+  27          void LCD_Write_Data(uchar d )
+  28          {
+  29   1      while (LCD_Check_Busy());
+  30   1      LCD_DB_PORT=0xFF;RW=0;_nop_();DI=1;
+  31   1      LCD_DB_PORT=d; E=1;_nop_();E=0;
+  32   1      }
+  33          //初始化 LCD
+  34          void LCD_Initialize()
+  35          {
+  36   1      CS1=1; CS2=1;
+  37   1      LCD_Write_Command(0x38); //8 位形式2 行字符
+  38   1      LCD_Write_Command(0x0F); //开显示
+  39   1      LCD_Write_Command(0x01); //清屏
+  40   1      
+  41   1      LCD_Write_Command(0x06); //画面不动光标右移
+  42   1      LCD_Write_Command(LCD_START_ROW); //设置起始行
+  43   1      }
+  44          //通用显示函数
+  45          //从第 P 页第 L 列开始显示 W 字节数据数据在 r 所指向的缓冲
+  46          //每字节 8 位是垂直显示的高位在下低位在上
+  47          //每个 8*128 的矩形区域为一页每页分左半页与右半页
+  48          //整个 LCD 又由 64*64 的左半习工和 64*64 的右半屏构成
+  49          void Common_Show(uchar P,uchar L,uchar W,uchar *r)
+  50          {
+  51   1        uchar i;
+  52   1      if(L<64) //显示在左半屏或右半屏
+  53   1      {
+  54   2      CS1=1;CS2=0;
+C51 COMPILER V9.60.0.0   LCD_12864                                                         06/18/2022 14:27:13 PAGE 2   
+
+  55   2      LCD_Write_Command(LCD_PAGE+P);
+  56   2      LCD_Write_Command(LCD_COL+L);
+  57   2      if(L+W<64) //全部显示在左半屏
+  58   2      {
+  59   3      for(i=0;i<W;i++) LCD_Write_Data(r[i]);
+  60   3      }
+  61   2      else //如果越界则跨越左右半屏显示
+  62   2      {
+  63   3      for(i=0;i<64-L;i++) LCD_Write_Data(r[i]); //左半屏显示
+  64   3      CS1=0; CS2=1; //右半屏显示
+  65   3      LCD_Write_Command(LCD_PAGE+P);
+  66   3      LCD_Write_Command(LCD_COL);
+  67   3      for(i=64-L;i<W;i++) LCD_Write_Data(r[i]);
+  68   3      }
+  69   2      }
+  70   1      else //全部显示在右半屏
+  71   1      {
+  72   2      CS1=0;CS2=1;
+  73   2      LCD_Write_Command(LCD_PAGE+P);
+  74   2      LCD_Write_Command(LCD_COL+L-64);
+  75   2      for(i=0;i<W;i++) LCD_Write_Data(r[i]);
+  76   2      }
+  77   1      }
+  78          //显示一个 8*16 点阵字符(字符上半部分与下半部分分别处在相邻两页中)
+  79          void Display_A_char(uchar P,uchar L,uchar *M)
+  80          {
+  81   1      Common_Show(P,L,8,M);
+  82   1      Common_Show(P+1,L,8,M+8);
+  83   1      }
+  84          //显示一个 16*16 点阵汉字汉字上半部分与下半部分分别处在相邻两页中
+  85          
+  86          void Display_A_WORD(uchar P,uchar L,uchar *M)
+  87          {
+  88   1      Common_Show(P,L,16,M); //显示汉字上半部分
+  89   1      Common_Show(P+1,L,16,M+16); //显示汉字下半部分
+  90   1      }
+  91          //显示一串 16*16 点阵汉字
+  92          void Display_A_WORD_String(uchar P,uchar L,uchar C,uchar *M)
+  93          {
+  94   1      uchar i;
+  95   1      for (i=0;i<C;i++)
+  96   1      Display_A_WORD(P,L+i*16,M+i*32);
+  97   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    398    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      22
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

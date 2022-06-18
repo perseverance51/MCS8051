@@ -1,0 +1,62 @@
+C51 COMPILER V9.60.0.0   KEYPAD                                                            06/18/2022 13:56:14 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE KEYPAD
+OBJECT MODULE PLACED IN .\Objects\KeyPad.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE KeyPad.c OPTIMIZE(8,SPEED) BROWSE INCDIR(..\Keil C) DEBUG OBJECTEXTEND P
+                    -RINT(.\Listings\KeyPad.lst) TABS(2) OBJECT(.\Objects\KeyPad.obj)
+
+line level    source
+
+   1          //键盘扫描程序
+   2          #include "KeyPad.H"
+   3          
+   4          //扫描键盘时发送到 0~3 列上的扫描
+   5          unsigned char KeyboardScanCode[4]= {0xEF,0xDF,0xBF,0x7F};
+   6          //扫描键盘并返回按键在键盘上的位置序号
+   7          unsigned char KeyScan ()
+   8          {
+   9   1          unsigned char Row=0,Col=0,Temp;
+  10   1          EX0=0; //防抖关闭
+  11   1          for(Col=0; Col<4; Col++) //扫描各列
+  12   1          {
+  13   2              P1=KeyboardScanCode[Col]; //输出扫描位
+  14   2              Temp=P1 & 0x0F; //读取扫描位
+  15   2              if(Temp!=0x0F)
+  16   2              {
+  17   3                  switch(Temp) //判断第 i 列是否有按键下
+  18   3                  {
+  19   4                  case 0x0E:
+  20   4                      Row=0;
+  21   4                      break;//得到对应的行号
+  22   4                  case 0x0D:
+  23   4                      Row=1;
+  24   4                      break;
+  25   4                  case 0x0B:
+  26   4                      Row=2;
+  27   4                      break;
+  28   4                  case 0x07:
+  29   4                      Row=3;
+  30   4                      break;
+  31   4                  }
+  32   3                  break;
+  33   3              }
+  34   2          }
+  35   1          P1=0x0F;
+  36   1          EX0=1; //重新许可按键中断
+  37   1          return Row*4+Col; //返回按键位置序号 0~15
+  38   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     79    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      4    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

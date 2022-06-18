@@ -1,0 +1,3 @@
+".\Objects\main.obj" 
+TO ".\Objects\clockesc" 
+PRINT(".\Listings\clockesc.m51") RAMSIZE(256) 

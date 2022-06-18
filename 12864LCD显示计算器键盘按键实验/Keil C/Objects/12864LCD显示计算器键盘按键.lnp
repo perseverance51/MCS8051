@@ -1,0 +1,5 @@
+".\Objects\MAIN.obj",
+".\Objects\LCD_12864.obj",
+".\Objects\KeyPad.obj" 
+TO ".\Objects\12864LCD显示计算器键盘按键" 
+PRINT(".\Listings\12864LCD显示计算器键盘按键.m51") RAMSIZE(256) 

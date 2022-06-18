@@ -1,0 +1,3 @@
+".\Objects\main.obj" 
+TO ".\Objects\clocktest" 
+PRINT(".\Listings\clocktest.m51") RAMSIZE(256) 
