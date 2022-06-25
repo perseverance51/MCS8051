@@ -1,0 +1,111 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              06/25/2022 11:09:59 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE INCDIR(.\inc) DEBUG OBJECTEXTEND PRINT(.
+                    -\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <reg52.h>
+   2          #include "Lcd1602.h"
+   3          #include "DS1302.h"
+   4          
+   5          #define   MAIN_Fosc     11059200uL  //定义主时钟
+   6          bit flag200ms = 0; //200ms 定时标志
+   7          unsigned char T0RH = 0; //T0 重载值的高字节
+   8          unsigned char T0RL = 0; //T0 重载值的低字节
+   9          
+  10          
+  11          void delayms(unsigned int ms){
+  12   1          unsigned long tmp; //临时变量
+  13   1          tmp = MAIN_Fosc / 12; //定时器计数频率
+  14   1          tmp = (tmp * ms) / 1000; //计算所需的计数值
+  15   1          tmp = 65536 - tmp; //计算定时器重载值
+  16   1          tmp = tmp + 12; //补偿中断响应延时造成的误差
+  17   1          T0RH = (unsigned char)(tmp>>8); //定时器重载值拆分为高低字节
+  18   1          T0RL = (unsigned char)tmp;
+  19   1          TMOD &= 0xF0; //清零 T0 的控制位
+  20   1          TMOD |= 0x01; //配置 T0 为模式 1
+  21   1          TH0 = T0RH; //加载 T0 重载值
+  22   1          TL0 = T0RL;
+  23   1          ET0 = 1; //使能 T0 中断
+  24   1          TR0 = 1; //启动 T0
+  25   1      }
+  26          /* T0 中断服务函数，执行 200ms 定时 */
+  27          void InterruptTimer0() interrupt 1{
+  28   1          static unsigned char tmr200ms = 0;
+  29   1          TH0 = T0RH; //重新加载重载值
+  30   1          TL0 = T0RL;
+  31   1          tmr200ms++;
+  32   1          if (tmr200ms >= 200){ //定时 200ms
+  33   2              tmr200ms = 0;
+  34   2              flag200ms = 1;
+  35   2          }
+  36   1      }
+  37          
+  38          void main(){
+  39   1          unsigned char psec=0xAA; //秒备份，初值 AA 确保首次读取时间后会刷新显示
+  40   1          unsigned char time[8]; //当前时间数组
+  41   1          unsigned char str[10]; //字符串转换缓冲区
+  42   1          unsigned char *weeklist[7]={"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
+  43   1          unsigned char week;
+  44   1          EA = 1; //开总中断
+  45   1          delayms(1); //T0 定时 1ms
+  46   1          InitDS1302(); //初始化实时时钟
+  47   1          InitLcd1602(); //初始化液晶
+  48   1      
+  49   1          while (1){
+  50   2              if (flag200ms){ //每 200ms 读取依次时间
+  51   3                  flag200ms = 0;
+  52   3                  DS1302BurstRead(time); //读取 DS1302 当前时间
+  53   3                  if (psec != time[0]){ //检测到时间有变化时刷新显示
+  54   4                      str[0] = '2'; //添加年份的高 2 位：20
+C51 COMPILER V9.60.0.0   MAIN                                                              06/25/2022 11:09:59 PAGE 2   
+
+  55   4                      str[1] = '0';
+  56   4                      str[2] = (time[6] >> 4) + '0'; //“年”高位数字转换为 ASCII 码
+  57   4                      str[3] = (time[6]&0x0F) + '0'; //“年”低位数字转换为 ASCII 码
+  58   4                      str[4] = '-'; //添加日期分隔符
+  59   4                      str[5] = (time[4] >> 4) + '0'; //“月”
+  60   4                      str[6] = (time[4]&0x0F) + '0';
+  61   4                      str[7] = '-';
+  62   4                      str[8] = (time[3] >> 4) + '0'; //“日”
+  63   4                      str[9] = (time[3]&0x0F) + '0';
+  64   4                      str[10] = '\0';
+  65   4                      LcdShowStr(0, 0, str); //显示到液晶的第一行
+  66   4                      week = (time[5]&0x0F) ; //“星期”
+  67   4                      LcdShowStr(13, 0, weeklist[week - 1]); //显示到液晶的第一行
+  68   4                /******  LCD1602第二行显示：时分秒显示   ******/
+  69   4                      str[0] = (time[2] >> 4) + '0'; //“时”
+  70   4                      str[1] = (time[2]&0x0F) + '0';
+  71   4                      str[2] = ':'; //添加时间分隔符
+  72   4                      str[3] = (time[1] >> 4) + '0'; //“分”
+  73   4                      str[4] = (time[1]&0x0F) + '0';
+  74   4                      str[5] = ':';
+  75   4                      str[6] = (time[0] >> 4) + '0'; //“秒”
+  76   4                      str[7] = (time[0]&0x0F) + '0';
+  77   4                      str[8] = '\0';
+  78   4                      LcdShowStr(4, 1, str); //显示到液晶的第二行
+  79   4                      psec = time[0]; //用当前值更新上次秒数
+  80   4                  }
+  81   3              }
+  82   2          }
+  83   1      }
+  84          
+  85          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    393    ----
+   CONSTANT SIZE    =     49    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      3      45
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

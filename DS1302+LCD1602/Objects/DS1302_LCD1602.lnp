@@ -1,0 +1,5 @@
+".\Objects\DS1302.obj",
+".\Objects\Lcd1602.obj",
+".\Objects\main.obj" 
+TO ".\Objects\DS1302_LCD1602" 
+PRINT(".\Listings\DS1302_LCD1602.m51") RAMSIZE(256) 
