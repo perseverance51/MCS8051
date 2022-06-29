@@ -1,0 +1,24 @@
+C51 COMPILER V9.60.0.0   ______________                                                    06/29/2022 15:22:35 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE ______________
+OBJECT MODULE PLACED IN .\obj\数码管局部闪烁.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE 数码管局部闪烁.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\obj
+                    -\数码管局部闪烁.lst) TABS(2) OBJECT(.\obj\数码管局部闪烁.obj)
+
+line level    source
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    347    ----
+   CONSTANT SIZE    =     18    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      8       6
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       1
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,24 @@
+C51 COMPILER V9.60.0.0   T1____________                                                    06/27/2022 21:54:22 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE T1____________
+OBJECT MODULE PLACED IN .\obj\T1外部计数输入.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE T1外部计数输入.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\obj
+                    -\T1外部计数输入.lst) TABS(2) OBJECT(.\obj\T1外部计数输入.obj)
+
+line level    source
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     30    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

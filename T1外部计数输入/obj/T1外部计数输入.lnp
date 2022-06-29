@@ -1,0 +1,3 @@
+".\obj\T1外部计数输入.obj" 
+TO ".\obj\T1外部计数输入" 
+PRINT(".\obj\T1外部计数输入.m51") RAMSIZE(256) 

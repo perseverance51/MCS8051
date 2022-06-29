@@ -1,0 +1,6 @@
+".\obj\main.obj",
+".\obj\delay.obj",
+".\obj\display.obj",
+".\obj\keyboard.obj" 
+TO ".\obj\矩阵键盘简易计算器" 
+PRINT(".\obj\矩阵键盘简易计算器.m51") RAMSIZE(256) 

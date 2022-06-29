@@ -1,0 +1,224 @@
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                    06/29/2022  21:28:42  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0, INVOKED BY:
+C:\KEIL_V5\C51\BIN\BL51.EXE .\obj\步进电机转速数码管显示.obj TO .\obj\步进电机转速数码管显示 PRINT (.\obj\步进电机转速数
+>> 码管显示.m51) RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  .\obj\步进电机转速数码管显示.obj (______________________)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_STARTUP)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_INIT)
+
+
+LINK MAP OF MODULE:  .\obj\步进电机转速数码管显示 (______________________)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0012H     UNIT         ?DT?______________________
+            DATA    001AH     0001H     UNIT         _DATA_GROUP_
+            IDATA   001BH     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     0003H     ABSOLUTE     
+                    0006H     0005H                  *** GAP ***
+            CODE    000BH     0003H     ABSOLUTE     
+            CODE    000EH     008CH     UNIT         ?C_C51STARTUP
+            CODE    009AH     0057H     UNIT         ?PR?ISR_INT0?______________________
+            CODE    00F1H     0053H     UNIT         ?PR?MAIN?______________________
+            CODE    0144H     002DH     UNIT         ?PR?TIMER0_ISR?______________________
+            CODE    0171H     002BH     UNIT         ?PR?_DISPLAY?______________________
+            CODE    019CH     0019H     UNIT         ?PR?_DELAYMS?______________________
+            CODE    01B5H     0012H     UNIT         ?CO?______________________
+            CODE    01C7H     000EH     UNIT         ?C_INITSEG
+            CODE    01D5H     000CH     UNIT         ?PR?INIT_TIMER0?______________________
+
+
+
+OVERLAY MAP OF MODULE:   .\obj\步进电机转速数码管显示 (______________________)
+
+
+SEGMENT                                          DATA_GROUP 
+  +--> CALLED SEGMENT                          START    LENGTH
+--------------------------------------------------------------
+?PR?ISR_INT0?______________________            -----    -----
+  +--> ?PR?_DELAYMS?______________________
+  +--> ?CO?______________________
+
+*** NEW ROOT ***************************************************
+
+?PR?TIMER0_ISR?______________________          -----    -----
+  +--> ?PR?_DISPLAY?______________________
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  06/29/2022  21:28:42  PAGE 2
+
+
+?PR?_DISPLAY?______________________            -----    -----
+  +--> ?CO?______________________
+
+*** NEW ROOT ***************************************************
+
+?C_C51STARTUP                                  -----    -----
+  +--> ?PR?MAIN?______________________
+  +--> ?C_INITSEG
+
+?PR?MAIN?______________________                001AH    0001H
+  +--> ?PR?INIT_TIMER0?______________________
+  +--> ?CO?______________________
+  +--> ?PR?_DELAYMS?______________________
+
+
+
+SYMBOL TABLE OF MODULE:  .\obj\步进电机转速数码管显示 (______________________)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        ______________________
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0080H         PUBLIC        P0
+  D:0090H         PUBLIC        P1
+  D:00A0H         PUBLIC        P2
+  D:00B0H         PUBLIC        P3
+  B:00A8H.7       PUBLIC        EA
+  D:00A8H         PUBLIC        IE
+  D:0009H         PUBLIC        TempData
+  D:00B8H         PUBLIC        IP
+  B:00B0H.2       PUBLIC        INT0
+  B:00A0H.2       PUBLIC        LATCH1
+  B:00A0H.3       PUBLIC        LATCH2
+  C:00F1H         PUBLIC        main
+  C:01D5H         PUBLIC        Init_Timer0
+  C:019CH         PUBLIC        _DelayMs
+  D:0098H         PUBLIC        SCON
+  D:0089H         PUBLIC        TMOD
+  D:0088H         PUBLIC        TCON
+  C:01B5H         PUBLIC        DuanMa
+  B:00A8H.1       PUBLIC        ET0
+  D:008CH         PUBLIC        TH0
+  B:00A8H.0       PUBLIC        EX0
+  B:0088H.0       PUBLIC        IT0
+  D:008AH         PUBLIC        TL0
+  B:00B8H.1       PUBLIC        PT0
+  C:01BFH         PUBLIC        WeiMa
+  B:0088H.4       PUBLIC        TR0
+  C:0171H         PUBLIC        _Display
+  D:0011H         PUBLIC        sequence
+  C:0144H         PUBLIC        Timer0_isr
+  D:00C8H         PUBLIC        T2CON
+  C:009AH         PUBLIC        ISR_INT0
+  B:0090H.0       PUBLIC        A1
+  B:0090H.1       PUBLIC        B1
+  D:0019H         PUBLIC        Speed
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  06/29/2022  21:28:42  PAGE 3
+
+
+  B:0090H.2       PUBLIC        C1
+  B:0090H.3       PUBLIC        D1
+  D:00D0H         PUBLIC        PSW
+  -------         PROC          _DELAYMS
+  D:0006H         SYMBOL        j
+  -------         DO            
+  D:0005H         SYMBOL        i
+  -------         ENDDO         
+  C:019CH         LINE#         44
+  C:019CH         LINE#         45
+  C:019CH         LINE#         47
+  C:01A5H         LINE#         48
+  C:01A7H         LINE#         49
+  C:01ADH         LINE#         50
+  C:01B4H         LINE#         51
+  -------         ENDPROC       _DELAYMS
+  -------         PROC          MAIN
+  -------         DO            
+  D:001AH         SYMBOL        i
+  -------         ENDDO         
+  C:00F1H         LINE#         55
+  C:00F1H         LINE#         56
+  C:00F1H         LINE#         58
+  C:00F4H         LINE#         59
+  C:00F6H         LINE#         60
+  C:00F8H         LINE#         61
+  C:00FAH         LINE#         63
+  C:00FDH         LINE#         64
+  C:0109H         LINE#         65
+  C:0114H         LINE#         66
+  C:011CH         LINE#         67
+  C:011FH         LINE#         68
+  C:011FH         LINE#         69
+  C:011FH         LINE#         70
+  C:0134H         LINE#         71
+  C:013BH         LINE#         72
+  C:0142H         LINE#         74
+  -------         ENDPROC       MAIN
+  -------         PROC          ISR_INT0
+  C:009AH         LINE#         80
+  C:00AFH         LINE#         83
+  C:00B2H         LINE#         84
+  C:00B2H         LINE#         85
+  C:00B9H         LINE#         86
+  C:00BCH         LINE#         88
+  C:00BCH         LINE#         89
+  C:00BEH         LINE#         90
+  C:00C4H         LINE#         91
+  C:00C7H         LINE#         92
+  C:00D3H         LINE#         93
+  C:00DEH         LINE#         94
+  C:00DEH         LINE#         95
+  C:00DEH         LINE#         96
+  -------         ENDPROC       ISR_INT0
+  -------         PROC          _DISPLAY
+  D:0007H         SYMBOL        FirstBit
+  D:0005H         SYMBOL        Num
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  06/29/2022  21:28:42  PAGE 4
+
+
+  -------         DO            
+  D:0008H         SYMBOL        i
+  -------         ENDDO         
+  C:0171H         LINE#         103
+  C:0171H         LINE#         104
+  C:0171H         LINE#         108
+  C:0174H         LINE#         109
+  C:0176H         LINE#         110
+  C:0178H         LINE#         112
+  C:0181H         LINE#         113
+  C:0183H         LINE#         114
+  C:0185H         LINE#         116
+  C:018DH         LINE#         117
+  C:018FH         LINE#         118
+  C:0191H         LINE#         120
+  C:0193H         LINE#         121
+  C:0198H         LINE#         122
+  C:019BH         LINE#         125
+  -------         ENDPROC       _DISPLAY
+  -------         PROC          INIT_TIMER0
+  C:01D5H         LINE#         129
+  C:01D5H         LINE#         130
+  C:01D5H         LINE#         131
+  C:01D8H         LINE#         134
+  C:01DAH         LINE#         135
+  C:01DCH         LINE#         136
+  C:01DEH         LINE#         137
+  C:01E0H         LINE#         138
+  -------         ENDPROC       INIT_TIMER0
+  -------         PROC          TIMER0_ISR
+  C:0144H         LINE#         142
+  C:0155H         LINE#         144
+  C:0158H         LINE#         145
+  C:015BH         LINE#         147
+  C:0162H         LINE#         149
+  -------         ENDPROC       TIMER0_ISR
+  -------         ENDMOD        ______________________
+
+Program Size: data=28.0 xdata=0 code=476
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)
