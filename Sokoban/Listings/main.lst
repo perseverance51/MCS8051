@@ -1,0 +1,325 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              07/02/2022 21:19:58 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include<reg52.h>
+   2          #include<stdlib.h>
+   3          #include<stdio.h>
+   4          #include<intrins.h>
+   5          #define uint unsigned int
+   6          #define uchar unsigned char
+   7           
+   8          sbit LCD_RS = P2^2;
+   9          sbit LCD_RW = P2^1;
+  10          sbit LCD_EN = P2^0;
+  11          sbit LCD_cs1 = P2^4;
+  12          sbit LCD_cs2 = P2^3;
+  13           
+  14          #define LCD_data P1
+  15          
+  16          char cur_x,cur_y,X,dir[4][2]={-1,0,1,0,0,-1,0,1},where[3][2]={4,6,5,6,6,6};
+  17           
+  18          sbit key_up = P3^0;
+  19          sbit key_down = P3^1;
+  20          sbit key_left = P3^2;
+  21          sbit key_right = P3^3;
+  22           
+  23          uchar code tmp[]={//空格
+  24          0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff
+  25          };
+  26          /* 0表示空格，1表示墙，2表示人，3表示箱子，4表示目的地 */
+  27          uchar code mat[8][8]={
+  28          1,1,1,1,1,1,1,1,
+  29          1,1,1,1,0,2,1,1,
+  30          1,1,0,0,3,0,1,1,
+  31          1,1,0,1,0,1,1,1,
+  32          1,0,0,1,0,1,4,1,
+  33          1,0,1,0,0,3,4,1,
+  34          1,0,3,0,0,0,4,1,
+  35          1,1,1,1,1,1,1,1
+  36          };
+  37           
+  38          uchar map[8][8];
+  39           
+  40          uchar code Qiang[]={//方格，有间隙
+  41          0xff,0x81,0x81,0x81,0x81,0x81,0x81,0xff
+  42          };
+  43           
+  44          uchar code Ren[]={//人
+  45          0xff,0xff,0xe3,0xc5,0xb1,0xc5,0xe3,0xff
+  46          };
+  47           
+  48          uchar code Xiang[]={//箱子  
+  49          0xff,0x42,0x24,0x18,0x18,0x24,0x42,0xff  
+  50          };
+  51           
+  52          uchar code Mudi[]={//目的地  
+  53          0xff,0xff,0xe7,0x81,0x81,0xe7,0xff,0xff  
+  54          }; 
+C51 COMPILER V9.60.0.0   MAIN                                                              07/02/2022 21:19:58 PAGE 2   
+
+  55           
+  56          uchar code Zifu[][8]={//字符表 
+  57          0xFF,0xFD,0xF9,0x87,0xB3,0xFD,0xFD,0xFF,  //Y
+  58          0xFF,0xFF,0xC3,0xBD,0xBD,0xC3,0xFF,0xFF,  //O
+  59          0xFF,0xFF,0xC3,0xBF,0xBF,0xC3,0xFF,0xFF,  //U
+  60           
+  61          0xFF,0xF1,0xCF,0xF1,0xF5,0xC3,0xFD,0xFF,  //W
+  62          0xFF,0xFF,0xFF,0x81,0xBD,0xFF,0xFF,0xFF,  //I
+  63          0xFF,0x81,0xBB,0xF7,0xEF,0xC1,0xFD,0xFF,  //N
+  64          0xFF,0xFF,0xA1,0xFF,0xFF,0xFF,0xFF,0xFF,    //!
+  65           
+  66          0xF7,0xF7,0xF7,0x00,0x77,0xD7,0xEF,0x00,  // 7
+  67          0xB5,0xB7,0xB6,0x01,0xB7,0xB7,0xB7,0xFF,
+  68          0xFD,0xBD,0x7E,0x80,0xFF,0xFF,0xFF,0x00,
+  69          0xBB,0xBB,0xBB,0x80,0xBB,0xBB,0xBB,0xFF,  /*"推"*/
+  70           
+  71          0xEF,0x77,0x78,0x7D,0x09,0x75,0x7D,0xED,  // 11
+  72          0x17,0xD8,0xDD,0xD9,0xC5,0x1D,0xFD,0xFF,
+  73          0xDF,0xEF,0xF3,0xFC,0x00,0xFD,0xF3,0xFF,
+  74          0x00,0xB6,0xB6,0xB6,0xB6,0x00,0xFF,0xFF,  /*"箱"*/
+  75           
+  76          0xFF,0xFF,0xFD,0xFD,0xFD,0xFD,0xFD,0x1D,  // 15
+  77          0xED,0xF5,0xF9,0xFD,0xFF,0x7F,0xFF,0xFF,
+  78          0xFE,0xFE,0xFE,0xFE,0xFE,0xBE,0x7E,0x80,
+  79          0xFE,0xFE,0xFE,0xFE,0xFE,0xFE,0xFE,0xFF,  /*"子"*/
+  80           
+  81          0xEF,0xF7,0xFB,0x2C,0xA9,0xA5,0xAD,0xA5,  // 19
+  82          0x0B,0xAC,0xA9,0xA5,0x8D,0xFD,0xFD,0xFF,
+  83          0xFF,0xDF,0xDF,0xDC,0xED,0xED,0xF5,0xF9,
+  84          0x00,0xFD,0xFD,0xED,0xDD,0xE1,0xFF,0xFF,  /*"第"*/
+  85           
+  86          0xFF,0x7F,0x7F,0x7F,0x7F,0x7F,0x7F,0x7F,  // 23
+  87          0x7F,0x7F,0x7F,0x7F,0x7F,0x3F,0x7F,0xFF,
+  88          0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+  89          0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,  /*"一"*/
+  90           
+  91          0xFF,0xEF,0xEF,0xEF,0xEE,0xE1,0xEB,0x0F,  // 27
+  92          0xEF,0xE7,0xE8,0xED,0xE7,0xEF,0xFF,0xFF,
+  93          0xFE,0x7E,0xBE,0xDE,0xEE,0xF6,0xFA,0xFC,
+  94          0xFA,0xF6,0xCE,0x9E,0x3E,0xBE,0xFE,0xFF   /*"关"*/                                                         
+             -                          
+  95          };
+  96           
+  97          void delay_1ms(uchar x){
+  98   1        uchar i,j;
+  99   1        for(j=0;j<x;j++)
+ 100   1          for(i=0;i<110;i++);
+ 101   1      }
+ 102           
+ 103          void write_command(uchar command){
+ 104   1        LCD_RS = 0;
+ 105   1        LCD_RW = 0;
+ 106   1        LCD_EN = 0;
+ 107   1        LCD_data = command;
+ 108   1        delay_1ms(2);
+ 109   1        LCD_EN = 1;     //EN 由1 -- 0 完成 有效数据 的 锁存
+ 110   1        delay_1ms(2);
+ 111   1        LCD_EN = 0;
+ 112   1      }
+ 113           
+ 114          void write_data(uchar fuck){
+ 115   1        LCD_RS = 1;
+C51 COMPILER V9.60.0.0   MAIN                                                              07/02/2022 21:19:58 PAGE 3   
+
+ 116   1        LCD_RW = 0;
+ 117   1        LCD_EN = 0;
+ 118   1        LCD_data = fuck;
+ 119   1        delay_1ms(2);
+ 120   1        LCD_EN = 1;
+ 121   1        delay_1ms(2);
+ 122   1        LCD_EN = 0;
+ 123   1      }
+ 124           
+ 125          void lcd_post(int X,int Y){
+ 126   1        write_command(0xb8+X);
+ 127   1        write_command(0x40+Y*8);
+ 128   1      }
+ 129          /* 0表示空格，1表示墙，2表示人，3表示箱子，4表示目的地 */
+ 130          uchar judge(int x,int y,int id){              //id 表示方向数组的行标，0,1,2,3 分别表示上下左右
+ 131   1        int xx,yy,xxx,yyy;
+ 132   1        xx=x+dir[id][0]; yy=y+dir[id][1];
+ 133   1        if(map[xx][yy]==0 || map[xx][yy]==4)return 1;        //1表示前面是 空格 或者 目的地，就是可以直接移动
+ 134   1        else if(map[xx][yy]==1)return 0;               //0表示无法移动
+ 135   1        else if(map[xx][yy]==3){
+ 136   2          xxx=xx+dir[id][0]; yyy=yy+dir[id][1];
+ 137   2          if(map[xxx][yyy]==1 || map[xxx][yyy]==3)return 0;
+ 138   2          else if(map[xxx][yyy]==0 || map[xxx][yyy]==4)return 2; //2表示需要间接移动，先把前面的箱子移动一，再让人
+             -移动一
+ 139   2        }return 0;
+ 140   1      }
+ 141           
+ 142          void lcd_init(){
+ 143   1        uchar i,j;  
+ 144   1      
+ 145   1        LCD_cs1 = 1; //刚开始关闭两屏
+ 146   1        LCD_cs2 = 1;
+ 147   1        delay_1ms(100);
+ 148   1        
+ 149   1        write_command(0x30);
+ 150   1        write_command(0x0c);
+ 151   1        write_command(0x01);
+ 152   1       
+ 153   1        cur_x=1; cur_y=5;
+ 154   1        X=3;
+ 155   1        
+ 156   1        for(i=0;i<8;i++){
+ 157   2          for(j=0;j<8;j++)map[i][j]=mat[i][j];
+ 158   2        }
+ 159   1      }
+ 160           
+ 161          void show_map(){
+ 162   1        uchar i,j,k;
+ 163   1        LCD_cs1=0; LCD_cs2=1;
+ 164   1        for(i=0;i<8;i++){
+ 165   2          for(j=0;j<8;j++){
+ 166   3            lcd_post(i,j);
+ 167   3            if(map[i][j]==0)
+ 168   3              for(k=0;k<8;k++)write_data(tmp[k]);
+ 169   3            else if(map[i][j]==1)
+ 170   3              for(k=0;k<8;k++)write_data(Qiang[k]);
+ 171   3            else if(map[i][j]==2)
+ 172   3              for(k=0;k<8;k++)write_data(Ren[k]);
+ 173   3            else if(map[i][j]==3)
+ 174   3              for(k=0;k<8;k++)write_data(Xiang[k]);
+ 175   3            else if(map[i][j]==4)
+ 176   3              for(k=0;k<8;k++)write_data(Mudi[k]);
+C51 COMPILER V9.60.0.0   MAIN                                                              07/02/2022 21:19:58 PAGE 4   
+
+ 177   3          }
+ 178   2        }delay_1ms(10);
+ 179   1        LCD_cs1=!LCD_cs1; LCD_cs2=!LCD_cs2;
+ 180   1       
+ 181   1        lcd_post(1,1); for(i=0;i<8;i++)write_data(Zifu[7][i]);
+ 182   1        lcd_post(1,2); for(i=0;i<8;i++)write_data(Zifu[8][i]);
+ 183   1        lcd_post(2,1); for(i=0;i<8;i++)write_data(Zifu[9][i]);
+ 184   1        lcd_post(2,2); for(i=0;i<8;i++)write_data(Zifu[10][i]); //推
+ 185   1       
+ 186   1        lcd_post(1,3); for(i=0;i<8;i++)write_data(Zifu[11][i]);
+ 187   1        lcd_post(1,4); for(i=0;i<8;i++)write_data(Zifu[12][i]);
+ 188   1        lcd_post(2,3); for(i=0;i<8;i++)write_data(Zifu[13][i]);
+ 189   1        lcd_post(2,4); for(i=0;i<8;i++)write_data(Zifu[14][i]); //箱
+ 190   1       
+ 191   1        lcd_post(1,5); for(i=0;i<8;i++)write_data(Zifu[15][i]);
+ 192   1        lcd_post(1,6); for(i=0;i<8;i++)write_data(Zifu[16][i]);
+ 193   1        lcd_post(2,5); for(i=0;i<8;i++)write_data(Zifu[17][i]);
+ 194   1        lcd_post(2,6); for(i=0;i<8;i++)write_data(Zifu[18][i]); //子
+ 195   1       
+ 196   1        LCD_cs1=!LCD_cs1; LCD_cs2=!LCD_cs2;
+ 197   1        delay_1ms(100);
+ 198   1      }
+ 199           
+ 200          void fun(uchar key,uchar dirction){
+ 201   1        uchar x,y,i;
+ 202   1      /* 0表示空格，1表示墙，2表示人，3表示箱子，4表示目的地 */
+ 203   1        if(key==1){
+ 204   2          lcd_post(cur_x,cur_y);
+ 205   2          if(mat[cur_x][cur_y]==4) for(i=0;i<8;i++)write_data(Mudi[i]);
+ 206   2          else for(i=0;i<8;i++)write_data(tmp[i]);
+ 207   2          map[cur_x][cur_y]=0;
+ 208   2                
+ 209   2          cur_x+=dir[dirction][0]; cur_y+=dir[dirction][1];
+ 210   2          lcd_post(cur_x,cur_y);
+ 211   2          for(i=0;i<8;i++)write_data(Ren[i]);
+ 212   2          map[cur_x][cur_y]=2;
+ 213   2                
+ 214   2        }
+ 215   1        else if(key==2){
+ 216   2          lcd_post(cur_x,cur_y);
+ 217   2          if(mat[cur_x][cur_y]==4) for(i=0;i<8;i++)write_data(Mudi[i]);
+ 218   2          else for(i=0;i<8;i++)write_data(tmp[i]);
+ 219   2          map[cur_x][cur_y]=0;
+ 220   2                
+ 221   2          cur_x+=dir[dirction][0]; cur_y+=dir[dirction][1];
+ 222   2          lcd_post(cur_x,cur_y);
+ 223   2          for(i=0;i<8;i++)write_data(Ren[i]);
+ 224   2          map[cur_x][cur_y]=2;
+ 225   2       
+ 226   2          x=cur_x+dir[dirction][0]; y=cur_y+dir[dirction][1];
+ 227   2          lcd_post(x,y);
+ 228   2          for(i=0;i<8;i++)write_data(Xiang[i]);
+ 229   2          map[x][y]=3;
+ 230   2        }
+ 231   1      }
+ 232           
+ 233          void main()
+ 234          {
+ 235   1        uchar i,num,index=6;
+ 236   1        lcd_init();
+ 237   1        
+ 238   1        show_map();
+C51 COMPILER V9.60.0.0   MAIN                                                              07/02/2022 21:19:58 PAGE 5   
+
+ 239   1       
+ 240   1        while(1){
+ 241   2          num=0;
+ 242   2          for(i=0;i<3;i++){
+ 243   3            if(map[ where[i][0] ][ where[0][1] ]==3)num++;
+ 244   3            else break;
+ 245   3          }
+ 246   2          if(num==X)goto WIN;
+ 247   2          if(key_up==0){
+ 248   3            delay_1ms(5);
+ 249   3            if(key_up==0){
+ 250   4              index=judge(cur_x,cur_y,0);
+ 251   4              fun(index,0);
+ 252   4            }while(!key_up);
+ 253   3          }
+ 254   2          else if(key_down==0){
+ 255   3            delay_1ms(5);
+ 256   3            if(key_down==0){
+ 257   4              index=judge(cur_x,cur_y,1);
+ 258   4              fun(index,1);
+ 259   4            }while(!key_down);
+ 260   3          }
+ 261   2          else if(key_left==0){
+ 262   3            delay_1ms(5);
+ 263   3            if(key_left==0){
+ 264   4              index=judge(cur_x,cur_y,2);
+ 265   4              fun(index,2);
+ 266   4            }while(!key_left);
+ 267   3          }
+ 268   2          else if(key_right==0){
+ 269   3            delay_1ms(5);
+ 270   3            if(key_right==0){
+ 271   4              index=judge(cur_x,cur_y,3);
+ 272   4              fun(index,3);
+ 273   4            }while(!key_right);
+ 274   3          }
+ 275   2        }
+ 276   1      WIN:
+ 277   1        LCD_cs1=!LCD_cs1; LCD_cs2=!LCD_cs2;
+ 278   1            
+ 279   1        lcd_post(5,0); for(i=0;i<8;i++)write_data(Zifu[0][i]);
+ 280   1        lcd_post(5,1); for(i=0;i<8;i++)write_data(Zifu[1][i]);
+ 281   1        lcd_post(5,2); for(i=0;i<8;i++)write_data(Zifu[2][i]);
+ 282   1       
+ 283   1        lcd_post(5,4); for(i=0;i<8;i++)write_data(Zifu[3][i]);
+ 284   1        lcd_post(5,5); for(i=0;i<8;i++)write_data(Zifu[4][i]);
+ 285   1        lcd_post(5,6); for(i=0;i<8;i++)write_data(Zifu[5][i]);
+ 286   1        lcd_post(5,7); for(i=0;i<8;i++)write_data(Zifu[6][i]);
+ 287   1        delay_1ms(100);
+ 288   1        while(1);
+ 289   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   2007    ----
+   CONSTANT SIZE    =    352    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     81      10
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+C51 COMPILER V9.60.0.0   MAIN                                                              07/02/2022 21:19:58 PAGE 6   
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
