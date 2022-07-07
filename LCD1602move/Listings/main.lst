@@ -1,0 +1,108 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              07/07/2022 22:36:30 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\inc) DEBUG OBJECTEXTEND P
+                    -RINT(.\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <STC89C5xRC.H>
+   2          #include "LCD1602.h"
+   3          
+   4          bit flag500ms = 0; //500ms 定时标志
+   5          unsigned char T0RH = 0; //T0 重载值的高字节
+   6          unsigned char T0RL = 0; //T0 重载值的低字节
+   7          unsigned char code str1[] = "Perseverance51";
+   8          //待显示的第二行字符串，需保持与第一行字符串等长，较短的行可用空格补齐
+   9          unsigned char code str2[] = "Hello ' World";
+  10          /* 配置并启动 T0，ms-T0 定时时间 */
+  11          void ConfigTimer0(unsigned int ms){
+  12   1          unsigned long tmp; //临时变量
+  13   1          tmp = 11059200 / 12; //定时器计数频率
+  14   1          tmp = (tmp * ms) / 1000; //计算所需的计数值
+  15   1          tmp = 65536 - tmp; //计算定时器重载值
+  16   1         tmp = tmp + 12; //补偿中断响应延时造成的误差
+  17   1          T0RH = (unsigned char)(tmp>>8); //定时器重载值拆分为高低字节
+  18   1          T0RL = (unsigned char)tmp;
+  19   1          TMOD &= 0xF0; //清零 T0 的控制位
+  20   1          TMOD |= 0x01; //配置 T0 为模式 1
+  21   1          TH0 = T0RH; //加载 T0 重载值
+  22   1          TL0 = T0RL;
+  23   1          ET0 = 1; //使能 T0 中断
+  24   1          TR0 = 1; //启动 T0
+  25   1      }
+  26          void main()
+  27          {
+  28   1            unsigned char i;
+  29   1          unsigned char index = 0; //移动索引
+  30   1          unsigned char  bufMove1[16+sizeof(str1)+16]; //移动显示缓冲区 1
+  31   1          unsigned char  bufMove2[16+sizeof(str2)+16]; //移动显示缓冲区 2
+  32   1        EA = 1; //开总中断
+  33   1         ConfigTimer0(60); //配置 T0 定时 设置过小会导致Proteus仿真时屏幕有黑块区域，按理这个值不应该超过51ms才行
+  34   1        //实际硬件添加定义：pdata 外部存储区
+  35   1        
+  36   1          LCD1602_Init();                 //初始化LCD1602
+  37   1        LCD1602_write_com(0x01);          //清屏指令
+  38   1        //缓冲区开头一段填充为空格
+  39   1          for (i=0; i<16; i++){
+  40   2              bufMove1[i] = ' ';
+  41   2              bufMove2[i] = ' ';
+  42   2          }
+  43   1          //待显示字符串拷贝到缓冲区中间位置
+  44   1          for (i=0; i<(sizeof(str1)-1); i++){
+  45   2              bufMove1[16+i] = str1[i];
+  46   2              bufMove2[16+i] = str2[i];
+  47   2          }
+  48   1          //缓冲区结尾一段也填充为空格
+  49   1          for (i=(16+sizeof(str1)-1); i<sizeof(bufMove1); i++){
+  50   2              bufMove1[i] = ' ';
+  51   2              bufMove2[i] = ' ';
+  52   2          }
+  53   1          while(1)
+  54   1          {
+C51 COMPILER V9.60.0.0   MAIN                                                              07/07/2022 22:36:30 PAGE 2   
+
+  55   2              if (flag500ms){ //每 500ms 移动一次屏幕
+  56   3                  flag500ms = 0;
+  57   3                  //从缓冲区抽出需显示的一段字符显示到液晶上
+  58   3                  LcdShowStr(0, 0, bufMove1+index, 16);
+  59   3                  LcdShowStr(1, 0, bufMove2+index, 16);
+  60   3                  //移动索引递增，实现左移
+  61   3                  index++;
+  62   3                  if (index >= (16+sizeof(str1)-1)){
+  63   4                      //起始位置达到字符串尾部后即返回从头开始
+  64   4                      index = 0;
+  65   4                  }
+  66   3              }
+  67   2          }
+  68   1      }
+  69          
+  70          /* T0 中断服务函数，定时 500ms */
+  71          void InterruptTimer0() interrupt 1{
+  72   1          static unsigned char tmr500ms = 0;
+  73   1         
+  74   1          TH0 = T0RH; //重新加载重载值
+  75   1          TL0 = T0RL;
+  76   1          tmr500ms++;
+  77   1          if (tmr500ms >= 10){
+  78   2              tmr500ms = 0;
+  79   2              flag500ms = 1;
+  80   2          }
+  81   1          
+  82   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    452    ----
+   CONSTANT SIZE    =     29    ----
+   XDATA SIZE       =      3      98
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

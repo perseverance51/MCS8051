@@ -1,0 +1,170 @@
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                    07/03/2022  13:16:16  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0, INVOKED BY:
+C:\KEIL_V5\C51\BIN\BL51.EXE .\Objects\main.obj TO .\Objects\matrix16_16 PRINT (.\Listings\matrix16_16.m51) RAMSIZE (256)
+>> 
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  .\Objects\main.obj (MAIN)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_STARTUP)
+
+
+LINK MAP OF MODULE:  .\Objects\matrix16_16 (MAIN)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0020H     UNIT         ?DT?MAIN
+            IDATA   0028H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+                    0003H     0008H                  *** GAP ***
+            CODE    000BH     0003H     ABSOLUTE     
+            CODE    000EH     0140H     UNIT         ?CO?MAIN
+            CODE    014EH     005DH     UNIT         ?PR?MAIN?MAIN
+            CODE    01ABH     0047H     UNIT         ?PR?TO_LED_DISPLAY_CONTROL?MAIN
+            CODE    01F2H     001CH     UNIT         ?PR?_SERIAL_INPUT_PIN?MAIN
+            CODE    020EH     001AH     UNIT         ?PR?_DELAY?MAIN
+            CODE    0228H     000CH     UNIT         ?C_C51STARTUP
+
+
+
+OVERLAY MAP OF MODULE:   .\Objects\matrix16_16 (MAIN)
+
+
+SEGMENT
+  +--> CALLED SEGMENT
+---------------------
+?PR?TO_LED_DISPLAY_CONTROL?MAIN
+  +--> ?PR?_SERIAL_INPUT_PIN?MAIN
+
+*** NEW ROOT ***************************************************
+
+?C_C51STARTUP
+  +--> ?PR?MAIN?MAIN
+
+?PR?MAIN?MAIN
+  +--> ?CO?MAIN
+  +--> ?PR?_DELAY?MAIN
+
+
+
+SYMBOL TABLE OF MODULE:  .\Objects\matrix16_16 (MAIN)
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  07/03/2022  13:16:16  PAGE 2
+
+
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        MAIN
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0080H         PUBLIC        P0
+  D:00A0H         PUBLIC        P2
+  D:00B0H         PUBLIC        P3
+  D:0008H         PUBLIC        Bit_Stream_8
+  D:00A8H         PUBLIC        IE
+  B:00D0H.7       PUBLIC        CY
+  C:014EH         PUBLIC        main
+  D:0089H         PUBLIC        TMOD
+  C:01ABH         PUBLIC        TO_Led_Display_control
+  B:00B0H.7       PUBLIC        Shift_CLK_Pin
+  B:0080H.0       PUBLIC        Serial_Data_Pin
+  C:000EH         PUBLIC        Word_Set_OF_16x16
+  D:008CH         PUBLIC        TH0
+  D:008AH         PUBLIC        TL0
+  B:0088H.4       PUBLIC        TR0
+  C:01F2H         PUBLIC        _Serial_Input_Pin
+  B:0080H.1       PUBLIC        RCK_Pin
+  C:020EH         PUBLIC        _Delay
+  B:00B0H.6       PUBLIC        Switch_74LS154
+  -------         PROC          _DELAY
+  D:0006H         SYMBOL        x
+  -------         DO            
+  D:0005H         SYMBOL        i
+  -------         ENDDO         
+  C:020EH         LINE#         57
+  C:020EH         LINE#         58
+  C:020EH         LINE#         60
+  C:0218H         LINE#         61
+  C:0218H         LINE#         62
+  C:0227H         LINE#         63
+  C:0227H         LINE#         64
+  -------         ENDPROC       _DELAY
+  -------         PROC          _SERIAL_INPUT_PIN
+  D:0007H         SYMBOL        Abyte
+  -------         DO            
+  D:0006H         SYMBOL        i
+  -------         ENDDO         
+  C:01F2H         LINE#         67
+  C:01F2H         LINE#         68
+  C:01F2H         LINE#         70
+  C:01FEH         LINE#         71
+  C:01FEH         LINE#         72
+  C:0202H         LINE#         73
+  C:0204H         LINE#         74
+  C:0206H         LINE#         75
+  C:0207H         LINE#         76
+  C:0208H         LINE#         77
+  C:020AH         LINE#         78
+  C:020DH         LINE#         79
+  -------         ENDPROC       _SERIAL_INPUT_PIN
+  -------         PROC          TO_LED_DISPLAY_CONTROL
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  07/03/2022  13:16:16  PAGE 3
+
+
+  -------         DO            
+  D:0005H         SYMBOL        i
+  -------         ENDDO         
+  C:01ABH         LINE#         83
+  C:01BAH         LINE#         86
+  C:01BDH         LINE#         87
+  C:01C0H         LINE#         88
+  C:01C6H         LINE#         89
+  C:01D0H         LINE#         90
+  C:01DBH         LINE#         91
+  C:01DDH         LINE#         92
+  C:01DFH         LINE#         93
+  C:01E1H         LINE#         94
+  C:01E3H         LINE#         95
+  C:01E5H         LINE#         97
+  -------         ENDPROC       TO_LED_DISPLAY_CONTROL
+  -------         PROC          MAIN
+  -------         DO            
+  D:0003H         SYMBOL        i
+  D:0004H         SYMBOL        k
+  -------         ENDDO         
+  C:014EH         LINE#         98
+  C:014EH         LINE#         99
+  C:014EH         LINE#         101
+  C:0151H         LINE#         102
+  C:0154H         LINE#         103
+  C:0157H         LINE#         104
+  C:015AH         LINE#         105
+  C:015DH         LINE#         106
+  C:015DH         LINE#         107
+  C:015DH         LINE#         108
+  C:0169H         LINE#         109
+  C:0169H         LINE#         110
+  C:0175H         LINE#         111
+  C:0175H         LINE#         112
+  C:0197H         LINE#         113
+  C:0199H         LINE#         114
+  C:01A0H         LINE#         115
+  C:01A2H         LINE#         116
+  C:01A5H         LINE#         117
+  C:01A8H         LINE#         118
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        MAIN
+
+Program Size: data=41.0 xdata=0 code=556
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

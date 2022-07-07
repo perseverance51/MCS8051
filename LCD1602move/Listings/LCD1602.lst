@@ -1,0 +1,121 @@
+C51 COMPILER V9.60.0.0   LCD1602                                                           07/07/2022 22:15:51 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE LCD1602
+OBJECT MODULE PLACED IN .\Objects\LCD1602.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE src\LCD1602.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\inc) DEBUG OBJECTE
+                    -XTEND PRINT(.\Listings\LCD1602.lst) TABS(2) OBJECT(.\Objects\LCD1602.obj)
+
+line level    source
+
+   1          #include "LCD1602.h"
+   2          
+   3          //****************************************************
+   4          //MS延时函数(12M晶振下测试)
+   5          //****************************************************
+   6          void LCD1602_delay_ms(unsigned int n)
+   7          {
+   8   1        unsigned int  i,j;
+   9   1        for(i=0;i<n;i++)
+  10   1          for(j=0;j<123;j++);
+  11   1      }
+  12          
+  13          //****************************************************
+  14          //写指令
+  15          //****************************************************
+  16          void LCD1602_write_com(unsigned char com)
+  17          {
+  18   1        LCD1602_RS = 0;
+  19   1        LCD1602_delay_ms(1);
+  20   1        LCD1602_EN = 1;
+  21   1        LCD1602_PORT = com;
+  22   1        LCD1602_delay_ms(1);
+  23   1        LCD1602_EN = 0;
+  24   1      }
+  25          
+  26          //****************************************************
+  27          //写数据
+  28          //****************************************************
+  29          void LCD1602_printc(unsigned char dat)
+  30          {
+  31   1        LCD1602_RS = 1;
+  32   1        LCD1602_delay_ms(1);  
+  33   1        LCD1602_PORT = dat;
+  34   1        LCD1602_EN = 1;
+  35   1        LCD1602_delay_ms(1);
+  36   1        LCD1602_EN = 0;
+  37   1      }
+  38          
+  39          //****************************************************
+  40          //连续写字符
+  41          //****************************************************
+  42          /*
+  43          void LCD1602_prints(unsigned char *s)
+  44          {
+  45            while(*s>0)
+  46            {
+  47              LCD1602_printc(*s);
+  48              s++;
+  49            }
+  50          }
+  51          */
+  52          //****************************************************
+  53          //LCD光标定位到x处
+  54          //****************************************************
+C51 COMPILER V9.60.0.0   LCD1602                                                           07/07/2022 22:15:51 PAGE 2   
+
+  55          
+  56          void LCD1602_set_position(bit hang, unsigned char x)          
+  57          {
+  58   1        if(hang)LCD1602_write_com(0x80 + 0x40 + x);
+  59   1        else LCD1602_write_com(0x80 + x);
+  60   1      }
+  61          
+  62          //****************************************************
+  63          //LCD初始化
+  64          //****************************************************
+  65          void LCD1602_Init()
+  66          {
+  67   1        LCD1602_EN = 0;
+  68   1        LCD1602_RW = 0;           //设置为写状态
+  69   1        LCD1602_write_com(0x38);      //显示模式设定
+  70   1        LCD1602_write_com(0x0c);      //开关显示、光标有无设置、光标闪烁设置
+  71   1        LCD1602_write_com(0x06);      //写一个字符后指针加一
+  72   1        LCD1602_write_com(0x01);      //清屏指令
+  73   1      }
+  74          
+  75          /* 设置显示 RAM 起始地址，亦即光标位置，(x,y)-对应屏幕上的字符坐标 */
+  76          /*
+  77          void LcdSetCursor(unsigned char x, unsigned char y){
+  78              unsigned char addr;
+  79              if (y == 0){ //由输入的屏幕坐标计算显示 RAM 的地址
+  80                  addr = 0x00 + x; //第一行字符地址从 0x00 起始
+  81              }else{
+  82                  addr = 0x40 + x; //第二行字符地址从 0x40 起始
+  83              }
+  84              LCD1602_write_com(addr | 0x80); //设置 RAM 地址
+  85          }
+  86          */
+  87          /* 在液晶上显示字符串，(x,y)-对应屏幕上的起始坐标，
+  88          str-字符串指针，len-需显示的字符长度 */
+  89          void LcdShowStr(unsigned char x, unsigned char y,
+  90                  unsigned char *str, unsigned char len){
+  91   1          LCD1602_set_position(x, y); //设置起始地址
+  92   1          while (len--){ //连续写入 len 个字符数据
+  93   2             LCD1602_printc(*str++); //先取 str 指向的数据，然后 str 自加 1
+  94   2          }
+  95   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    184    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----       7
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       1
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
