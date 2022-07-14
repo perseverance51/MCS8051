@@ -1,0 +1,449 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              07/14/2022 08:51:37 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          /*-------------------------------
+   2          
+   3          --------------------------------*/
+   4            
+   5          #include <REG52.H>
+   6          #define uchar unsigned char
+   7          #define uint  unsigned int
+   8          #define qiang_ledon qiang_led=1;
+   9          #define qiang_ledoff qiang_led=0;
+  10          #define biao_ledon biao_led=1;
+  11          #define biao_ledoff biao_led=0;
+  12          #define ruo_ledon ruo_led=1;
+  13          #define ruo_ledoff ruo_led=0;
+  14          #define piao_ledon piao_led=1;
+  15          #define piao_ledoff piao_led=0;
+  16          #define sgan_ledon sgan_led=1;
+  17          #define sgan_ledoff sgan_led=0;
+  18          #define jin_ledon jin_led=1;
+  19          #define jin_ledoff jin_led=0;
+  20          #define pai_ledon pai_led=1;
+  21          #define pai_ledoff pai_led=0;
+  22          unsigned char code Tab[11]={0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F}; //数码管显示0～9的段码表
+  23          unsigned char int_time;        //记录中断次数
+  24          unsigned char second;        //储存秒
+  25          uint t=0,tt=0;
+  26             sbit k1=P0^0;
+  27             sbit k2=P0^1;
+  28             sbit k3=P0^2;
+  29             sbit sg=P0^3;
+  30             sbit hk1=P0^4;
+  31             sbit hk2=P0^5;
+  32             sbit ledon=P0^7;
+  33             sbit qiang_led=P2^0;
+  34             sbit biao_led=P2^1;
+  35             sbit ruo_led=P2^2;
+  36             sbit piao_led=P2^3;
+  37             sbit sgan_led=P2^4;
+  38             sbit jin_led=P2^5;
+  39             sbit pai_led=P2^6;
+  40             sbit p30=P3^0;
+  41             sbit p31=P3^1;
+  42             sbit beepon=P2^7;
+  43             sbit sm1=P3^6;
+  44             sbit sm2=P3^7;
+  45          void delay2(void)
+  46             {
+  47   1        unsigned char m;
+  48   1        for(m=0;m<200;m++)
+  49   1              ;
+  50   1         }
+  51          
+  52          void delay1(int s)
+  53             { 
+  54   1         int i;
+  55   1         for(;s>0;s--)
+C51 COMPILER V9.60.0.0   MAIN                                                              07/14/2022 08:51:37 PAGE 2   
+
+  56   1         for(i=0;i<65;i++);
+  57   1         }
+  58           
+  59          void delay(uint i)
+  60             {
+  61   1         uchar j;
+  62   1         for(i;i>0;i--)
+  63   1         for(j=255;j>0;j--);
+  64   1         }
+  65          
+  66          void DisplaySecond(unsigned char k)
+  67          {
+  68   1         
+  69   1         sm1=0;        //P2.6引脚输出低电平， DS6点亮 
+  70   1         P1=Tab[k/10];          //显示十位
+  71   1           delay2();
+  72   1           delay2();
+  73   1         sm1=1;
+  74   1         sm2=0;       //P2.7引脚输出低电平， DS7点亮 
+  75   1         P1=Tab[k%10];         //显示个位
+  76   1           delay2();
+  77   1           delay2();
+  78   1         P3=0xff;     //关闭所有数码管
+  79   1         P1=1;        //显示个位
+  80   1           delay2();
+  81   1           delay2();
+  82   1      }
+  83               
+  84          void beep()
+  85             {
+  86   1          p30=0;
+  87   1          p31=0;
+  88   1          t=0;
+  89   1        while(1)
+  90   1        {
+  91   2          beepon^=1;
+  92   2            delay(300);
+  93   2            if(t>=80) break;
+  94   2        }
+  95   1        beepon=0;
+  96   1        biao_led=0;
+  97   1          }
+  98              
+  99          void f_qiang()
+ 100              {  
+ 101   1         qiang_ledon;
+ 102   1         t=0;
+ 103   1         tt=0;  
+ 104   1           int_time=0;
+ 105   1           second=00;
+ 106   1         while(1)
+ 107   1          { 
+ 108   2          if(tt>=400) break; 
+ 109   2            t=0;
+ 110   2          while(t<80&&tt<=400)
+ 111   2          { 
+ 112   3            p31=0;
+ 113   3            p30=1;  //正转 4s
+ 114   3              DisplaySecond(second);
+ 115   3            }
+ 116   2          t=0;    //反转 4s 
+ 117   2          while(t<80&&tt<=400)
+C51 COMPILER V9.60.0.0   MAIN                                                              07/14/2022 08:51:37 PAGE 3   
+
+ 118   2          {
+ 119   3            p30=0;
+ 120   3            p31=1;
+ 121   3            DisplaySecond(second);
+ 122   3            }
+ 123   2           }
+ 124   1          p30=0;
+ 125   1          p31=0;    
+ 126   1           }
+ 127          
+ 128          void f_biao()
+ 129            {
+ 130   1          qiang_led=0;
+ 131   1            biao_led=1;
+ 132   1          t=0;
+ 133   1          tt=0;
+ 134   1            int_time=0;
+ 135   1            second=00;
+ 136   1         while(1)
+ 137   1           {
+ 138   2           if(tt>=400) break; 
+ 139   2           t=0;
+ 140   2          while(t<60&&tt<=400)
+ 141   2           {  
+ 142   3                p31=0;
+ 143   3            p30=1;  //正转3s
+ 144   3                DisplaySecond(second);
+ 145   3             }
+ 146   2      
+ 147   2          t=0;    //反转3s
+ 148   2          while(t<60&&tt<=400)
+ 149   2             {
+ 150   3              p30=0;
+ 151   3            p31=1;
+ 152   3            DisplaySecond(second);
+ 153   3          }
+ 154   2             }
+ 155   1             p30=0;
+ 156   1           p31=0;
+ 157   1         }
+ 158          
+ 159          void f_ruo()
+ 160              {
+ 161   1          qiang_led=0;
+ 162   1          biao_led=0;
+ 163   1          ruo_led=1;
+ 164   1          t=0;
+ 165   1          tt=0;
+ 166   1            int_time=0;
+ 167   1             second=00;
+ 168   1          while(1)
+ 169   1             {
+ 170   2             if(tt>=400) break; 
+ 171   2           t=0;
+ 172   2               while(t<40&&tt<=400)
+ 173   2                 {  p31=0;
+ 174   3                  p30=1;  //正转2s
+ 175   3                      DisplaySecond(second);
+ 176   3                }
+ 177   2             t=0;   //反转 2s
+ 178   2               while(t<40&&tt<=400)
+ 179   2                  {   p30=0;
+C51 COMPILER V9.60.0.0   MAIN                                                              07/14/2022 08:51:37 PAGE 4   
+
+ 180   3                  p31=1;
+ 181   3                  DisplaySecond(second);
+ 182   3                }
+ 183   2               }
+ 184   1          p30=0;
+ 185   1            p31=0;
+ 186   1             }
+ 187          
+ 188          void f_piao()
+ 189            {
+ 190   1           qiang_ledoff;
+ 191   1           biao_ledoff;
+ 192   1           piao_ledon;
+ 193   1           t=0;
+ 194   1           tt=0;
+ 195   1             int_time=0;
+ 196   1             second=00;
+ 197   1           while(1)
+ 198   1                {
+ 199   2               if(tt>=400) break; 
+ 200   2             t=0;
+ 201   2                 while(t<40&&tt<=400)
+ 202   2                     {  p31=0;
+ 203   3                        p30=1;  //正转2s
+ 204   3                          DisplaySecond(second);
+ 205   3                   }
+ 206   2             t=0;   //反转2s
+ 207   2                 while(t<40&&tt<=400)
+ 208   2                     {    p30=0;
+ 209   3                      p31=1;
+ 210   3                      DisplaySecond(second);
+ 211   3                 }
+ 212   2                   }
+ 213   1          p30=0;
+ 214   1            p31=0;
+ 215   1          piao_ledoff;
+ 216   1          }
+ 217          
+ 218          void pai_leds()
+ 219               {
+ 220   1            p30=0;
+ 221   1            p31=0;
+ 222   1              pai_led=1;  //排水阀灯亮 等待霍尔开关2 
+ 223   1            while(hk2);
+ 224   1            if(hk2==0)  //如果闭合
+ 225   1            pai_led=0;  //排水灯灭
+ 226   1           }
+ 227          
+ 228          void jin()
+ 229              {
+ 230   1            p30=0;
+ 231   1            p31=0;
+ 232   1            jin_ledon; 
+ 233   1            while(hk1);
+ 234   1            if(hk1==0)
+ 235   1            jin_ledoff;
+ 236   1           }
+ 237          
+ 238          void sgan()
+ 239              {
+ 240   1            sgan_ledon;  //甩干灯亮
+ 241   1            t=0;
+C51 COMPILER V9.60.0.0   MAIN                                                              07/14/2022 08:51:37 PAGE 5   
+
+ 242   1              int_time=0;
+ 243   1              second=00;
+ 244   1             while(t<=400)
+ 245   1                  { 
+ 246   2                p31=0;
+ 247   2                  p30=1;  
+ 248   2                      DisplaySecond(second);
+ 249   2                 }
+ 250   1              sgan_ledoff;
+ 251   1          }
+ 252          
+ 253          void sgan1()
+ 254              {
+ 255   1           sgan_ledon;
+ 256   1           t=0;
+ 257   1             int_time=0;
+ 258   1             second=00;
+ 259   1             while(t<=400)
+ 260   1                  { 
+ 261   2               p31=0;
+ 262   2                   p30=1; 
+ 263   2                     DisplaySecond(second);
+ 264   2                 }
+ 265   1              piao_ledoff;
+ 266   1              sgan_ledoff;
+ 267   1              beep();
+ 268   1            t=401;
+ 269   1          }
+ 270          
+ 271          
+ 272          void f_an1()
+ 273             {  
+ 274   1        qiang_ledon; //方案1灯亮
+ 275   1        jin();  //进入强洗
+ 276   1        f_qiang();  //循环20S
+ 277   1        delay1(4000);//延时4s
+ 278   1        f_biao();  //循环20S
+ 279   1        delay1(4000);//延时4s
+ 280   1        f_ruo();  //循环20S
+ 281   1        ruo_ledoff; 
+ 282   1        pai_leds();
+ 283   1        delay1(1000); //延时1S 进入甩干
+ 284   1        sgan(); //甩干20s
+ 285   1        sgan_ledoff;
+ 286   1        ruo_ledoff;
+ 287   1        piao_ledoff;
+ 288   1        jin();
+ 289   1        delay1(1000); //延时1S 进入漂洗
+ 290   1        f_piao();  //循环20S
+ 291   1        sgan_ledoff;
+ 292   1        piao_ledoff;
+ 293   1        pai_leds();
+ 294   1        delay1(1000); //延时1S 进入甩干
+ 295   1        sgan1();//最终甩干20S
+ 296   1        delay(500);//延时 
+ 297   1        beep();
+ 298   1         }
+ 299          
+ 300          void f_an2()
+ 301             {  
+ 302   1        biao_ledon; //方案1灯亮
+ 303   1        jin();
+C51 COMPILER V9.60.0.0   MAIN                                                              07/14/2022 08:51:37 PAGE 6   
+
+ 304   1        f_biao();  //循环20S
+ 305   1        delay1(4000); //延时4S
+ 306   1        f_ruo();  //循环20S
+ 307   1        ruo_ledoff;
+ 308   1        pai_leds();
+ 309   1        delay1(1000); //延时1S 进入甩干
+ 310   1        sgan(); //甩干20s
+ 311   1        ruo_ledoff;
+ 312   1        piao_ledoff;
+ 313   1        jin();
+ 314   1        delay1(1000); //延时1S 进入漂洗
+ 315   1        f_piao();  //循环20S
+ 316   1        sgan_led=0;
+ 317   1        pai_leds();
+ 318   1        delay1(1000); //延时1S 进入甩干
+ 319   1        sgan();//最终甩干20s
+ 320   1        delay(500);//延时5s
+ 321   1        piao_led=0;
+ 322   1        beep(); 
+ 323   1         }
+ 324          
+ 325          void f_an3()
+ 326            {  
+ 327   1        ruo_led=1; //方案1灯亮
+ 328   1        jin();
+ 329   1        f_ruo();  //循环20S
+ 330   1        ruo_ledoff;
+ 331   1        pai_leds();
+ 332   1        delay1(1000); //延时1S 进入甩干
+ 333   1        sgan(); //甩干20S
+ 334   1        ruo_ledoff;
+ 335   1        piao_ledoff;
+ 336   1        jin();
+ 337   1        delay1(1000); //延时1S 进入漂洗
+ 338   1        f_piao();  //循环20S
+ 339   1        sgan_led=0;
+ 340   1        pai_leds();
+ 341   1        delay1(1000); //延时1S 进入甩干
+ 342   1        sgan();//最终甩干20s
+ 343   1        delay(500);//延时5s
+ 344   1        piao_led=0;
+ 345   1        p30=0;
+ 346   1        beep();
+ 347   1         }
+ 348          
+ 349          
+ 350          void main(void)
+ 351          {  
+ 352   1        TMOD=0x01;       //方式1 16位计数器
+ 353   1        TH0=-50000/256;   //设定初值
+ 354   1        TL0=-50000%256;
+ 355   1        EA=1;               //开总中断
+ 356   1        ET0=1;             //开定时器0中断
+ 357   1        TR0=1;             //启动定时器0
+ 358   1        P2=0;
+ 359   1        int_time=0;     //中断次数初始化
+ 360   1        second=00;     //秒初始化
+ 361   1         while(1)
+ 362   1          { 
+ 363   2          if(k1==0)
+ 364   2        {  
+ 365   3          delay(10);
+C51 COMPILER V9.60.0.0   MAIN                                                              07/14/2022 08:51:37 PAGE 7   
+
+ 366   3          if(k1==0) 
+ 367   3            {
+ 368   4            f_an1();
+ 369   4          }
+ 370   3        }
+ 371   2        if(k2==0)
+ 372   2        {
+ 373   3          delay(10);
+ 374   3          if(k2==0)
+ 375   3          {
+ 376   4            f_an2();
+ 377   4          }
+ 378   3        }
+ 379   2        if(k3==0)
+ 380   2        {
+ 381   3            delay(10);
+ 382   3           if(k3==0)
+ 383   3            {
+ 384   4             f_an3();
+ 385   4            }
+ 386   3        }
+ 387   2      
+ 388   2        if(sg==0)
+ 389   2        {
+ 390   3          delay(10);
+ 391   3          if(sg==0)
+ 392   3          {
+ 393   4             sgan1();
+ 394   4          }
+ 395   3        }
+ 396   2      }
+ 397   1      //  return 0;
+ 398   1      }  
+ 399          
+ 400          
+ 401          void time0() interrupt 1 using 1
+ 402             {  
+ 403   1           int_time ++;        //每来一次中断,中断次数int_time自加1
+ 404   1          if(int_time==20)   //够20次中断,即1秒钟进行一次检测结果采样
+ 405   1            {
+ 406   2              int_time=0;    //中断次数清0
+ 407   2              second++;    //秒加1
+ 408   2            }             
+ 409   1         TH0=-50000/256;   //50000  =50ms中断一次
+ 410   1         TL0=-50000%256;
+ 411   1         t++; 
+ 412   1         tt++;
+ 413   1         }
+ 414          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    968    ----
+   CONSTANT SIZE    =     11    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      6    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,4 @@
+"main.obj",
+"DS1302.obj" 
+TO "LCD1602_driver" 
+RAMSIZE(256) 

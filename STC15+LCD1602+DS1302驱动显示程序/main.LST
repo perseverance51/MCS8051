@@ -1,0 +1,433 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              07/11/2022 13:07:05 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE INCDIR(..\STC15+LCD1602+DS1302驱动显示程
+                    -序) DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          
+   2          /*************  本程序功能说明  **************
+   3          
+   4          驱动LCD1602字符屏.
+   5          
+   6          显示效果为:  DS1302 + LCD1602显示时间
+   7          
+   8          ******************************************/
+   9          #include  "STC15Fxxxx.H"
+  10          #include "DS1302.h"
+  11          
+  12          #define T1MS (65536-MAIN_Fosc/12/1000)   //12T模式1ms定时
+  13          #define  interval  1000 //设置延时时间间隔
+  14          /*************  本地变量声明  **************/
+  15          static volatile unsigned long sysRunmillis = 0; //系统运行时间计数，保存单片机从上电复位以来运行的时间，单
+             -位是毫秒。该数值由定时器T0的中断响应子函数更新
+  16          unsigned long previousMillis = 0;
+  17          sbit Buzzer = P3^7;
+  18          
+  19          void Timer0Init(void);    //1毫秒@12.000MHz
+  20          void  DisplayRTC(void);
+  21          void  delay_ms(unsigned long ms);
+  22          void  Initialize_LCD(void);
+  23          void  Write_AC(u8 hang,u8 lie);
+  24          void  Write_DIS_Data(u8 DIS_Data);
+  25          void  ClearLine(u8 row);
+  26          u8    BIN_ASCII(u8 tmp);
+  27          void  PutString(u8 row, u8 column, u8 *puts);
+  28          void  WriteChar(u8 row, u8 column, u8 dat);
+  29          void Buzzer_Di(void);
+  30          
+  31          //========================================================================
+  32          // 函数: void main(void)
+  33          // 描述: 主函数。
+  34          // 参数: none.
+  35          // 返回: none.
+  36          // 版本: VER1.0
+  37          // 日期: 2013-4-1
+  38          // 备注: 
+  39          //========================================================================
+  40          void main(void)
+  41          {
+  42   1        unsigned long currentMillis;//当前时间
+  43   1        P0M1 = 0; P0M0 = 0; //设置为准双向口
+  44   1        P1M1 = 0; P1M0 = 0; //设置为准双向口
+  45   1        P2M1 = 0; P2M0 = 0; //设置为准双向口
+  46   1        P3M1 = 0; P3M0 = 0; //设置为准双向口
+  47   1        P4M1 = 0; P4M0 = 0; //设置为准双向口
+  48   1        P5M1 = 0; P5M0 = 0; //设置为准双向口
+  49   1        P6M1 = 0; P6M0 = 0; //设置为准双向口
+  50   1        P7M1 = 0; P7M0 = 0; //设置为准双向口
+  51   1        Timer0Init(); //1毫秒@12.000MHz
+  52   1        Initialize_LCD();
+  53   1        ClearLine(0);
+C51 COMPILER V9.60.0.0   MAIN                                                              07/11/2022 13:07:05 PAGE 2   
+
+  54   1        ClearLine(1);
+  55   1        DS1302_Init();                  //初始化DS1302
+  56   1        delay_ms(500);
+  57   1        DS1302_GetTime(&DS1302Buffer);//获取当前RTCC值
+  58   1        while(1)
+  59   1        {
+  60   2          DisplayRTC();       //显示实时时钟  
+  61   2          currentMillis = sysRunmillis; 
+  62   2        if (currentMillis - previousMillis  >= interval){//每隔1秒翻转一次
+  63   3          currentMillis = sysRunmillis;
+  64   3            DS1302_GetTime(&DS1302Buffer);//获取当前RTCC值
+  65   3          }
+  66   2      //  if(Flag_Time_Refresh)     //数据更新时才刷新LCD
+  67   2      //    {
+  68   2      //      Flag_Time_Refresh = 0;    
+  69   2      //      DisplayRTC();       //显示实时时钟    
+  70   2      //    }
+  71   2      //      DS1302_GetTime(&DS1302Buffer);//获取当前RTCC值
+  72   2        }
+  73   1      } 
+  74          
+  75          void Timer0Init(void)   //1毫秒@12.000MHz
+  76          {
+  77   1        AUXR &= 0x7F;   //定时器时钟12T模式
+  78   1        TMOD &= 0xF0;   //设置定时器模式
+  79   1        TL0 = T1MS ;    //设置定时初始值
+  80   1        TH0 = T1MS >>8;   //设置定时初始值
+  81   1      //  TL0 = 0x18;   //设置定时初始值
+  82   1      //  TH0 = 0xFC;   //设置定时初始值
+  83   1        
+  84   1        TF0 = 0;    //清除TF0标志
+  85   1        TR0 = 1;    //定时器0开始计时
+  86   1        ET0 = 1;     //enable timer0 interrupt
+  87   1        EA = 1;      //open global interrupt switch
+  88   1      }
+  89          
+  90          /* Timer0 interrupt routine */
+  91          void tm0_isr() interrupt 1
+  92          {
+  93   1      //  TL0 = 0x18;   //设置定时初始值
+  94   1      //  TH0 = 0xFC;   //设置定时初始值
+  95   1          TL0 = T1MS;                     //reload timer0 low byte
+  96   1          TH0 = T1MS >> 8;                //reload timer0 high byte
+  97   1        sysRunmillis ++;
+  98   1      }
+  99          
+ 100          
+ 101          //========================================================================
+ 102          // 函数: void  delay_ms(u8 ms)
+ 103          // 描述: 延时函数。
+ 104          // 参数: ms,要延时的ms数, 这里只支持1~255ms. 自动适应主时钟.
+ 105          // 返回: none.
+ 106          // 版本: VER1.0
+ 107          // 日期: 2013-4-1
+ 108          // 备注: 
+ 109          //========================================================================
+ 110          void  delay_ms(unsigned long ms)
+ 111          {
+ 112   1        unsigned long temp = sysRunmillis ;
+ 113   1          while(sysRunmillis - temp < ms );
+ 114   1      //     unsigned int i;
+ 115   1      //   do{
+C51 COMPILER V9.60.0.0   MAIN                                                              07/11/2022 13:07:05 PAGE 3   
+
+ 116   1      //        i = MAIN_Fosc / 13000;
+ 117   1      //      while(--i)  ;   //14T per loop
+ 118   1      //     }while(--ms);
+ 119   1      }
+ 120          
+ 121          //****************************************************
+ 122          //显示实时时钟
+ 123          //****************************************************
+ 124          void  DisplayRTC(void)
+ 125          {
+ 126   1        unsigned char *weeklist[7]={"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
+ 127   1        PutString(0,0,"20");
+ 128   1        WriteChar(0,2,DS1302Buffer.Year/10 + 0x30);  //显示Year高位
+ 129   1        WriteChar(0,3,DS1302Buffer.Year%10 + 0x30);  //显示Year低位
+ 130   1        WriteChar(0,4,'-');
+ 131   1        WriteChar(0,5,DS1302Buffer.Month/10 + 0x30);   //显示Month高位
+ 132   1        WriteChar(0,6,DS1302Buffer.Month%10 + 0x30);   //显示Month低位
+ 133   1        WriteChar(0,7,'-');
+ 134   1        WriteChar(0,8,DS1302Buffer.Day/10 + 0x30);     //显示Day高位
+ 135   1        WriteChar(0,9,DS1302Buffer.Day%10 + 0x30);     //显示Day低位
+ 136   1      
+ 137   1        PutString(0,13,weeklist[DS1302Buffer.Week -1]);
+ 138   1        if(DS1302Buffer.Hour > 9)
+ 139   1        WriteChar(1,0,DS1302Buffer.Hour/10 + 0x30);  //显示Hour高位
+ 140   1        else      WriteChar(1,0,  0x30);
+ 141   1        WriteChar(1,1,DS1302Buffer.Hour%10 + 0x30);  //显示Hour低位
+ 142   1        WriteChar(1,2,':');
+ 143   1        WriteChar(1,3,DS1302Buffer.Minute/10 + 0x30);  //显示Minute高位
+ 144   1        WriteChar(1,4,DS1302Buffer.Minute%10 + 0x30);  //显示Minute低位
+ 145   1        WriteChar(1,5,':');
+ 146   1        WriteChar(1,6,DS1302Buffer.Second/10 + 0x30);  //显示Second高位
+ 147   1        WriteChar(1,7,DS1302Buffer.Second%10 + 0x30);  //显示Second低位 
+ 148   1      }
+ 149          
+ 150          
+ 151          /************* LCD1602相关程序  *****************************************************/
+ 152          //8位数据访问方式 LCD1602   标准程序  梁工编写  2014-2-21
+ 153          
+ 154          #define LineLength  16    //16x2
+ 155          
+ 156          /*************  Pin define  *****************************************************/
+ 157          
+ 158          sfr   LCD_BUS = 0x80; //P0--0x80, P1--0x90, P2--0xA0, P3--0xB0
+ 159          
+ 160          sbit  LCD_B7  = LCD_BUS^7;  //D7 -- Pin 14    LED- -- Pin 16 
+ 161          sbit  LCD_B6  = LCD_BUS^6;  //D6 -- Pin 13    LED+ -- Pin 15
+ 162          sbit  LCD_B5  = LCD_BUS^5;  //D5 -- Pin 12    Vo   -- Pin 3
+ 163          sbit  LCD_B4  = LCD_BUS^4;  //D4 -- Pin 11    VDD  -- Pin 2
+ 164          sbit  LCD_B3  = LCD_BUS^3;  //D3 -- Pin 10    VSS  -- Pin 1
+ 165          sbit  LCD_B2  = LCD_BUS^2;  //D2 -- Pin  9
+ 166          sbit  LCD_B1  = LCD_BUS^1;  //D1 -- Pin  8
+ 167          sbit  LCD_B0  = LCD_BUS^0;  //D0 -- Pin  7
+ 168          
+ 169          sbit  LCD_ENA = P2^2; //Pin 6
+ 170          sbit  LCD_RW  = P2^1; //Pin 5 //LCD_RS   R/W   DB7--DB0        FOUNCTION
+ 171          sbit  LCD_RS  = P2^0; //Pin 4 //  0   0   INPUT      write the command to LCD model
+ 172                          //  0   1     OUTPUT     read BF and AC pointer from LCD model
+ 173                          //  1   0     INPUT      write the data to LCD  model
+ 174                          //  1   1     OUTPUT     read the data from LCD model
+ 175          /*
+ 176          total 2 lines, 16x2= 32
+ 177          first line address:  0~15
+C51 COMPILER V9.60.0.0   MAIN                                                              07/11/2022 13:07:05 PAGE 4   
+
+ 178          second line address: 64~79
+ 179          
+ 180          */
+ 181          
+ 182          #define C_CLEAR     0x01    //clear LCD
+ 183          #define C_HOME      0x02    //cursor go home
+ 184          #define C_CUR_L     0x04    //cursor shift left after input
+ 185          #define C_RIGHT     0x05    //picture shift right after input
+ 186          #define C_CUR_R     0x06    //cursor shift right after input
+ 187          #define C_LEFT      0x07    //picture shift left after input
+ 188          #define C_OFF       0x08    //turn off LCD
+ 189          #define C_ON        0x0C    //turn on  LCD
+ 190          #define C_FLASH     0x0D    //turn on  LCD, flash 
+ 191          #define C_CURSOR    0x0E    //turn on  LCD and cursor
+ 192          #define C_FLASH_ALL   0x0F    //turn on  LCD and cursor, flash
+ 193          #define C_CURSOR_LEFT 0x10    //single cursor shift left
+ 194          #define C_CURSOR_RIGHT  0x10    //single cursor shift right
+ 195          #define C_PICTURE_LEFT  0x10    //single picture shift left
+ 196          #define C_PICTURE_RIGHT 0x10    //single picture shift right
+ 197          #define C_BIT8      0x30    //set the data is 8 bits
+ 198          #define C_BIT4      0x20    //set the data is 4 bits
+ 199          #define C_L1DOT7    0x30    //8 bits,one line 5*7  dots
+ 200          #define C_L1DOT10   0x34    //8 bits,one line 5*10 dots
+ 201          #define C_L2DOT7    0x38    //8 bits,tow lines 5*7 dots
+ 202          #define C_4bitL2DOT7  0x28    //4 bits,tow lines 5*7 dots
+ 203          #define C_CGADDRESS0  0x40    //CGRAM address0 (addr=40H+x)
+ 204          #define C_DDADDRESS0  0x80    //DDRAM address0 (addr=80H+x)
+ 205          
+ 206          
+ 207          #define LCD_DelayNop()  NOP(15)
+ 208          
+ 209          #define   LCD_BusData(dat)  LCD_BUS = dat
+ 210          
+ 211          
+ 212          //========================================================================
+ 213          // 函数: void CheckBusy(void)
+ 214          // 描述: 检测忙函数
+ 215          // 参数: none.
+ 216          // 返回: none.
+ 217          // 版本: VER1.0
+ 218          // 日期: 2013-4-1
+ 219          // 备注: 
+ 220          //========================================================================
+ 221          void  CheckBusy(void)
+ 222          {
+ 223   1        u16 i;
+ 224   1        for(i=0; i<5000; i++) {if(!LCD_B7)  break;}   //check the LCD busy or not. With time out
+ 225   1      //  while(LCD_B7);      //check the LCD busy or not. Without time out
+ 226   1      }
+ 227          
+ 228          //========================================================================
+ 229          // 函数: void IniSendCMD(u8 cmd)
+ 230          // 描述: 初始化写命令(不检测忙)
+ 231          // 参数: cmd: 要写的命令.
+ 232          // 返回: none.
+ 233          // 版本: VER1.0
+ 234          // 日期: 2013-4-1
+ 235          // 备注: 
+ 236          //========================================================================
+ 237          void IniSendCMD(u8 cmd)
+ 238          {
+ 239   1        LCD_RW = 0;
+C51 COMPILER V9.60.0.0   MAIN                                                              07/11/2022 13:07:05 PAGE 5   
+
+ 240   1        LCD_BusData(cmd);
+ 241   1        LCD_DelayNop();
+ 242   1        LCD_ENA = 1;
+ 243   1        LCD_DelayNop();
+ 244   1        LCD_ENA = 0;
+ 245   1        LCD_BusData(0xff);
+ 246   1      }
+ 247          
+ 248          //========================================================================
+ 249          // 函数: void Write_CMD(u8 cmd)
+ 250          // 描述: 写命令(检测忙)
+ 251          // 参数: cmd: 要写的命令.
+ 252          // 返回: none.
+ 253          // 版本: VER1.0
+ 254          // 日期: 2013-4-1
+ 255          // 备注: 
+ 256          //========================================================================
+ 257          void Write_CMD(u8 cmd)
+ 258          {
+ 259   1        LCD_RS  = 0;
+ 260   1        LCD_RW = 1;
+ 261   1        LCD_BusData(0xff);
+ 262   1        LCD_DelayNop();
+ 263   1        LCD_ENA = 1;
+ 264   1        CheckBusy();      //check the LCD busy or not.
+ 265   1        LCD_ENA = 0;
+ 266   1        LCD_RW = 0;
+ 267   1        
+ 268   1        LCD_BusData(cmd);
+ 269   1        LCD_DelayNop();
+ 270   1        LCD_ENA = 1;
+ 271   1        LCD_DelayNop();
+ 272   1        LCD_ENA = 0;
+ 273   1        LCD_BusData(0xff);
+ 274   1      }
+ 275          
+ 276          //========================================================================
+ 277          // 函数: void Write_DIS_Data(u8 dat)
+ 278          // 描述: 写显示数据(检测忙)
+ 279          // 参数: dat: 要写的数据.
+ 280          // 返回: none.
+ 281          // 版本: VER1.0
+ 282          // 日期: 2013-4-1
+ 283          // 备注: 
+ 284          //========================================================================
+ 285          void Write_DIS_Data(u8 dat)
+ 286          {
+ 287   1        LCD_RS = 0;
+ 288   1        LCD_RW = 1;
+ 289   1      
+ 290   1        LCD_BusData(0xff);
+ 291   1        LCD_DelayNop();
+ 292   1        LCD_ENA = 1;
+ 293   1        CheckBusy();      //check the LCD busy or not.
+ 294   1        LCD_ENA = 0;
+ 295   1        LCD_RW = 0;
+ 296   1        LCD_RS  = 1;
+ 297   1      
+ 298   1        LCD_BusData(dat);
+ 299   1        LCD_DelayNop();
+ 300   1        LCD_ENA = 1;
+ 301   1        LCD_DelayNop();
+C51 COMPILER V9.60.0.0   MAIN                                                              07/11/2022 13:07:05 PAGE 6   
+
+ 302   1        LCD_ENA = 0;
+ 303   1        LCD_BusData(0xff);
+ 304   1      }
+ 305          
+ 306          
+ 307          //========================================================================
+ 308          // 函数: void Initialize_LCD(void)
+ 309          // 描述: 初始化函数
+ 310          // 参数: none.
+ 311          // 返回: none.
+ 312          // 版本: VER1.0
+ 313          // 日期: 2013-4-1
+ 314          // 备注: 
+ 315          //========================================================================
+ 316          void Initialize_LCD(void)
+ 317          {
+ 318   1        LCD_ENA = 0;
+ 319   1        LCD_RS  = 0;
+ 320   1        LCD_RW = 0;
+ 321   1      
+ 322   1        delay_ms(100);
+ 323   1        IniSendCMD(C_BIT8);   //set the data is 8 bits
+ 324   1      
+ 325   1        delay_ms(10);
+ 326   1        Write_CMD(C_L2DOT7);    //tow lines 5*7 dots
+ 327   1      
+ 328   1        delay_ms(6);
+ 329   1        Write_CMD(C_CLEAR);   //clear LCD RAM
+ 330   1        Write_CMD(C_CUR_R);   //Curror Shift Right
+ 331   1        Write_CMD(C_ON);    //turn on  LCD
+ 332   1      }
+ 333          
+ 334          
+ 335          
+ 336          //========================================================================
+ 337          // 函数: void ClearLine(u8 row)
+ 338          // 描述: 清除1行
+ 339          // 参数: row: 行(0或1)
+ 340          // 返回: none.
+ 341          // 版本: VER1.0
+ 342          // 日期: 2013-4-1
+ 343          // 备注: 
+ 344          //========================================================================
+ 345          void ClearLine(u8 row)
+ 346          {
+ 347   1        u8 i;
+ 348   1        Write_CMD(((row & 1) << 6) | 0x80);
+ 349   1        for(i=0; i<LineLength; i++) Write_DIS_Data(' ');
+ 350   1      }
+ 351          
+ 352          //========================================================================
+ 353          // 函数: void WriteChar(u8 row, u8 column, u8 dat)
+ 354          // 描述: 指定行、列和字符, 写一个字符
+ 355          // 参数: row: 行(0或1),  column: 第几个字符(0~15),  dat: 要写的字符.
+ 356          // 返回: none.
+ 357          // 版本: VER1.0
+ 358          // 日期: 2013-4-1
+ 359          // 备注: 
+ 360          //========================================================================
+ 361          void  WriteChar(u8 row, u8 column, u8 dat)
+ 362          {
+ 363   1        Write_CMD((((row & 1) << 6) + column) | 0x80);
+C51 COMPILER V9.60.0.0   MAIN                                                              07/11/2022 13:07:05 PAGE 7   
+
+ 364   1        Write_DIS_Data(dat);
+ 365   1      }
+ 366          
+ 367          //========================================================================
+ 368          // 函数: void PutString(u8 row, u8 column, u8 *puts)
+ 369          // 描述: 写一个字符串，指定行、列和字符串首地址
+ 370          // 参数: row: 行(0或1),  column: 第几个字符(0~15),  puts: 要写的字符串指针.
+ 371          // 返回: none.
+ 372          // 版本: VER1.0
+ 373          // 日期: 2013-4-1
+ 374          // 备注: 
+ 375          //========================================================================
+ 376          void PutString(u8 row, u8 column, u8 *puts)
+ 377          {
+ 378   1        Write_CMD((((row & 1) << 6) + column) | 0x80);
+ 379   1        for ( ;  *puts != 0;  puts++)   //遇到停止符0结束
+ 380   1        {
+ 381   2          Write_DIS_Data(*puts);
+ 382   2          if(++column >= LineLength)  break;
+ 383   2        }
+ 384   1      }
+ 385          
+ 386          
+ 387          //******************** LCD20 Module END ***************************
+ 388          //****************************************************
+ 389          //蜂鸣器程序
+ 390          //****************************************************
+ 391          void Buzzer_Di(void){
+ 392   1        Buzzer = 0;
+ 393   1        delay_ms(3);
+ 394   1        Buzzer = 1;
+ 395   1        delay_ms(3);
+ 396   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    968    ----
+   CONSTANT SIZE    =     52    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      8      33
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

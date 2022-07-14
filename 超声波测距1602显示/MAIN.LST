@@ -1,0 +1,162 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              07/09/2022 16:35:11 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN MAIN.OBJ
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE MAIN.C OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          #include<reg52.h>
+   2          #include<intrins.h>
+   3          #define uint  unsigned int
+   4          #define uchar unsigned char
+   5          #define NOP() {_nop_();_nop_();_nop_();_nop_();}
+   6          //------LCDÒý½Å-----
+   7          sbit LCD_RS=P2^0;
+   8          sbit LCD_RW=P2^1;
+   9          sbit LCD_EN=P2^2;
+  10          //------³¬Éù²¨Òý½Å-------
+  11          sbit Tx=P3^3;   //´¥·¢¿ØÖÆÐÅºÅÊäÈë
+  12          sbit Rx=P3^2;   //»ØÏìÐÅºÅÊä³ö
+  13          uchar code table[]={"Distance :"};    //LCDµÚÒ»ÐÐÏÔÊ¾
+  14          uchar temp_dis[]= {"000.0 cm"};       //LCDµÚ¶þÐÐ
+  15          long int t,distance;
+  16          uchar cache[4]={0,0,0,0};
+  17          //--------ÑÓÊ±-------
+  18          void delay(uint ms)
+  19          {
+  20   1        uint t;
+  21   1        while(ms--)
+  22   1          for(t=0;t<120;t++);
+  23   1      }
+  24          //-------¶ÁLCD×´Ì¬-------
+  25          uchar read_lcd_state()
+  26          {
+  27   1        uchar state;
+  28   1        LCD_RS=0;
+  29   1        LCD_RW=1;
+  30   1        LCD_EN=1;
+  31   1        _nop_();
+  32   1        state=P0;
+  33   1        LCD_EN=0;
+  34   1        _nop_();
+  35   1        return state;
+  36   1      }
+  37          //-------Ã¦µÈ´ý------
+  38          void lcd_busy_wait()
+  39          {
+  40   1        while((read_lcd_state() & 0x80)==0x80);
+  41   1        NOP();
+  42   1      }
+  43          //----------LCDÐ´Ö¸Áî----------
+  44          void lcd_write_com(uchar com)
+  45          {
+  46   1        lcd_busy_wait();
+  47   1        LCD_RS=0;   //RSÎª0Ê±£¬Ð´Ö¸Áî£¬RSÎª1Ê±£¬Ð´Êý¾Ý
+  48   1        LCD_RW=0;
+  49   1        P0=com;
+  50   1        NOP();
+  51   1        LCD_EN=1;
+  52   1        NOP();
+  53   1        LCD_EN=0;
+  54   1      }
+  55          //----------LCDÐ´Êý¾Ý----------
+C51 COMPILER V9.60.0.0   MAIN                                                              07/09/2022 16:35:11 PAGE 2   
+
+  56          void lcd_write_data(uchar dat)
+  57          {
+  58   1        lcd_busy_wait();
+  59   1        LCD_RS=1;
+  60   1        LCD_RW=0;
+  61   1        P0=dat;
+  62   1        NOP();          
+  63   1        LCD_EN=1;
+  64   1        NOP();
+  65   1        LCD_EN=0;
+  66   1      }
+  67          //-------LCD³õÊ¼»¯-------
+  68          void lcd_init()
+  69          {
+  70   1        LCD_EN=0;
+  71   1        lcd_write_com(0x38);      //LCDÏÔÊ¾Ä£Ê½ÉèÖÃ
+  72   1        lcd_write_com(0x0c);      //LCDÏÔÊ¾¿ª/¹Ø¼°¹â±êÉèÖÃ
+  73   1        lcd_write_com(0x06);      //µ±Ð´Ò»¸ö×Ö·ûºóµØÖ·Ö¸Õë¼Ó1£¬ÇÒ¹â±ê¼Ó1
+  74   1        lcd_write_com(0x01);      //ÏÔÊ¾ÇåÆÁ
+  75   1      }
+  76          //---------ÉèÖÃÒº¾§ÏÔÊ¾Î»ÖÃ-----------
+  77          void set_lcd_pos(uchar p)
+  78          {
+  79   1        lcd_write_com(p|0x80);
+  80   1      }
+  81          //---------Òº¾§ÏÔÊ¾³ÌÐò----------
+  82          void lcd_print(uchar p,uchar *s,uint low)
+  83          {
+  84   1        uint num;
+  85   1        set_lcd_pos(p);
+  86   1        for(num=0;num<low;num++)    
+  87   1        {
+  88   2          lcd_write_data(s[num]);
+  89   2          delay(1); 
+  90   2        }
+  91   1      }
+  92          void HC05_Init()
+  93          {
+  94   1        Tx=1;           //´¥·¢Âö³å
+  95   1        NOP();NOP();NOP();NOP();
+  96   1        Tx=0;
+  97   1        distance=0.175*t;     //¾àÀë¼ÆËã
+  98   1      }
+  99          void distance_convert(long int dat)
+ 100          {
+ 101   1        cache[0]=dat/1000;
+ 102   1        cache[1]=dat/100%10;
+ 103   1        cache[2]=dat/10%10;
+ 104   1        cache[3]=dat%10;
+ 105   1        temp_dis[0]=cache[0]+'0';
+ 106   1        temp_dis[1]=cache[1]+'0';
+ 107   1        temp_dis[2]=cache[2]+'0';
+ 108   1        temp_dis[4]=cache[3]+'0';
+ 109   1      }
+ 110          //------------Ö÷³ÌÐò-----------
+ 111          void main()
+ 112          {
+ 113   1        lcd_init();
+ 114   1        delay(5);
+ 115   1        TMOD=0x19;
+ 116   1        EA=1;     //¿ª×ÜÖÐ¶Ï
+ 117   1        TR0=1;      //Æô¶¯¶¨Ê±Æ÷
+C51 COMPILER V9.60.0.0   MAIN                                                              07/09/2022 16:35:11 PAGE 3   
+
+ 118   1        EX0=1;      //¿ªÍâ²¿ÖÐ¶Ï
+ 119   1        IT0=1;      //ÉèÖÃÎªÏÂ½µÑØÖÐ¶Ï·½Ê½
+ 120   1        while(1)
+ 121   1        {
+ 122   2          HC05_Init();
+ 123   2          distance_convert(distance);
+ 124   2          lcd_print(0x01,table,10);
+ 125   2          lcd_print(0x44,temp_dis,8);
+ 126   2        }
+ 127   1      }
+ 128          //Íâ²¿ÖÐ¶Ï0
+ 129          void int0() interrupt 0
+ 130          {
+ 131   1        t=(TH0*256 + TL0);  //¼ÆËã¸ßµçÆ½³ÖÐøµÄÊ±¼ä,ÉÏÉýÑØµ½À´Ê±ºò¿ªÊ¼¼ÆÊ±£¬ÏÂ½µÑØµ½À´½øÈëÍâ²¿ÖÐ¶Ï£¬¹Ø±Õ¼ÆÊ±Æ÷£¬Í£Ö
+             -¹¼ÆÊ±
+ 132   1        TH0=0;
+ 133   1        TL0=0;
+ 134   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    500    ----
+   CONSTANT SIZE    =     11    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     21      12
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
